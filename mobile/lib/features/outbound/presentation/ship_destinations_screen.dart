@@ -9,11 +9,13 @@ import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/outbound_repository.dart';
 import '../domain/outbound.dart';
+import '../../../core/ui/edit_drawer.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// Opens the form for a destination: a new one, or [existing] to change.
 /// Resolves to the saved destination (with its id), or null.
 Future<ShipDestination?> showDestinationDialog(BuildContext context, {ShipDestination? existing}) =>
-    showDialog<ShipDestination>(context: context, builder: (_) => _DestinationDialog(existing: existing));
+    showEditDrawer<ShipDestination>(context, builder: (_) => _DestinationDialog(existing: existing));
 
 /// A card chosen from those kept (searched by any of its words), or null.
 Future<ShipDestination?> pickDestinationCard(BuildContext context) =>
@@ -283,7 +285,7 @@ class _DestinationDialogState extends ConsumerState<_DestinationDialog> {
             child: Text(t, style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary)),
           ),
         );
-    return AlertDialog(
+    return EditDrawer(
       title: Text(widget.existing == null ? l10n.obDestNew : l10n.obDestEdit),
       content: SizedBox(
         width: 560,
@@ -513,16 +515,13 @@ class _ShipDestinationsScreenState extends ConsumerState<ShipDestinationsScreen>
 
   Future<void> _retire(ShipDestination d) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l10n.obDestRetireQ(d.name)),
-        content: Text(l10n.obDestRetireBody),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-          FilledButton(key: const ValueKey('sd-retire-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.actionDelete)),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.obDestRetireQ(d.name),
+      message: l10n.obDestRetireBody,
+      okLabel: l10n.actionDelete,
+      okKey: const ValueKey('sd-retire-ok'),
+      danger: true,
     );
     if (ok != true || !mounted) return;
     final r = await ref.read(outboundRepositoryProvider).retireDestination(d.id!);

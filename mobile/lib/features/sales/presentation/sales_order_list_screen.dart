@@ -13,6 +13,7 @@ import '../application/sales_order_providers.dart';
 import '../domain/sales_order.dart';
 import 'sales_order_detail_screen.dart';
 import 'sales_order_status_ui.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// Sales orders (spec §46 checklist item 7, 0034) — what a customer ordered,
 /// before fulfillment starts. Distinct from shipment plans (an already-
@@ -244,9 +245,7 @@ class _CreateSalesOrderSheetState extends State<_CreateSalesOrderSheet> {
   }
 
   Future<void> _addLine() async {
-    final draft = await showDialog<SalesOrderLineDraft>(
-      context: context,
-      builder: (_) => const _AddLineDialog(),
+    final draft = await showEditDrawer<SalesOrderLineDraft>(context, builder: (_) => const _AddLineDialog(),
     );
     if (draft == null) return;
     setState(() {
@@ -420,7 +419,7 @@ class _AddLineDialogState extends State<_AddLineDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.soAddLine),
       content: SingleChildScrollView(
         child: Column(

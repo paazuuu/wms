@@ -37,6 +37,7 @@ import '../domain/outbound_plan.dart';
 import '../domain/outbound_sheet.dart';
 import 'outbound_calendar_tab.dart';
 import 'outbound_file_detail_screen.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// The shipping list chosen to read (overridden in tests).
 final outboundFilePickerProvider = Provider<Future<({String name, Uint8List bytes})?> Function()>((_) => () async {
@@ -431,7 +432,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
   }
 
   Future<void> _addRow() async {
-    final row = await showDialog<OutboundRow>(context: context, builder: (_) => const _ManualRowDialog());
+    final row = await showEditDrawer<OutboundRow>(context, builder: (_) => const _ManualRowDialog());
     if (row == null || !mounted) return;
     setState(() {
       _manual.add(row);
@@ -2178,7 +2179,7 @@ class _ManualRowDialogState extends State<_ManualRowDialog> {
           keyboardType: type,
           decoration: InputDecoration(labelText: label),
         );
-    return AlertDialog(
+    return EditDrawer(
       key: const ValueKey('pr-row-dialog'),
       title: Text(l10n.prAddRowTitle),
       content: SizedBox(

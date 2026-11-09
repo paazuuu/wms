@@ -20,6 +20,8 @@ import '../data/payments_repository.dart';
 import '../domain/payment.dart';
 import '../../stock_import/data/stock_import_repository.dart' show unplannedWaitingProvider;
 import '../../unplanned_receipt/unplanned_receipt_screen.dart' show UnplannedReceiptScreen;
+import '../../../core/ui/edit_drawer.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// A picked file: its name and bytes, or null when nothing was chosen.
 typedef PickProof = Future<({String name, Uint8List bytes})?> Function();
@@ -282,20 +284,12 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
 
   Future<void> _removeProof(PaymentProof proof) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l10n.payProofRemoveTitle),
-        content: Text(l10n.payProofRemoveBody(proof.name)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-          FilledButton(
-            key: const ValueKey('pay-proof-remove-ok'),
-            onPressed: () => Navigator.pop(c, true),
-            child: Text(l10n.payProofRemove),
-          ),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.payProofRemoveTitle,
+      message: l10n.payProofRemoveBody(proof.name),
+      okLabel: l10n.payProofRemove,
+      okKey: const ValueKey('pay-proof-remove-ok'),
     );
     if (ok != true || !mounted) return;
     if (await _run(() => ref.read(paymentsRepositoryProvider).removeProof(proof.id))) refreshPayments(ref, p.importId);
@@ -376,9 +370,7 @@ class _PaymentCardState extends ConsumerState<PaymentCard> {
   Future<void> _editAccount() async {
     final id = p.supplierId;
     if (id == null) return;
-    final payee = await showDialog<Payee?>(
-      context: context,
-      builder: (_) => _AccountDialog(initial: p.supplierAccount ?? p.payee, supplier: p.supplierName),
+    final payee = await showEditDrawer<Payee?>(context, builder: (_) => _AccountDialog(initial: p.supplierAccount ?? p.payee, supplier: p.supplierName),
     );
     if (payee == null || !mounted) return;
     if (await _run(() => ref.read(paymentsRepositoryProvider).setSupplierAccount(id, payee.isEmpty ? null : payee))) {
@@ -718,7 +710,7 @@ class _AccountDialogState extends State<_AccountDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final types = {'普通', '当座', '貯蓄', if (_type != null) _type!};
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.payPayeeTitle(widget.supplier)),
       content: SizedBox(
         width: 420,

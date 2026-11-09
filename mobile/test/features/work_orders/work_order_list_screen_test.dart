@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/core/ui/edit_drawer.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 import 'package:wms_mobile/features/work_orders/application/work_order_providers.dart';
@@ -102,11 +103,11 @@ void main() {
     // output field already on the sheet behind it — scope to the dialog.
     await tester.enterText(
         find.descendant(
-            of: find.byType(AlertDialog), matching: find.widgetWithText(TextField, 'JANコード')),
+            of: find.byType(EditDrawer), matching: find.widgetWithText(TextField, 'JANコード')),
         '4901234567890');
     await tester.enterText(
         find.descendant(
-            of: find.byType(AlertDialog), matching: find.widgetWithText(TextField, '商品名')),
+            of: find.byType(EditDrawer), matching: find.widgetWithText(TextField, '商品名')),
         'テスト部品');
     await tester.enterText(find.widgetWithText(TextField, '必要数量'), '20');
     await tester.tap(find.widgetWithText(FilledButton, '部材を追加'));

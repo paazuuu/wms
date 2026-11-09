@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/l10n/locale_controller.dart';
 import 'core/router/app_router.dart';
+import 'core/ui/popconfirm.dart';
 import 'core/ui/selectable_app.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/appearance_controller.dart';
@@ -17,6 +18,8 @@ class WmsApp extends ConsumerWidget {
     final locale = ref.watch(localeControllerProvider);
     final textScale = ref.watch(textScaleControllerProvider);
     final look = ref.watch(appearanceControllerProvider);
+    // A popconfirm opens beside the button that was clicked.
+    PopconfirmAnchor.install();
 
     return MaterialApp.router(
       routerConfig: ref.watch(goRouterProvider),

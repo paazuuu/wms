@@ -24,6 +24,7 @@ import 'qc_result_ui.dart';
 import '../../../core/offline/pending_sync_banner.dart';
 import '../data/offline_inspection_repository.dart';
 import '../../product_library/presentation/product_thumb.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// One inspection: each received line with its count and pass/fail split, then
 /// a sticky action to close it.
@@ -1273,22 +1274,11 @@ class _AttachmentThumbnail extends ConsumerWidget {
 
   Future<void> _withdraw(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.attachmentWithdrawQ),
-        content: Text(l10n.attachmentWithdrawBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.attachmentWithdraw),
-          ),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.attachmentWithdrawQ,
+      message: l10n.attachmentWithdrawBody,
+      okLabel: l10n.attachmentWithdraw,
     );
     if (ok != true) return;
 

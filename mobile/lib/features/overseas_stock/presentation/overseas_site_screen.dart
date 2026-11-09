@@ -17,6 +17,7 @@ import '../../outbound_file/presentation/outbound_file_detail_screen.dart';
 import 'overseas_import_tab.dart';
 import 'overseas_trend_view.dart';
 import 'overseas_widgets.dart';
+import '../../../core/ui/popconfirm.dart';
 
 final _day = DateFormat('y/MM/dd');
 
@@ -123,15 +124,11 @@ class _OverseasSiteScreenState extends ConsumerState<OverseasSiteScreen> with Si
 
   Future<void> _undo(OverseasImport i) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l10n.osUndoQ(i.asOf == null ? '' : _day.format(i.asOf!))),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-          FilledButton(key: const ValueKey('os-undo-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.osUndo)),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.osUndoQ(i.asOf == null ? '' : _day.format(i.asOf!)),
+      okLabel: l10n.osUndo,
+      okKey: const ValueKey('os-undo-ok'),
     );
     if (ok != true || !mounted) return;
     final r = await ref.read(overseasStockRepositoryProvider).undo(i.id);

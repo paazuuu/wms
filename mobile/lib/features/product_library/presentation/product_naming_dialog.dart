@@ -8,6 +8,7 @@ import '../application/product_library_providers.dart';
 import '../application/product_naming_providers.dart';
 import '../domain/product_image.dart';
 import '../domain/product_naming.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// A product's name, built from its parts in our format (0111): the base
 /// name, 単位 and 定価 here, size and colour on the attributes tab, and the
@@ -107,7 +108,7 @@ class _ProductNamingDialogState extends ConsumerState<ProductNamingDialog> {
         : renderProductName(chosen?.template ?? '{base}',
             base: _base.text.trim(), maker: n?.maker, code: n?.sku, jan: n?.janCode, unit: _unit.text.trim(), attributes: attrs);
 
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.pnTitle),
       content: SizedBox(
         width: 480,

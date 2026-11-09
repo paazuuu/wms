@@ -8,6 +8,7 @@ import '../api/api_result.dart';
 import '../theme/app_spacing.dart';
 import 'ai_health_screen.dart';
 import 'ai_keys.dart';
+import '../ui/edit_drawer.dart';
 
 String aiKeyTierLabel(AppLocalizations l10n, AiKeyTier t) => switch (t) {
       AiKeyTier.free => l10n.akTierFree,
@@ -95,7 +96,7 @@ class AiKeysSection extends ConsumerWidget {
 
   Future<void> _edit(BuildContext context, WidgetRef ref, {AiApiKey? key}) async {
     final l10n = AppLocalizations.of(context);
-    final saved = await showDialog<bool>(context: context, builder: (_) => _KeyDialog(existing: key));
+    final saved = await showEditDrawer<bool>(context, builder: (_) => _KeyDialog(existing: key));
     if (saved == true && context.mounted) {
       ref.invalidate(aiKeysProvider);
       _snack(context, key == null ? l10n.akAdded : l10n.aiSaved);
@@ -327,7 +328,7 @@ class _KeyDialogState extends ConsumerState<_KeyDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isNew = widget.existing == null;
-    return AlertDialog(
+    return EditDrawer(
       title: Text(isNew ? l10n.akAdd : l10n.akEdit),
       content: SingleChildScrollView(
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [

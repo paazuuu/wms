@@ -20,6 +20,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart' show Warehouse;
 import '../data/outbound_file_repository.dart';
 import '../domain/outbound_currency.dart' show PriceCurrency;
+import '../../../core/ui/edit_drawer.dart';
 import 'outbound_file_screen.dart'
     show
         OutboundPickProductDialog,
@@ -204,9 +205,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
   Future<void> _editCurrency(OutboundFileDetail d) async {
     final l10n = AppLocalizations.of(context);
     final f = d.file;
-    final picked = await showDialog<({PriceCurrency? all, double? rate})>(
-      context: context,
-      builder: (_) => _CurrencyEditDialog(rate: f.fxCnyJpy),
+    final picked = await showEditDrawer<({PriceCurrency? all, double? rate})>(context, builder: (_) => _CurrencyEditDialog(rate: f.fxCnyJpy),
     );
     if (picked == null || !mounted) return;
     final all = picked.all;
@@ -1061,7 +1060,7 @@ class _CurrencyEditDialogState extends State<_CurrencyEditDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return AlertDialog(
+    return EditDrawer(
       key: const ValueKey('of-currency-edit-dialog'),
       title: Text(l10n.ofCurrencyEditTitle),
       content: SizedBox(

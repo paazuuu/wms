@@ -9,6 +9,7 @@ import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/virtual_stock_providers.dart';
 import '../domain/virtual_stock.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 DateTime _monthStart(DateTime d) => DateTime(d.year, d.month);
 DateTime _monthEnd(DateTime d) => DateTime(d.year, d.month + 1, 0);
@@ -55,9 +56,7 @@ class _VirtualStockScreenState extends ConsumerState<VirtualStockScreen> {
     final l10n = AppLocalizations.of(context);
     final id = _warehouseId;
     if (id == null) return;
-    final draft = await showDialog<_EntryDraft>(
-      context: context,
-      builder: (_) => _EntryDialog(janCode: product?.janCode, productName: product?.productName),
+    final draft = await showEditDrawer<_EntryDraft>(context, builder: (_) => _EntryDialog(janCode: product?.janCode, productName: product?.productName),
     );
     if (draft == null || !mounted) return;
     final result = await ref.read(virtualStockRepositoryProvider).record(
@@ -491,7 +490,7 @@ class _EntryDialogState extends State<_EntryDialog> {
     final l10n = AppLocalizations.of(context);
     final df = DateFormat('yyyy-MM-dd');
     final valid = _jan.text.trim().isNotEmpty && _quantity != null;
-    return AlertDialog(
+    return EditDrawer(
       title: Text(widget.productName ?? l10n.virtualRecord),
       content: SingleChildScrollView(
         child: Column(

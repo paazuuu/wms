@@ -9,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../warehouse_context/presentation/warehouse_overview_screen.dart' show countryLabel;
 import '../application/trading_partner_providers.dart';
 import '../domain/trading_partner.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// The supplier/customer directory (spec §46 checklist item 8, 0035) — one
 /// list serving both roles, since a real-world company can be either (or
@@ -76,7 +77,7 @@ class TradingPartnerListScreen extends ConsumerWidget {
             tooltip: l10n.pcRulesTitle,
             icon: const Icon(Icons.pin_outlined),
             onPressed: () async {
-              await showDialog<void>(context: context, builder: (_) => const PartnerCodeRulesDialog());
+              await showEditDrawer<void>(context, builder: (_) => const PartnerCodeRulesDialog());
               ref.invalidate(tradingPartnerListProvider);
             },
           ),
@@ -662,7 +663,7 @@ class _PartnerCodeRulesDialogState extends ConsumerState<PartnerCodeRulesDialog>
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final formats = _formats;
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.pcRulesTitle),
       content: SizedBox(
         width: 520,

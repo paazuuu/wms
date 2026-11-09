@@ -11,6 +11,7 @@ import 'sc_editors.dart';
 import 'sc_labels.dart';
 import 'sc_simulation_screen.dart';
 import 'sc_widgets.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// 物流ルート (§8–10, §22, §33): each supplier's ways into our warehouses,
 /// leg by leg — sea, air, truck, customs — with what each leg costs and
@@ -121,7 +122,7 @@ class _RoutesTab extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: FilledButton.tonalIcon(
               key: const ValueKey('sc-add-route'),
-              onPressed: () => showDialog(context: context, builder: (_) => ScRouteDialog(model: model)),
+              onPressed: () => showEditDrawer(context, builder: (_) => ScRouteDialog(model: model)),
               icon: const Icon(Icons.add),
               label: Text(l10n.scAddRoute),
             ),
@@ -150,7 +151,7 @@ class _RoutesTab extends StatelessWidget {
                             IconButton(
                               tooltip: l10n.actionEdit,
                               icon: const Icon(Icons.edit_outlined, size: 18),
-                              onPressed: () => showDialog(context: context, builder: (_) => ScRouteDialog(model: model, route: r)),
+                              onPressed: () => showEditDrawer(context, builder: (_) => ScRouteDialog(model: model, route: r)),
                             ),
                         ]),
                         ScRouteGraph(route: r, model: model, onLegTap: (e) => _openLeg(context, r, e)),
@@ -183,7 +184,7 @@ class _NodesTab extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: FilledButton.tonalIcon(
               key: const ValueKey('sc-add-node'),
-              onPressed: () => showDialog(context: context, builder: (_) => const ScNodeDialog()),
+              onPressed: () => showEditDrawer(context, builder: (_) => const ScNodeDialog()),
               icon: const Icon(Icons.add),
               label: Text(l10n.scAddNode),
             ),
@@ -202,7 +203,7 @@ class _NodesTab extends StatelessWidget {
                 if (n.dwellDays > 0) '${l10n.scDwellDays} ${scNumber(n.dwellDays)}',
               ].join(' · ')),
               trailing: ScRiskBadge(level: n.riskLevel),
-              onTap: canManage ? () => showDialog(context: context, builder: (_) => ScNodeDialog(node: n)) : null,
+              onTap: canManage ? () => showEditDrawer(context, builder: (_) => ScNodeDialog(node: n)) : null,
             ),
           ),
       ],

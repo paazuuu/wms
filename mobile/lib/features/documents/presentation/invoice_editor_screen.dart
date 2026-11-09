@@ -12,6 +12,7 @@ import '../../delivery/application/delivery_providers.dart';
 import '../application/documents_providers.dart';
 import '../domain/documents.dart';
 import 'documents_labels.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// A supplier's invoice (§55): typed, or read from its PDF / photo / Excel by
 /// the same reader as delivery notes — read twice by the AI and checked
@@ -130,9 +131,7 @@ class _InvoiceEditorScreenState extends ConsumerState<InvoiceEditorScreen> {
   }
 
   Future<void> _editLine(int? index) async {
-    final line = await showDialog<InvoiceLine>(
-      context: context,
-      builder: (_) => _LineDialog(line: index == null ? null : _lines[index]),
+    final line = await showEditDrawer<InvoiceLine>(context, builder: (_) => _LineDialog(line: index == null ? null : _lines[index]),
     );
     if (line == null) return;
     setState(() {
@@ -280,7 +279,7 @@ class _LineDialogState extends State<_LineDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.docLines),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         TextField(key: const ValueKey('doc-line-jan'), controller: _jan, decoration: InputDecoration(labelText: l10n.ntFieldJan)),

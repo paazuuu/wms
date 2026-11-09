@@ -12,6 +12,7 @@ import '../domain/user_tier.dart';
 import 'add_users_dialog.dart';
 import 'menu_visibility_screen.dart' show userTierLabel;
 import '../domain/app_user_summary.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// Assigning roles to teammates (spec §21/§22) — the UI half of 0024/0025's
 /// admin RPCs. Anyone can open this screen; the server is the real gate
@@ -129,22 +130,12 @@ class UserManagementScreen extends ConsumerWidget {
   Future<void> _removeWarehouse(BuildContext context, WidgetRef ref,
       AppUserSummary user, Warehouse warehouse) async {
     final l10n = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.userMgmtRemoveWarehouseTitle),
-        content: Text(l10n.userMgmtRemoveWarehouseBody(warehouse.name, user.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.userMgmtRemoveWarehouseAction),
-          ),
-        ],
-      ),
+    final confirmed = await showPopconfirm(
+      context,
+      title: l10n.userMgmtRemoveWarehouseTitle,
+      message: l10n.userMgmtRemoveWarehouseBody(warehouse.name, user.name),
+      okLabel: l10n.userMgmtRemoveWarehouseAction,
+      danger: true,
     );
     if (confirmed != true || !context.mounted) return;
 
@@ -161,22 +152,12 @@ class UserManagementScreen extends ConsumerWidget {
   Future<void> _removeRole(BuildContext context, WidgetRef ref,
       AppUserSummary user, UserRoleTag role) async {
     final l10n = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.userMgmtRemoveRoleTitle),
-        content: Text(l10n.userMgmtRemoveRoleBody(role.name, user.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.userMgmtRemoveRoleAction),
-          ),
-        ],
-      ),
+    final confirmed = await showPopconfirm(
+      context,
+      title: l10n.userMgmtRemoveRoleTitle,
+      message: l10n.userMgmtRemoveRoleBody(role.name, user.name),
+      okLabel: l10n.userMgmtRemoveRoleAction,
+      danger: true,
     );
     if (confirmed != true || !context.mounted) return;
 

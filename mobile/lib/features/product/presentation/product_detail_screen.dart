@@ -38,6 +38,8 @@ import '../../inbound/presentation/product_inbound_card.dart';
 import '../../master_import/presentation/master_imports_screen.dart';
 import '../../stock_history/presentation/stock_history_views.dart';
 import 'purchase_price_card.dart';
+import '../../../core/ui/edit_drawer.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// Everything Phase A gave one product, on one screen: its codes (0057), its
 /// units (0059), its lots and serials (0060), and how this warehouse handles it
@@ -171,7 +173,7 @@ class _Header extends ConsumerWidget {
   /// 商品名（言語別） (0166): the 商品名 in Japanese (looked up on the web, or
   /// typed), English and Chinese.
   Future<void> _editNames(BuildContext context, WidgetRef ref) async {
-    final saved = await showDialog<bool>(context: context, builder: (_) => ProductNamesDialog(product: product));
+    final saved = await showEditDrawer<bool>(context, builder: (_) => ProductNamesDialog(product: product));
     if (saved == true) ref.invalidate(productListProvider);
   }
 
@@ -321,9 +323,7 @@ class _Header extends ConsumerWidget {
                       OutlinedButton.icon(
                         key: const ValueKey('product-naming'),
                         onPressed: () async {
-                          final saved = await showDialog<bool>(
-                            context: context,
-                            builder: (_) => ProductNamingDialog(productId: product.id),
+                          final saved = await showEditDrawer<bool>(context, builder: (_) => ProductNamingDialog(productId: product.id),
                           );
                           if (saved == true) {
                             ref.invalidate(productListProvider);
@@ -588,22 +588,12 @@ class _BarcodesCard extends ConsumerWidget {
   Future<void> _remove(
       BuildContext context, WidgetRef ref, ProductBarcode barcode) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.productBarcodeRemoveQ),
-        content: Text(l10n.productBarcodeRemoveBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.actionDelete),
-          ),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.productBarcodeRemoveQ,
+      message: l10n.productBarcodeRemoveBody,
+      okLabel: l10n.actionDelete,
+      danger: true,
     );
     if (ok != true || !context.mounted) return;
     final result =
@@ -1222,22 +1212,12 @@ class _UnitsCard extends ConsumerWidget {
   Future<void> _remove(
       BuildContext context, WidgetRef ref, ProductUom uom) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.productUnitRemoveQ),
-        content: Text(l10n.productUnitRemoveBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.actionDelete),
-          ),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.productUnitRemoveQ,
+      message: l10n.productUnitRemoveBody,
+      okLabel: l10n.actionDelete,
+      danger: true,
     );
     if (ok != true || !context.mounted) return;
     final result = await ref
@@ -1791,22 +1771,12 @@ class _WarehouseSettingsCard extends ConsumerWidget {
 
   Future<void> _clear(BuildContext context, WidgetRef ref, int warehouseId) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.whpClearQ),
-        content: Text(l10n.whpClearBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.actionDelete),
-          ),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.whpClearQ,
+      message: l10n.whpClearBody,
+      okLabel: l10n.actionDelete,
+      danger: true,
     );
     if (ok != true || !context.mounted) return;
     final result = await ref.read(productRepositoryProvider)

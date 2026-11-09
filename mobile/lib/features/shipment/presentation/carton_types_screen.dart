@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../product/presentation/product_labels.dart';
 import '../application/packaging_providers.dart';
 import '../domain/packaging.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// The boxes we ship in (0115): size, empty weight, the packing material
 /// that usually goes in, and how much a box takes. Added and changed here;
@@ -22,9 +23,7 @@ class CartonTypesScreen extends ConsumerWidget {
   final bool embedded;
 
   Future<void> _edit(BuildContext context, WidgetRef ref, [CartonType? type]) async {
-    final draft = await showDialog<CartonType>(
-      context: context,
-      builder: (_) => _CartonTypeDialog(type: type),
+    final draft = await showEditDrawer<CartonType>(context, builder: (_) => _CartonTypeDialog(type: type),
     );
     if (draft == null || !context.mounted) return;
     final l10n = AppLocalizations.of(context);
@@ -167,7 +166,7 @@ class _CartonTypeDialogState extends State<_CartonTypeDialog> {
           ),
         );
 
-    return AlertDialog(
+    return EditDrawer(
       title: Text(widget.type == null ? l10n.ctAdd : l10n.ctEdit),
       content: SizedBox(
         width: 420,

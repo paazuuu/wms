@@ -12,6 +12,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/purchase_request_repository.dart';
 import '../domain/purchase_request.dart';
 import 'purchase_request_screen.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// 入荷希望リスト (0140, 0205): the wishes from downstream — each list an end
 /// customer's (or our own plan), by when — and the summary of the open
@@ -39,15 +40,12 @@ class _PurchaseRequestsScreenState extends ConsumerState<PurchaseRequestsScreen>
 
   Future<void> _remove(PurchaseRequest r) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l10n.prRemoveQ(r.number)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-          FilledButton(key: const ValueKey('pr-remove-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.actionDelete)),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.prRemoveQ(r.number),
+      okLabel: l10n.actionDelete,
+      okKey: const ValueKey('pr-remove-ok'),
+      danger: true,
     );
     if (ok != true || !mounted) return;
     final res = await ref.read(purchaseRequestRepositoryProvider).remove(r.id);

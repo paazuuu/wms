@@ -18,6 +18,7 @@ import '../domain/wish_file.dart';
 import 'wish_file_tab.dart';
 import '../../record_notes/data/record_notes_repository.dart' show NoteSubject;
 import '../../record_notes/presentation/record_notes_panel.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// The suppliers a request can be addressed to (customers left out).
 final requestSuppliersProvider = FutureProvider.autoDispose<List<TradingPartner>>((ref) async {
@@ -276,7 +277,7 @@ class _PurchaseRequestScreenState extends ConsumerState<PurchaseRequestScreen> {
   }
 
   Future<void> _addManual() async {
-    final row = await showDialog<RequestRow>(context: context, builder: (_) => _ManualRowDialog(seq: _manualSeq + 1));
+    final row = await showEditDrawer<RequestRow>(context, builder: (_) => _ManualRowDialog(seq: _manualSeq + 1));
     if (row == null || !mounted) return;
     _manualSeq++;
     setState(() => _put(row));
@@ -924,7 +925,7 @@ class _ManualRowDialogState extends State<_ManualRowDialog> {
             decoration: InputDecoration(labelText: label, isDense: true),
           ),
         );
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.prAddManual),
       content: SizedBox(
         width: 420,

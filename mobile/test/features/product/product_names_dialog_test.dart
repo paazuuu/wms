@@ -11,6 +11,7 @@ import 'package:wms_mobile/features/product_library/application/product_library_
 import '../../support/fake_market_name_repository.dart';
 import '../../support/fake_web_photo_repository.dart';
 import '../../support/harness.dart';
+import 'package:wms_mobile/core/ui/edit_drawer.dart';
 
 const _jan = '4909999000014';
 
@@ -36,7 +37,7 @@ void main() {
       Builder(
         builder: (context) => TextButton(
           onPressed: () async =>
-              saved = await showDialog<bool>(context: context, builder: (_) => const ProductNamesDialog(product: product)),
+              saved = await showEditDrawer<bool>(context, builder: (_) => const ProductNamesDialog(product: product)),
           child: const Text('open'),
         ),
       ),

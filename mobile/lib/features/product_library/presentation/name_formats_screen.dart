@@ -9,6 +9,7 @@ import '../application/product_library_providers.dart';
 import '../application/product_naming_providers.dart';
 import '../domain/product_image.dart';
 import '../domain/product_naming.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 // 商品様式 (0111): the company's own product format. A product's name is
 // built from its parts by a template; change the template, a maker's name
@@ -49,9 +50,7 @@ class _FormatsTab extends ConsumerWidget {
 
   Future<void> _edit(BuildContext context, WidgetRef ref, NameFormat? f) async {
     final l10n = AppLocalizations.of(context);
-    final saved = await showDialog<NameFormatSaved>(
-      context: context,
-      builder: (_) => NameFormatEditor(format: f),
+    final saved = await showEditDrawer<NameFormatSaved>(context, builder: (_) => NameFormatEditor(format: f),
     );
     if (saved == null || !context.mounted) return;
     ref.invalidate(nameFormatsProvider);
@@ -207,7 +206,7 @@ class _NameFormatEditorState extends ConsumerState<NameFormatEditor> {
       for (final a in attrs)
         if (a.active) ('{attr:${a.key}}', a.name),
     ];
-    return AlertDialog(
+    return EditDrawer(
       title: Text(widget.format == null ? l10n.nfNew : l10n.nfEdit),
       content: SizedBox(
         width: 520,

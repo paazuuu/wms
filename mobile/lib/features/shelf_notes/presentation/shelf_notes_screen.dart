@@ -12,6 +12,7 @@ import '../../product/data/market_names.dart';
 import '../../product/domain/product.dart';
 import '../../product/presentation/product_marks_ui.dart';
 import '../data/shelf_notes_repository.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// 棚メモ (0167): where something was put, written freely — until shelves
 /// have numbers, a note per product ("・A棚の上段の奥", "・割れ物なので下段")
@@ -161,9 +162,7 @@ class _NoteCard extends ConsumerWidget {
 
 /// A note written or changed (or taken off), about [product] when given.
 Future<void> editShelfNote(BuildContext context, WidgetRef ref, {ShelfNote? note, Product? product}) async {
-  final saved = await showDialog<bool>(
-    context: context,
-    builder: (_) => _NoteDialog(note: note, product: product),
+  final saved = await showEditDrawer<bool>(context, builder: (_) => _NoteDialog(note: note, product: product),
   );
   if (saved == true) ref.invalidate(shelfNotesProvider);
 }
@@ -225,7 +224,7 @@ class _NoteDialogState extends ConsumerState<_NoteDialog> {
     final products = ref.watch(productListProvider).valueOrNull ?? const <Product>[];
     String label(Product p) =>
         [if ((p.maker ?? '').isNotEmpty) p.maker!, marketNameOf(p) ?? p.name, if (p.sku != null) p.sku!].join('  ');
-    return AlertDialog(
+    return EditDrawer(
       title: Text(widget.note == null ? l10n.snAdd : l10n.snEdit),
       content: SizedBox(
         width: 480,

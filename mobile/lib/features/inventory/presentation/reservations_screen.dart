@@ -12,6 +12,7 @@ import '../../product/presentation/product_detail_screen.dart';
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../application/inventory_providers.dart';
 import '../domain/reservation.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// Localized name for a reservation's status (0064).
 String reservationStatusLabel(AppLocalizations l10n, String status) =>
@@ -45,22 +46,11 @@ class ReservationsScreen extends ConsumerWidget {
   Future<void> _release(
       BuildContext context, WidgetRef ref, Reservation reservation) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.reservationReleaseQ),
-        content: Text(l10n.reservationReleaseBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.reservationRelease),
-          ),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.reservationReleaseQ,
+      message: l10n.reservationReleaseBody,
+      okLabel: l10n.reservationRelease,
     );
     if (ok != true || !context.mounted) return;
 

@@ -11,6 +11,7 @@ import '../domain/supply_chain.dart';
 import 'sc_editors.dart';
 import 'sc_labels.dart';
 import 'sc_widgets.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// リスク分析 (§17, §34): suppliers, sites and routes scored by explainable
 /// rules — the level set on them, registered risks, capacity, sole
@@ -60,7 +61,7 @@ class ScRiskScreen extends ConsumerWidget {
               trailing: canManage && model != null
                   ? TextButton.icon(
                       key: const ValueKey('sc-add-risk-event'),
-                      onPressed: () => showDialog(context: context, builder: (_) => _RiskEventDialog(model: model)),
+                      onPressed: () => showEditDrawer(context, builder: (_) => _RiskEventDialog(model: model)),
                       icon: const Icon(Icons.add, size: 18),
                       label: Text(l10n.scAddRiskEvent),
                     )
@@ -81,7 +82,7 @@ class ScRiskScreen extends ConsumerWidget {
                       if (e.capacityMultiplier != null) '${l10n.scCapacityMultiplier} ×${e.capacityMultiplier}',
                       if (e.delayDays != null) '${l10n.scDelayDays} ${scNumber(e.delayDays!)}',
                     ].join(' · ')),
-                    onTap: canManage && model != null ? () => showDialog(context: context, builder: (_) => _RiskEventDialog(model: model, event: e)) : null,
+                    onTap: canManage && model != null ? () => showEditDrawer(context, builder: (_) => _RiskEventDialog(model: model, event: e)) : null,
                   ),
               ]),
             ),
@@ -144,7 +145,7 @@ class _RiskEventDialogState extends ConsumerState<_RiskEventDialog> {
     final targets = scTargets(l10n, widget.model);
     String? t(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
     int? targetId(String kind) => _target != null && _target!.startsWith('$kind:') ? int.tryParse(_target!.split(':').last) : null;
-    return AlertDialog(
+    return EditDrawer(
       title: Text(widget.event?.title ?? l10n.scAddRiskEvent),
       content: SizedBox(
         width: 480,

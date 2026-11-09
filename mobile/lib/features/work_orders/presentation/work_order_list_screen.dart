@@ -13,6 +13,7 @@ import '../application/work_order_providers.dart';
 import '../domain/work_order.dart';
 import 'work_order_detail_screen.dart';
 import 'work_order_status_ui.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// Work orders / kitting / assembly (spec §46 checklist item 9, 0036) —
 /// consume a set of component JANs, produce one output JAN, inside one
@@ -281,9 +282,7 @@ class _CreateWorkOrderSheetState extends State<_CreateWorkOrderSheet> {
   }
 
   Future<void> _addComponent() async {
-    final draft = await showDialog<WorkOrderComponentDraft>(
-      context: context,
-      builder: (_) => const _AddComponentDialog(),
+    final draft = await showEditDrawer<WorkOrderComponentDraft>(context, builder: (_) => const _AddComponentDialog(),
     );
     if (draft == null) return;
     setState(() {
@@ -461,7 +460,7 @@ class _AddComponentDialogState extends State<_AddComponentDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.woAddComponent),
       content: Column(
         mainAxisSize: MainAxisSize.min,

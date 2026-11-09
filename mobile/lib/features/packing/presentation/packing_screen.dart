@@ -20,6 +20,7 @@ import '../domain/packing.dart';
 import '../domain/packing_list_reader.dart' show PackingListRead;
 import 'pack_estimate_card.dart';
 import 'packing_lists_screen.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// The rows of a shipping list that go in boxes: those shipped (or kept, for
 /// 在庫外出荷), each under the mark of its 注番.
@@ -143,16 +144,12 @@ class _PackingScreenState extends ConsumerState<PackingScreen> {
   Future<void> _plan(OutboundFileDetail d) async {
     final l10n = AppLocalizations.of(context);
     if ((_boxes ?? const []).isNotEmpty) {
-      final ok = await showDialog<bool>(
-        context: context,
-        builder: (c) => AlertDialog(
-          title: Text(l10n.pkReplanQ),
-          content: Text(l10n.pkReplanBody),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-            FilledButton(key: const ValueKey('pk-replan-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.pkReplan)),
-          ],
-        ),
+      final ok = await showPopconfirm(
+        context,
+        title: l10n.pkReplanQ,
+        message: l10n.pkReplanBody,
+        okLabel: l10n.pkReplan,
+        okKey: const ValueKey('pk-replan-ok'),
       );
       if (ok != true || !mounted) return;
     }
@@ -192,16 +189,12 @@ class _PackingScreenState extends ConsumerState<PackingScreen> {
   Future<void> _clearBoxes() async {
     final l10n = AppLocalizations.of(context);
     final n = _boxes?.length ?? 0;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l10n.pkBoxesClearQ),
-        content: Text(l10n.pkBoxesClearBody(n)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-          FilledButton(key: const ValueKey('pk-boxes-clear-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.pkBoxesClear)),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.pkBoxesClearQ,
+      message: l10n.pkBoxesClearBody(n),
+      okLabel: l10n.pkBoxesClear,
+      okKey: const ValueKey('pk-boxes-clear-ok'),
     );
     if (ok != true || !mounted) return;
     setState(() => _busy = true);

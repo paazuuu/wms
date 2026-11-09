@@ -14,6 +14,7 @@ import 'package:wms_mobile/features/product/application/product_providers.dart';
 import 'package:wms_mobile/features/product_library/data/english_name_suggester.dart';
 
 import '../../support/harness.dart';
+import 'package:wms_mobile/core/ui/edit_drawer.dart';
 
 class _FakeSuggester implements EnglishNameSuggester {
   _FakeSuggester(this.names);
@@ -225,7 +226,7 @@ void main() {
         Builder(
           builder: (context) => Scaffold(
             body: TextButton(
-              onPressed: () => showDialog<bool>(context: context, builder: (_) => ProductNamingDialog(productId: n.id)),
+              onPressed: () => showEditDrawer<bool>(context, builder: (_) => ProductNamingDialog(productId: n.id)),
               child: const Text('open'),
             ),
           ),

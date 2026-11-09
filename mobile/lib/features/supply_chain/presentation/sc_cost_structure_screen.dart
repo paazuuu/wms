@@ -11,6 +11,7 @@ import 'sc_editors.dart';
 import 'sc_labels.dart';
 import 'sc_product_sheet.dart';
 import 'sc_widgets.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// 原価構造 (§4, §10–13, §32): one product's cost from sales price down to
 /// profit, and the rules every cost comes from — warehouse, labour and
@@ -77,7 +78,7 @@ class _ScCostStructureScreenState extends ConsumerState<ScCostStructureScreen> {
           ),
           if (canManage && id != null)
             TextButton.icon(
-              onPressed: () => showDialog(context: context, builder: (_) => ScProfileDialog(productId: id, profile: profile)),
+              onPressed: () => showEditDrawer(context, builder: (_) => ScProfileDialog(productId: id, profile: profile)),
               icon: const Icon(Icons.tune, size: 18),
               label: Text(l10n.scEditProfile),
             ),
@@ -109,7 +110,7 @@ class _RulesTab extends ConsumerWidget {
             alignment: Alignment.centerLeft,
             child: FilledButton.tonalIcon(
               key: const ValueKey('sc-add-rule'),
-              onPressed: () => showDialog(context: context, builder: (_) => const _RuleDialog()),
+              onPressed: () => showEditDrawer(context, builder: (_) => const _RuleDialog()),
               icon: const Icon(Icons.add),
               label: Text(l10n.scAddRule),
             ),
@@ -128,7 +129,7 @@ class _RulesTab extends ConsumerWidget {
               ].join(' · ')),
               trailing: Text(r.isPercent ? scPercent(r.amount, digits: 2) : scUnitMoney(r.amount),
                   style: Theme.of(context).textTheme.titleSmall),
-              onTap: canManage ? () => showDialog(context: context, builder: (_) => _RuleDialog(rule: r)) : null,
+              onTap: canManage ? () => showEditDrawer(context, builder: (_) => _RuleDialog(rule: r)) : null,
             ),
           ),
       ],
@@ -166,7 +167,7 @@ class _RuleDialogState extends ConsumerState<_RuleDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final r = widget.rule;
-    return AlertDialog(
+    return EditDrawer(
       title: Text(r?.name ?? l10n.scAddRule),
       content: SizedBox(
         width: 480,
@@ -263,7 +264,7 @@ class _TariffsTab extends ConsumerWidget {
             alignment: Alignment.centerLeft,
             child: FilledButton.tonalIcon(
               key: const ValueKey('sc-add-tariff'),
-              onPressed: () => showDialog(context: context, builder: (_) => const _TariffDialog()),
+              onPressed: () => showEditDrawer(context, builder: (_) => const _TariffDialog()),
               icon: const Icon(Icons.add),
               label: Text(l10n.scAddTariff),
             ),
@@ -281,7 +282,7 @@ class _TariffsTab extends ConsumerWidget {
                 t.valuation,
               ].join(' · ')),
               trailing: Text(scPercent(t.tariffRate, digits: 2), style: Theme.of(context).textTheme.titleSmall),
-              onTap: canManage ? () => showDialog(context: context, builder: (_) => _TariffDialog(rule: t)) : null,
+              onTap: canManage ? () => showEditDrawer(context, builder: (_) => _TariffDialog(rule: t)) : null,
             ),
           ),
       ],
@@ -323,7 +324,7 @@ class _TariffDialogState extends ConsumerState<_TariffDialog> {
     final l10n = AppLocalizations.of(context);
     final r = widget.rule;
     String? t(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
-    return AlertDialog(
+    return EditDrawer(
       title: Text(r?.name ?? l10n.scAddTariff),
       content: SizedBox(
         width: 480,

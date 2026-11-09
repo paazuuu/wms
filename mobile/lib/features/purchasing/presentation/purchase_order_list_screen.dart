@@ -14,6 +14,7 @@ import '../application/purchase_order_providers.dart';
 import '../domain/purchase_order.dart';
 import 'purchase_order_detail_screen.dart';
 import 'purchase_order_status_ui.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// Purchase orders (spec §46 checklist item 6, 0033) — what was ordered from
 /// a supplier, before it ships. Distinct from delivery plans (already-shipped
@@ -257,9 +258,7 @@ class _CreatePurchaseOrderSheetState extends State<_CreatePurchaseOrderSheet> {
   }
 
   Future<void> _addLine() async {
-    final draft = await showDialog<PurchaseOrderLineDraft>(
-      context: context,
-      builder: (_) => const _AddLineDialog(),
+    final draft = await showEditDrawer<PurchaseOrderLineDraft>(context, builder: (_) => const _AddLineDialog(),
     );
     if (draft == null) return;
     setState(() {
@@ -433,7 +432,7 @@ class _AddLineDialogState extends State<_AddLineDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.poAddLine),
       content: SingleChildScrollView(
         child: Column(

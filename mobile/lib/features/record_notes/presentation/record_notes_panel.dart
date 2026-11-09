@@ -11,6 +11,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../outbound/presentation/outbound_downloads.dart' show saveFileProvider;
 import '../data/record_notes_repository.dart';
+import '../../../core/ui/edit_drawer.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// Files chosen to put with a note (overridden in tests).
 final noteFilePickerProvider = Provider<Future<List<({String name, Uint8List bytes})>> Function()>((_) => () async {
@@ -99,7 +101,7 @@ class _RecordNotesPanelState extends ConsumerState<RecordNotesPanel> {
 
   Future<void> _edit(RecordNote n) async {
     final l10n = AppLocalizations.of(context);
-    final text = await showDialog<String>(context: context, builder: (_) => _EditNoteDialog(initial: n.body));
+    final text = await showEditDrawer<String>(context, builder: (_) => _EditNoteDialog(initial: n.body));
     if (text == null || !mounted) return;
     if (await _ok(await _repo.write(id: n.id, subject: widget.subject, subjectId: widget.subjectId, body: text))) {
       _snack(l10n.rnSaved);
@@ -109,15 +111,11 @@ class _RecordNotesPanelState extends ConsumerState<RecordNotesPanel> {
 
   Future<void> _remove(RecordNote n) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l10n.rnRemoveQ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-          FilledButton(key: const ValueKey('rn-remove-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.rnRemove)),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.rnRemoveQ,
+      okLabel: l10n.rnRemove,
+      okKey: const ValueKey('rn-remove-ok'),
     );
     if (ok != true || !mounted) return;
     await _ok(await _repo.remove(n.id));
@@ -135,15 +133,12 @@ class _RecordNotesPanelState extends ConsumerState<RecordNotesPanel> {
 
   Future<void> _removeFile(NoteFile f) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l10n.rnFileRemoveQ(f.name)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-          FilledButton(key: const ValueKey('rn-file-remove-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.actionDelete)),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.rnFileRemoveQ(f.name),
+      okLabel: l10n.actionDelete,
+      okKey: const ValueKey('rn-file-remove-ok'),
+      danger: true,
     );
     if (ok != true || !mounted) return;
     await _ok(await _repo.removeFile(f.id));
@@ -296,7 +291,7 @@ class _EditNoteDialogState extends State<_EditNoteDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.rnEdit),
       content: SizedBox(
         width: 480,

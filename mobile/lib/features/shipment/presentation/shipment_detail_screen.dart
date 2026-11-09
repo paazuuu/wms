@@ -27,6 +27,7 @@ import 'shipment_weight_card.dart';
 import 'shipment_parcels_screen.dart';
 import 'shipment_status_ui.dart';
 import '../../product_library/presentation/product_thumb.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// One shipment: the overall list, the cartons it is split into, printing, and
 /// confirming (which deducts stock) or undoing the shipment.
@@ -64,16 +65,7 @@ class _ShipmentDetailScreenState extends ConsumerState<ShipmentDetailScreen> {
 
   Future<void> _deleteCarton(Carton c) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: Text(l10n.deleteCartonQ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.actionCancel)),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.actionDelete)),
-        ],
-      ),
-    );
+    final ok = await showPopconfirm(context, title: l10n.deleteCartonQ, okLabel: l10n.actionDelete, danger: true);
     if (ok != true || !mounted) return;
     final result = await ref.read(shipmentRepositoryProvider).deleteCarton(_id, c.id);
     if (!mounted) return;

@@ -13,6 +13,7 @@ import '../domain/warehouse.dart';
 import '../domain/warehouse_role.dart';
 import 'add_warehouse_screen.dart';
 import 'bin_type_ui.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// The "all warehouses" view (spec §50): every warehouse with its headline
 /// figures plus a company total, and the entry point for adding one. Tapping a
@@ -331,9 +332,7 @@ class _WarehouseCard extends ConsumerWidget {
 Future<void> _editRole(BuildContext context, WidgetRef ref, WarehouseRole role) async {
   final l10n = AppLocalizations.of(context);
   final messenger = ScaffoldMessenger.of(context);
-  final next = await showDialog<WarehouseRole>(
-    context: context,
-    builder: (_) => WarehouseRoleDialog(role: role),
+  final next = await showEditDrawer<WarehouseRole>(context, builder: (_) => WarehouseRoleDialog(role: role),
   );
   if (next == null) return;
   final result = await ref.read(warehouseRoleRepositoryProvider).set(role.id,
@@ -360,9 +359,7 @@ String warehouseInspectionLabel(AppLocalizations l10n, WarehouseRole role) =>
 Future<void> _editInspection(BuildContext context, WidgetRef ref, WarehouseRole role) async {
   final l10n = AppLocalizations.of(context);
   final messenger = ScaffoldMessenger.of(context);
-  final next = await showDialog<WarehouseRole>(
-    context: context,
-    builder: (_) => WarehouseInspectionDialog(role: role),
+  final next = await showEditDrawer<WarehouseRole>(context, builder: (_) => WarehouseInspectionDialog(role: role),
   );
   if (next == null) return;
   final result = await ref.read(warehouseRoleRepositoryProvider).setInspection(role.id,
@@ -424,7 +421,7 @@ class _WarehouseInspectionDialogState extends State<WarehouseInspectionDialog> {
           title: Text(title),
           subtitle: Text(body),
         );
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.whInspectionTitle(widget.role.name)),
       content: SingleChildScrollView(
         child: RadioGroup<WarehouseInspectionMode>(
@@ -542,7 +539,7 @@ class _WarehouseRoleDialogState extends State<WarehouseRoleDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final known = const ['JP', 'CN'].contains(_country);
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.whRoleEdit),
       content: Column(
         mainAxisSize: MainAxisSize.min,

@@ -14,6 +14,7 @@ import '../domain/supply_chain.dart';
 import 'sc_editors.dart';
 import 'sc_labels.dart';
 import 'sc_widgets.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// 仕入先比較 (§5, §7, §28): for one product and one order quantity, every
 /// supplier × route side by side — not the cheapest price but what is left —
@@ -326,13 +327,13 @@ class _Terms extends ConsumerWidget {
           ? Wrap(children: [
               TextButton.icon(
                 key: const ValueKey('sc-edit-profile'),
-                onPressed: () => showDialog(context: context, builder: (_) => ScProfileDialog(productId: productId, profile: profile)),
+                onPressed: () => showEditDrawer(context, builder: (_) => ScProfileDialog(productId: productId, profile: profile)),
                 icon: const Icon(Icons.tune, size: 18),
                 label: Text(l10n.scEditProfile),
               ),
               TextButton.icon(
                 key: const ValueKey('sc-add-term'),
-                onPressed: () => showDialog(context: context, builder: (_) => ScTermDialog(productId: productId, model: model)),
+                onPressed: () => showEditDrawer(context, builder: (_) => ScTermDialog(productId: productId, model: model)),
                 icon: const Icon(Icons.add, size: 18),
                 label: Text(l10n.scAddTerm),
               ),
@@ -357,7 +358,7 @@ class _Terms extends ConsumerWidget {
                 if (t.leadTimeDays != null) l10n.scDays(scNumber(t.leadTimeDays!)),
               ].join(' · ')),
               onTap: canManage
-                  ? () => showDialog(context: context, builder: (_) => ScTermDialog(productId: productId, term: t, model: model))
+                  ? () => showEditDrawer(context, builder: (_) => ScTermDialog(productId: productId, term: t, model: model))
                   : null,
             ),
         ],

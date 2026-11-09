@@ -40,6 +40,7 @@ import '../../home/presentation/feature_link.dart';
 import '../../stock_history/presentation/stock_history_views.dart';
 import '../../outbound/presentation/outbound_downloads.dart';
 import '../../outbound_file/data/shipping_list_export.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// 商品マスタ: what each product is — its names, codes, attributes, size and
 /// weight (0125), base unit, pack units and tracking (0057-0060). Suppliers,
@@ -132,22 +133,11 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   Future<void> _toggleStatus(Product product) async {
     final l10n = AppLocalizations.of(context);
     if (product.isActive) {
-      final ok = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(l10n.productDeactivateQ),
-          content: Text(l10n.productDeactivateBody),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(l10n.actionCancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(l10n.productDeactivateAction),
-            ),
-          ],
-        ),
+      final ok = await showPopconfirm(
+        context,
+        title: l10n.productDeactivateQ,
+        message: l10n.productDeactivateBody,
+        okLabel: l10n.productDeactivateAction,
       );
       if (ok != true || !mounted) return;
     }

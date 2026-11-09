@@ -9,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../application/product_providers.dart';
 import '../data/market_names.dart';
 import '../domain/product.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 /// 商品名（言語別） (0166): the 商品名 — the name shops show — in Japanese,
 /// English and Chinese, each changeable by hand. The Japanese one can be
@@ -106,7 +107,7 @@ class _ProductNamesDialogState extends ConsumerState<ProductNamesDialog> {
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
     final p = widget.product;
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.productNamesTitle),
       content: SizedBox(
         width: 520,

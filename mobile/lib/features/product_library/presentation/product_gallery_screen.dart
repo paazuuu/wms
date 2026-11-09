@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../application/product_library_providers.dart';
 import '../domain/product_image.dart';
 import 'product_profile_tabs.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// A picked picture: its bytes, file name and type.
 typedef PickedPicture = ({Uint8List bytes, String name, String contentType});
@@ -141,15 +142,11 @@ class _ProductGalleryScreenState extends ConsumerState<ProductGalleryScreen> wit
 
   Future<void> _withdraw(ProductImage image) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        content: Text(l10n.plWithdrawConfirm),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-          FilledButton(key: const ValueKey('pl-withdraw-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.plWithdraw)),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.plWithdrawConfirm,
+      okLabel: l10n.plWithdraw,
+      okKey: const ValueKey('pl-withdraw-ok'),
     );
     if (ok == true) await _run(() => ref.read(productImageRepositoryProvider).withdraw(image.id));
   }

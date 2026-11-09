@@ -10,6 +10,7 @@ import '../application/supply_chain_providers.dart';
 import '../domain/supply_chain.dart';
 import 'sc_labels.dart';
 import 'sc_widgets.dart';
+import '../../../core/ui/edit_drawer.dart';
 
 // The master editors shared by the screens. Each saves through its own RPC
 // (0107), shows the server's refusal as words, and refreshes what reads it.
@@ -109,7 +110,7 @@ class _ScTermDialogState extends ConsumerState<ScTermDialog> {
     final partners = ref.watch(_suppliersProvider).valueOrNull ?? const <TradingPartner>[];
     final ids = partners.map((p) => p.id).toSet();
     final routes = widget.model.routes;
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.scSupplyTerms),
       content: SizedBox(
         width: 520,
@@ -222,7 +223,7 @@ class _ScProfileDialogState extends ConsumerState<ScProfileDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     String? t(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.scProfile),
       content: SizedBox(
         width: 520,
@@ -297,9 +298,7 @@ class _ScRouteDialogState extends ConsumerState<ScRouteDialog> {
 
   Future<void> _editLeg(int? index) async {
     final prev = index == null ? (_legs.isEmpty ? null : _legs.last) : _legs[index];
-    final leg = await showDialog<ScEdge>(
-      context: context,
-      builder: (_) => _LegDialog(
+    final leg = await showEditDrawer<ScEdge>(context, builder: (_) => _LegDialog(
         model: widget.model,
         leg: index == null ? null : _legs[index],
         fromNodeId: index == null ? prev?.toNodeId : null,
@@ -320,7 +319,7 @@ class _ScRouteDialogState extends ConsumerState<ScRouteDialog> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     String name(int id) => widget.model.node(id)?.name ?? '#$id';
-    return AlertDialog(
+    return EditDrawer(
       title: Text(widget.route == null ? l10n.scAddRoute : widget.route!.name),
       content: SizedBox(
         width: 560,
@@ -440,7 +439,7 @@ class _LegDialogState extends State<_LegDialog> {
           ],
           onChanged: onChanged,
         );
-    return AlertDialog(
+    return EditDrawer(
       title: Text(l10n.scLegs),
       content: SizedBox(
         width: 520,
@@ -553,7 +552,7 @@ class _ScNodeDialogState extends ConsumerState<ScNodeDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final n = widget.node;
-    return AlertDialog(
+    return EditDrawer(
       title: Text(n == null ? l10n.scAddNode : n.name),
       content: SizedBox(
         width: 520,

@@ -17,6 +17,8 @@ import '../stock_import/presentation/stock_import_calendar_screen.dart' show cal
 import '../warehouse_context/application/warehouse_providers.dart';
 import '../warehouse_context/domain/warehouse.dart';
 import 'warehouse_memos_repository.dart';
+import '../../core/ui/edit_drawer.dart';
+import '../../core/ui/popconfirm.dart';
 
 /// What a list asks for: the kind, a warehouse (null, all), a month (the
 /// カレンダー's), and words.
@@ -122,9 +124,7 @@ class _WarehouseMemosScreenState extends ConsumerState<WarehouseMemosScreen> wit
     if (!warehouses.any((w) => w.id == wh)) wh = warehouses.first.id;
     final kind = memo?.kind ?? _kind;
     final now = DateTime.now();
-    final got = await showDialog<_Written>(
-      context: context,
-      builder: (_) => _MemoDialog(
+    final got = await showEditDrawer<_Written>(context, builder: (_) => _MemoDialog(
         warehouses: warehouses,
         warehouseId: wh,
         body: memo?.body ?? '',
@@ -161,17 +161,13 @@ class _WarehouseMemosScreenState extends ConsumerState<WarehouseMemosScreen> wit
 
   Future<void> _remove(WarehouseMemo memo) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (d) => AlertDialog(
-        title: Text(l10n.wmRemoveQ),
-        content: Text(memo.body, maxLines: 6, overflow: TextOverflow.ellipsis),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(l10n.actionCancel)),
-          FilledButton(
-              key: const ValueKey('wm-remove-go'), onPressed: () => Navigator.pop(d, true), child: Text(l10n.wmRemove)),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.wmRemoveQ,
+      message: memo.body,
+      okLabel: l10n.wmRemove,
+      okKey: const ValueKey('wm-remove-go'),
+      danger: true,
     );
     if (ok != true || !mounted) return;
     final r = await ref.read(warehouseMemosRepositoryProvider).remove(memo.id);
@@ -252,18 +248,12 @@ class _WarehouseMemosScreenState extends ConsumerState<WarehouseMemosScreen> wit
 
   Future<void> _removeFile(MemoFile f) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (d) => AlertDialog(
-        title: Text(l10n.wmFileRemoveQ(f.name)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(d, false), child: Text(l10n.actionCancel)),
-          FilledButton(
-              key: const ValueKey('wm-file-remove-go'),
-              onPressed: () => Navigator.pop(d, true),
-              child: Text(l10n.wmRemove)),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.wmFileRemoveQ(f.name),
+      okLabel: l10n.wmRemove,
+      okKey: const ValueKey('wm-file-remove-go'),
+      danger: true,
     );
     if (ok != true || !mounted) return;
     final r = await ref.read(warehouseMemosRepositoryProvider).removeFile(f.id);
@@ -788,7 +778,7 @@ class _MemoDialogState extends ConsumerState<_MemoDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final calendar = widget.kind == MemoKind.calendar;
-    return AlertDialog(
+    return EditDrawer(
       title: Text(widget.editing
           ? l10n.wmEdit
           : calendar

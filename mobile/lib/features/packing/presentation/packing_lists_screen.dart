@@ -21,6 +21,7 @@ import '../data/packing_list_excel.dart';
 import '../data/packing_repository.dart';
 import '../domain/packing.dart';
 import '../domain/packing_list_reader.dart';
+import '../../../core/ui/popconfirm.dart';
 
 /// The packing list chosen to upload (overridden in tests).
 final packingListPickerProvider = Provider<Future<({String name, Uint8List bytes})?> Function()>((_) => () async {
@@ -373,16 +374,12 @@ class PackingListCard extends ConsumerWidget {
 
   Future<void> _withdraw(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l10n.pkWithdrawQ),
-        content: Text(l10n.pkWithdrawBody),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
-          FilledButton(key: const ValueKey('pk-withdraw-ok'), onPressed: () => Navigator.pop(c, true), child: Text(l10n.pkWithdraw)),
-        ],
-      ),
+    final ok = await showPopconfirm(
+      context,
+      title: l10n.pkWithdrawQ,
+      message: l10n.pkWithdrawBody,
+      okLabel: l10n.pkWithdraw,
+      okKey: const ValueKey('pk-withdraw-ok'),
     );
     if (ok != true || !context.mounted) return;
     final r = await ref.read(packingRepositoryProvider).withdrawList(record.id);

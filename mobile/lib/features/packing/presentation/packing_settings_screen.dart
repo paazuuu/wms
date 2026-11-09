@@ -13,6 +13,7 @@ import '../../stock_ops/presentation/stock_adjustment_screen.dart' show adjustPr
 import '../data/packing_repository.dart';
 import '../domain/packing.dart';
 import 'packing_lists_screen.dart' show packingKg;
+import '../../../core/ui/edit_drawer.dart';
 
 /// 段ボール: the few cartons of ours (S, M, L …) — their size, empty
 /// weight and the load they take — used by the box plan (箱詰め案) and the
@@ -67,7 +68,7 @@ class _CasePacksViewState extends ConsumerState<CasePacksView> {
       if (p == null || !mounted) return;
       pack = CasePack(productId: p.id, caseQuantity: 0, jan: p.janCode, name: p.name, maker: p.maker, sku: p.sku);
     }
-    final r = await showDialog<({CasePack? save, bool retire})>(context: context, builder: (_) => _CasePackDialog(pack: pack!));
+    final r = await showEditDrawer<({CasePack? save, bool retire})>(context, builder: (_) => _CasePackDialog(pack: pack!));
     if (r == null || !mounted) return;
     final repo = ref.read(packingRepositoryProvider);
     if (r.retire) {
@@ -251,7 +252,7 @@ class _CasePackDialogState extends State<_CasePackDialog> {
             onChanged: (_) => setState(() {}),
           ),
         );
-    return AlertDialog(
+    return EditDrawer(
       key: const ValueKey('pk-case-dialog'),
       title: Text(p.name ?? p.sku ?? p.jan ?? '#${p.productId}'),
       content: SizedBox(
