@@ -8154,7 +8154,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pfLifecycle => '状态';
 
   @override
-  String get pfMaker => '制造商';
+  String get pfMaker => '厂家';
 
   @override
   String get pfSupplier => '供应商';
@@ -16485,4 +16485,77 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ofNoCardTag => '未选收货方卡片';
+
+  @override
+  String get pfTitle => '每月收益（来自所有出货）';
+
+  @override
+  String get pfHelp =>
+      '对所有已出库的出货明细（含库存外出货），用出货金额（不含税）减去当日的进货价，按月合计。进货价取自“进货价历史”（导入的发票和手动录入），使用出货日当天或之前最新的一个（若无则用之后的第一个）。人民币按该出货明细的汇率换算为日元。';
+
+  @override
+  String pfPeriod(int n) {
+    return '$n个月';
+  }
+
+  @override
+  String get pfMeasureProfit => '收益';
+
+  @override
+  String get pfMeasureRevenue => '销售额';
+
+  @override
+  String get pfMeasureCost => '成本';
+
+  @override
+  String get pfAllMakers => '所有厂家';
+
+  @override
+  String get pfSearch => '按商品筛选（名称・JAN）';
+
+  @override
+  String pfTotals(String revenue, String cost, String profit, String margin) {
+    return '期间合计　销售额 $revenue　成本 $cost　收益 $profit　利润率 $margin';
+  }
+
+  @override
+  String pfNoCost(int qty, String yen) {
+    return '$qty个没有进货价（销售额 $yen）未计入收益。在商品详情的“进货价历史”中录入进货价后即可计算。';
+  }
+
+  @override
+  String pfNoPrice(int qty) {
+    return '$qty个使用未设定汇率的货币，无法换算为日元，未计入销售额（可在出货明细的“货币・汇率”中设定）。';
+  }
+
+  @override
+  String get pfColMonth => '月份';
+
+  @override
+  String get pfColQty => '数量';
+
+  @override
+  String get pfColMargin => '利润率';
+
+  @override
+  String get pfColNoCost => '无进货价';
+
+  @override
+  String get pfProducts => '按商品（期间合计・收益从高到低）';
+
+  @override
+  String get pfEmpty => '此期间尚无已出库的出货。';
+
+  @override
+  String get pfNoPermission => '没有查看进货价的权限，无法显示收益。';
+
+  @override
+  String pfTooltip(String month, String revenue, String cost, String profit) {
+    return '$month\n销售额 $revenue\n成本 $cost\n收益 $profit';
+  }
+
+  @override
+  String pfShowMore(int n) {
+    return '另有 $n 个商品';
+  }
 }

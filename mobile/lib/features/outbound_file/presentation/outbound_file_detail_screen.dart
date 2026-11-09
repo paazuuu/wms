@@ -112,6 +112,8 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
   /// 中身を直す (0202): the rows' quantities, whether each ships, a product
   /// added, a row's currency.
   bool _editing = false;
+  // The whole 出荷先カード, opened under its one-line summary.
+  bool _cardOpen = false;
 
   @override
   void dispose() {
@@ -646,6 +648,58 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                     child: Icon(Icons.lock_outline, size: 16, color: scheme.onSurfaceVariant),
                   ),
               ]),
+              // 出荷先カード (0190): beside the warehouse and the day, where it
+              // is seen at a glance; the whole card opens under it.
+              Row(key: const ValueKey('of-ship-to'), children: [
+                Icon(Icons.contact_mail_outlined,
+                    size: 18, color: f.shipTo == null && !f.proxy ? scheme.error : scheme.onSurfaceVariant),
+                const SizedBox(width: AppSpacing.xs),
+                Flexible(
+                  child: f.shipTo != null
+                      ? Text(
+                          [
+                            '${l10n.ofEditCardLabel}: ${f.shipTo!.name}',
+                            if (f.shipTo!.nameEn != null && f.shipTo!.nameEn != f.shipTo!.name) f.shipTo!.nameEn!,
+                            if (f.shipTo!.port != null) f.shipTo!.port!,
+                            if (f.shipTo!.incoterms != null) f.shipTo!.incoterms!,
+                          ].join(' · '),
+                          key: const ValueKey('of-ship-to-summary'),
+                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600))
+                      : Text(
+                          f.planned && !f.proxy && !f.undone
+                              ? l10n.ofCardRequiredNote
+                              : '${l10n.ofEditCardLabel}: ${l10n.ofConfirmCardNone}',
+                          key: const ValueKey('of-card-required'),
+                          style: TextStyle(color: scheme.error, fontWeight: FontWeight.w600)),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                if (!f.undone)
+                  TextButton.icon(
+                    key: const ValueKey('of-ship-to-change'),
+                    onPressed: _busy ? null : () => _setCard(f),
+                    icon: const Icon(Icons.swap_horiz, size: 18),
+                    label: Text(f.shipTo == null ? l10n.ofPickCard : l10n.ofShipToChange),
+                  ),
+                if (f.shipTo != null) ...[
+                  IconButton(
+                    key: const ValueKey('of-ship-to-copy'),
+                    tooltip: l10n.sdcCopy,
+                    icon: const Icon(Icons.copy_all_outlined, size: 18),
+                    onPressed: () => copyDestinationCard(context, f.shipTo!),
+                  ),
+                  IconButton(
+                    key: const ValueKey('of-ship-to-open'),
+                    tooltip: l10n.ofShipTo,
+                    icon: Icon(_cardOpen ? Icons.expand_less : Icons.expand_more, size: 20),
+                    onPressed: () => setState(() => _cardOpen = !_cardOpen),
+                  ),
+                ],
+              ]),
+              if (f.shipTo != null && _cardOpen)
+                Padding(
+                  padding: const EdgeInsets.only(left: 26, top: AppSpacing.xs, bottom: AppSpacing.xs),
+                  child: DestinationCardView(destination: f.shipTo!),
+                ),
               if (f.note != null) Text(f.note!, style: theme.textTheme.bodyMedium),
               if (f.createdByName != null && f.createdAt != null)
                 Text(l10n.ofBy(f.createdByName!, DateFormat('y/MM/dd HH:mm').format(f.createdAt!)), style: muted),
@@ -765,38 +819,6 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
           _keepCard(l10n, d),
         ],
         const SizedBox(height: AppSpacing.md),
-        // 出荷先カード (0190): where it went, as the card was then.
-        Card(
-          key: const ValueKey('of-ship-to'),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Expanded(child: Text(l10n.ofShipTo, style: theme.textTheme.labelLarge)),
-                if (f.shipTo != null)
-                  IconButton(
-                    key: const ValueKey('of-ship-to-copy'),
-                    tooltip: l10n.sdcCopy,
-                    icon: const Icon(Icons.copy_all_outlined),
-                    onPressed: () => copyDestinationCard(context, f.shipTo!),
-                  ),
-                if (!f.undone)
-                  TextButton.icon(
-                    key: const ValueKey('of-ship-to-change'),
-                    onPressed: () => _setCard(f),
-                    icon: const Icon(Icons.contact_mail_outlined, size: 18),
-                    label: Text(f.shipTo == null ? l10n.ofPickCard : l10n.ofShipToChange),
-                  ),
-              ]),
-              if (f.shipTo != null)
-                DestinationCardView(destination: f.shipTo!)
-              else if (f.planned && !f.proxy && !f.undone)
-                Text(l10n.ofCardRequiredNote,
-                    key: const ValueKey('of-card-required'),
-                    style: TextStyle(color: scheme.error, fontWeight: FontWeight.w600)),
-            ]),
-          ),
-        ),
         const SizedBox(height: AppSpacing.md),
         if (_editing && f.warehouseMovable) ...[
           Card(

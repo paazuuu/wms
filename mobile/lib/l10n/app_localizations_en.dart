@@ -8379,7 +8379,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pfStockOut => 'Out of stock';
 
   @override
-  String get pfClear => 'Clear filters';
+  String get pfClear => 'Clear filter';
 
   @override
   String pfShowing(int shown, int total) {
@@ -16927,4 +16927,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ofNoCardTag => 'No destination card';
+
+  @override
+  String get pfTitle => 'Monthly profit (from every shipment)';
+
+  @override
+  String get pfHelp =>
+      'For every shipped list (shipments outside stock included), what each line sold for (excl. tax) less the purchase price of the day, added up by month. The purchase price is the latest one on or before the shipping day from the purchase price history (invoices read in and prices entered by hand), else the first one after. Yuan are put in yen at the list\'s rate.';
+
+  @override
+  String pfPeriod(int n) {
+    return '$n months';
+  }
+
+  @override
+  String get pfMeasureProfit => 'Profit';
+
+  @override
+  String get pfMeasureRevenue => 'Sales';
+
+  @override
+  String get pfMeasureCost => 'Cost';
+
+  @override
+  String get pfAllMakers => 'All makers';
+
+  @override
+  String get pfSearch => 'Filter by product (name, JAN)';
+
+  @override
+  String pfTotals(String revenue, String cost, String profit, String margin) {
+    return 'Period total  sales $revenue  cost $cost  profit $profit  margin $margin';
+  }
+
+  @override
+  String pfNoCost(int qty, String yen) {
+    return '$qty pcs with no known purchase price (sales $yen) are left out of the profit. Enter a price in the product\'s purchase price history to count them.';
+  }
+
+  @override
+  String pfNoPrice(int qty) {
+    return '$qty pcs in a currency with no rate could not be put in yen and are left out of sales (set it under the list\'s currency and rate).';
+  }
+
+  @override
+  String get pfColMonth => 'Month';
+
+  @override
+  String get pfColQty => 'Qty';
+
+  @override
+  String get pfColMargin => 'Margin';
+
+  @override
+  String get pfColNoCost => 'No cost';
+
+  @override
+  String get pfProducts => 'By product (period total, most profit first)';
+
+  @override
+  String get pfEmpty => 'Nothing has shipped in this period yet.';
+
+  @override
+  String get pfNoPermission =>
+      'You cannot see purchase prices, so profit is not shown.';
+
+  @override
+  String pfTooltip(String month, String revenue, String cost, String profit) {
+    return '$month\nSales $revenue\nCost $cost\nProfit $profit';
+  }
+
+  @override
+  String pfShowMore(int n) {
+    return '$n more products';
+  }
 }

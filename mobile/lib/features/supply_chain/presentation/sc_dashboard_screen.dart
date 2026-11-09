@@ -14,6 +14,7 @@ import 'sc_labels.dart';
 import 'sc_product_sheet.dart';
 import 'sc_widgets.dart';
 import '../../home/presentation/feature_link.dart';
+import '../../profit/presentation/monthly_profit_section.dart';
 
 /// 収益ダッシュボード (§4): what is left after every cost, for the warehouse
 /// in the header — totals, what the cost is made of, what needs attention,
@@ -99,6 +100,9 @@ class _ScDashboardScreenState extends ConsumerState<ScDashboardScreen> {
             return ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
+                // What the shipments actually made, month by month (0211).
+                const MonthlyProfitSection(),
+                const SizedBox(height: AppSpacing.md),
                 const FeatureLinkChips(_scScreens),
                 SizedBox(
                   height: 260,
@@ -124,6 +128,8 @@ class _ScDashboardScreenState extends ConsumerState<ScDashboardScreen> {
                 Text(warehouse?.name ?? l10n.scAllWarehouses,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 const SizedBox(height: AppSpacing.sm),
+                const MonthlyProfitSection(),
+                const SizedBox(height: AppSpacing.md),
                 ScKpiGrid(summary: run.summary),
                 const SizedBox(height: AppSpacing.md),
                 const FeatureLinkChips(_scScreens),

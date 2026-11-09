@@ -562,8 +562,12 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('of-post-ok')));
     await tester.pumpAndSettle();
     expect(repo.destinations, [(1, 31)]);
-    // The detail: the card as it was, with the export terms.
+    // The detail: the card in one line beside the warehouse, and as a whole
+    // when opened, with the export terms.
     expect(find.byKey(const ValueKey('of-ship-to')), findsOneWidget);
+    expect(find.text('出荷先: テスト貿易 · Test Trading · Shanghai · FOB'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-ship-to-open')));
+    await tester.pumpAndSettle();
     expect(find.text('Test Trading'), findsOneWidget);
     expect(find.text('FOB'), findsOneWidget);
   });

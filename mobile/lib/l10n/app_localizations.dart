@@ -15010,7 +15010,7 @@ abstract class AppLocalizations {
   /// No description provided for @pfClear.
   ///
   /// In ja, this message translates to:
-  /// **'絞り込みを解除'**
+  /// **'絞り込みを外す'**
   String get pfClear;
 
   /// No description provided for @pfShowing.
@@ -29170,6 +29170,126 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'出荷先カード未選択'**
   String get ofNoCardTag;
+
+  /// No description provided for @pfTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'月ごとの収益（すべての出荷から）'**
+  String get pfTitle;
+
+  /// No description provided for @pfHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫済みのすべての出荷明細（在庫外出荷も含む）について、出荷した額（税抜）から、その日の仕入値を引いて月ごとに足しています。仕入値は「仕入れ値の履歴」（取り込んだ請求書・手入力）から、出荷日以前で最も新しいもの（なければその後で最初のもの）を使います。元はその出荷明細のレートで円にします。'**
+  String get pfHelp;
+
+  /// No description provided for @pfPeriod.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}か月'**
+  String pfPeriod(int n);
+
+  /// No description provided for @pfMeasureProfit.
+  ///
+  /// In ja, this message translates to:
+  /// **'収益'**
+  String get pfMeasureProfit;
+
+  /// No description provided for @pfMeasureRevenue.
+  ///
+  /// In ja, this message translates to:
+  /// **'売上'**
+  String get pfMeasureRevenue;
+
+  /// No description provided for @pfMeasureCost.
+  ///
+  /// In ja, this message translates to:
+  /// **'原価'**
+  String get pfMeasureCost;
+
+  /// No description provided for @pfAllMakers.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべてのメーカー'**
+  String get pfAllMakers;
+
+  /// No description provided for @pfSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品で絞り込む（名前・JAN）'**
+  String get pfSearch;
+
+  /// No description provided for @pfTotals.
+  ///
+  /// In ja, this message translates to:
+  /// **'期間の合計　売上 {revenue}　原価 {cost}　収益 {profit}　利益率 {margin}'**
+  String pfTotals(String revenue, String cost, String profit, String margin);
+
+  /// No description provided for @pfNoCost.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入値がわからない {qty}個（売上 {yen}）は収益に入れていません。商品詳細の「仕入れ値の履歴」で仕入値を入れると計算されます。'**
+  String pfNoCost(int qty, String yen);
+
+  /// No description provided for @pfNoPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'レートが決まっていない通貨の {qty}個は円にできず、売上に入っていません（出荷明細の「通貨・レート」で入れられます）。'**
+  String pfNoPrice(int qty);
+
+  /// No description provided for @pfColMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'月'**
+  String get pfColMonth;
+
+  /// No description provided for @pfColQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get pfColQty;
+
+  /// No description provided for @pfColMargin.
+  ///
+  /// In ja, this message translates to:
+  /// **'利益率'**
+  String get pfColMargin;
+
+  /// No description provided for @pfColNoCost.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入値なし'**
+  String get pfColNoCost;
+
+  /// No description provided for @pfProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ごと（期間の合計・収益の多い順）'**
+  String get pfProducts;
+
+  /// No description provided for @pfEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'この期間に出庫済みの出荷はまだありません。'**
+  String get pfEmpty;
+
+  /// No description provided for @pfNoPermission.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入値を見る権限がないため、収益は表示できません。'**
+  String get pfNoPermission;
+
+  /// No description provided for @pfTooltip.
+  ///
+  /// In ja, this message translates to:
+  /// **'{month}\n売上 {revenue}\n原価 {cost}\n収益 {profit}'**
+  String pfTooltip(String month, String revenue, String cost, String profit);
+
+  /// No description provided for @pfShowMore.
+  ///
+  /// In ja, this message translates to:
+  /// **'ほか {n}商品'**
+  String pfShowMore(int n);
 }
 
 class _AppLocalizationsDelegate

@@ -7357,7 +7357,7 @@
   "pfStockAll": "すべて",
   "pfStockIn": "在庫あり",
   "pfStockOut": "在庫なし",
-  "pfClear": "絞り込みを解除",
+  "pfClear": "絞り込みを外す",
   "pfShowing": "{shown}件を表示（全{total}件）",
   "@pfShowing": {
     "placeholders": {
@@ -14651,5 +14651,88 @@
   "ofPostNeedsCard": "出庫するには出荷先カードを選んでください（出庫予定として登録するなら後で選べます）。",
   "ofCardRequiredHint": "出庫には出荷先カードが必須です",
   "ofEditCardLabel": "出荷先",
-  "ofNoCardTag": "出荷先カード未選択"
+  "ofNoCardTag": "出荷先カード未選択",
+  "pfTitle": "月ごとの収益（すべての出荷から）",
+  "pfHelp": "出庫済みのすべての出荷明細（在庫外出荷も含む）について、出荷した額（税抜）から、その日の仕入値を引いて月ごとに足しています。仕入値は「仕入れ値の履歴」（取り込んだ請求書・手入力）から、出荷日以前で最も新しいもの（なければその後で最初のもの）を使います。元はその出荷明細のレートで円にします。",
+  "pfPeriod": "{n}か月",
+  "@pfPeriod": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pfMeasureProfit": "収益",
+  "pfMeasureRevenue": "売上",
+  "pfMeasureCost": "原価",
+  "pfAllMakers": "すべてのメーカー",
+  "pfSearch": "商品で絞り込む（名前・JAN）",
+  "pfTotals": "期間の合計　売上 {revenue}　原価 {cost}　収益 {profit}　利益率 {margin}",
+  "@pfTotals": {
+    "placeholders": {
+      "revenue": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "profit": {
+        "type": "String"
+      },
+      "margin": {
+        "type": "String"
+      }
+    }
+  },
+  "pfNoCost": "仕入値がわからない {qty}個（売上 {yen}）は収益に入れていません。商品詳細の「仕入れ値の履歴」で仕入値を入れると計算されます。",
+  "@pfNoCost": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      },
+      "yen": {
+        "type": "String"
+      }
+    }
+  },
+  "pfNoPrice": "レートが決まっていない通貨の {qty}個は円にできず、売上に入っていません（出荷明細の「通貨・レート」で入れられます）。",
+  "@pfNoPrice": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "pfColMonth": "月",
+  "pfColQty": "数量",
+  "pfColMargin": "利益率",
+  "pfColNoCost": "仕入値なし",
+  "pfProducts": "商品ごと（期間の合計・収益の多い順）",
+  "pfEmpty": "この期間に出庫済みの出荷はまだありません。",
+  "pfNoPermission": "仕入値を見る権限がないため、収益は表示できません。",
+  "pfTooltip": "{month}\n売上 {revenue}\n原価 {cost}\n収益 {profit}",
+  "@pfTooltip": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "revenue": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "profit": {
+        "type": "String"
+      }
+    }
+  },
+  "pfShowMore": "ほか {n}商品",
+  "@pfShowMore": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

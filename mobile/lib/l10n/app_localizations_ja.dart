@@ -8210,7 +8210,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pfStockOut => '在庫なし';
 
   @override
-  String get pfClear => '絞り込みを解除';
+  String get pfClear => '絞り込みを外す';
 
   @override
   String pfShowing(int shown, int total) {
@@ -16603,4 +16603,77 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ofNoCardTag => '出荷先カード未選択';
+
+  @override
+  String get pfTitle => '月ごとの収益（すべての出荷から）';
+
+  @override
+  String get pfHelp =>
+      '出庫済みのすべての出荷明細（在庫外出荷も含む）について、出荷した額（税抜）から、その日の仕入値を引いて月ごとに足しています。仕入値は「仕入れ値の履歴」（取り込んだ請求書・手入力）から、出荷日以前で最も新しいもの（なければその後で最初のもの）を使います。元はその出荷明細のレートで円にします。';
+
+  @override
+  String pfPeriod(int n) {
+    return '$nか月';
+  }
+
+  @override
+  String get pfMeasureProfit => '収益';
+
+  @override
+  String get pfMeasureRevenue => '売上';
+
+  @override
+  String get pfMeasureCost => '原価';
+
+  @override
+  String get pfAllMakers => 'すべてのメーカー';
+
+  @override
+  String get pfSearch => '商品で絞り込む（名前・JAN）';
+
+  @override
+  String pfTotals(String revenue, String cost, String profit, String margin) {
+    return '期間の合計　売上 $revenue　原価 $cost　収益 $profit　利益率 $margin';
+  }
+
+  @override
+  String pfNoCost(int qty, String yen) {
+    return '仕入値がわからない $qty個（売上 $yen）は収益に入れていません。商品詳細の「仕入れ値の履歴」で仕入値を入れると計算されます。';
+  }
+
+  @override
+  String pfNoPrice(int qty) {
+    return 'レートが決まっていない通貨の $qty個は円にできず、売上に入っていません（出荷明細の「通貨・レート」で入れられます）。';
+  }
+
+  @override
+  String get pfColMonth => '月';
+
+  @override
+  String get pfColQty => '数量';
+
+  @override
+  String get pfColMargin => '利益率';
+
+  @override
+  String get pfColNoCost => '仕入値なし';
+
+  @override
+  String get pfProducts => '商品ごと（期間の合計・収益の多い順）';
+
+  @override
+  String get pfEmpty => 'この期間に出庫済みの出荷はまだありません。';
+
+  @override
+  String get pfNoPermission => '仕入値を見る権限がないため、収益は表示できません。';
+
+  @override
+  String pfTooltip(String month, String revenue, String cost, String profit) {
+    return '$month\n売上 $revenue\n原価 $cost\n収益 $profit';
+  }
+
+  @override
+  String pfShowMore(int n) {
+    return 'ほか $n商品';
+  }
 }
