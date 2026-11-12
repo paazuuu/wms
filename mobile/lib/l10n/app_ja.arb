@@ -14734,5 +14734,87 @@
         "type": "int"
       }
     }
-  }
+  },
+  "rqErrReceiptPrice": "仕入単価がない行があります（{rows}行目）。入荷では仕入単価が必須です（システム管理者が「必須項目の設定」で変えられます）。",
+  "@rqErrReceiptPrice": {
+    "placeholders": {
+      "rows": {
+        "type": "String"
+      }
+    }
+  },
+  "rqErrShipPrice": "出荷単価がない行があります（{rows}行目）。出庫・在庫外出荷では各行の単価が必須です。「中身を直す」で入れてください。",
+  "@rqErrShipPrice": {
+    "placeholders": {
+      "rows": {
+        "type": "String"
+      }
+    }
+  },
+  "rqErrShipRate": "元の行がありますが、レート（1元＝?円）が決まっていません。「通貨・レート」で入れてください。",
+  "featRequirements": "必須項目の設定",
+  "featRequirementsDesc": "入荷・出荷などの作業ごとに何が必須かを一覧し、システム管理者が必須の一部をゆるめられます。",
+  "rqIntro": "作業ごとに、登録や出庫の前にそろっている必要があるものです。「固定」はシステムの正しさのために外せないもの、スイッチがあるものはシステム管理者が必須を外せます。外すと、その数字が抜けたまま進めるようになり、月ごとの収益などの計算からその分が漏れます。",
+  "rqOnlyAdmin": "変更できるのはシステム管理者だけです。",
+  "rqRequired": "必須",
+  "rqOptional": "任意",
+  "rqFixed": "固定",
+  "rqDefault": "初期設定",
+  "rqChanged": "{name}が{at}に変更",
+  "@rqChanged": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "rqRelaxQ": "「{item}」を必須から外しますか？",
+  "@rqRelaxQ": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "rqRelaxBody": "外すと、この数字がないままでも作業が進みます。月ごとの収益の計算からその分が漏れます。",
+  "rqRelax": "必須から外す",
+  "rqSaved": "「{item}」を{state}にしました",
+  "@rqSaved": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "rqOpReceipt": "入荷（仕入先のファイル・発注の取込）",
+  "rqOpUnplanned": "予定外の入荷",
+  "rqOpInspection": "検品",
+  "rqOpPlan": "出庫予定の登録",
+  "rqOpShip": "出庫（出庫済みにする）",
+  "rqOpProxy": "在庫外出荷",
+  "rqOpAdjust": "在庫調整・棚卸",
+  "rqReceiptPrice": "各行の仕入単価",
+  "rqReceiptPriceHint": "税抜単価（なければ税込単価、金額÷数量）。月ごとの収益の原価になります。",
+  "rqShipPrice": "各行の出荷単価",
+  "rqShipPriceHint": "出荷明細の単価（なければ金額）。月ごとの収益の売上になります。出庫済みにする時と、在庫外出荷を記録する時に確かめます。",
+  "rqShipRate": "元の行のレート（1元＝?円）",
+  "rqShipRateHint": "元で書かれた行を円にするため。出荷明細の「通貨・レート」で入れます。",
+  "rqShipCard": "出荷先カード",
+  "rqShipCardHint": "どこへ出したか。国外の仮想在庫やパッキングリスト・輸出書類が使います。",
+  "rqFixedWarehouse": "倉庫",
+  "rqFixedJan": "JAN（商品ライブラリーにある商品だけ在庫に入る・出る）",
+  "rqFixedQty": "数量（0以上）",
+  "rqFixedUnplannedPrice": "仕入単価は後から届く請求書で決まります（請求書待ち）",
+  "rqFixedInspect": "検品完了にした数だけ在庫に入る",
+  "rqFixedPlanDay": "出庫予定日（未定でも登録できる）",
+  "rqFixedShipCheck": "「実際に倉庫から出した」のチェック",
+  "rqFixedShipDay": "出庫日は今日以前",
+  "rqFixedPrincipal": "依頼元（記録のみ・在庫は動かない）",
+  "rqFixedAdjustConfirm": "確認してから反映（取り消せない）"
 }

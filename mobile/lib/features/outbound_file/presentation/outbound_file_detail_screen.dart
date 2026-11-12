@@ -21,6 +21,7 @@ import '../../warehouse_context/domain/warehouse.dart' show Warehouse;
 import '../data/outbound_file_repository.dart';
 import '../domain/outbound_currency.dart' show PriceCurrency;
 import '../../../core/ui/edit_drawer.dart';
+import '../../requirements/requirements_repository.dart';
 import 'outbound_file_screen.dart'
     show
         OutboundPickProductDialog,
@@ -324,7 +325,18 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     // the list has none yet.
     int? cardId;
     String? cardName;
-    bool hasCard() => f.shipTo != null || cardId != null;
+    // 必須項目 (0212), as the system administrator has them.
+    final needCard = ref.read(requirementOnProvider(Req.shipCard));
+    bool hasCard() => !needCard || f.shipTo != null || cardId != null;
+    final unpriced = ref.read(requirementOnProvider(Req.shipPrice))
+        ? [
+            for (final l in d.lines)
+              if (l.action != 'skip' && l.quantity > 0 && (l.unitPrice ?? l.unitPriceTax ?? l.amount ?? 0) <= 0) l.rowNo
+          ]
+        : const <int>[];
+    final noRate = ref.read(requirementOnProvider(Req.shipRate)) &&
+        f.fxCnyJpy == null &&
+        d.lines.any((l) => l.action != 'skip' && l.quantity > 0 && l.currency.toUpperCase() == 'CNY');
     final ship = [for (final l in d.lines) if (l.action == 'ship' && l.productId != null) l];
     final ok = await showDialog<bool>(
       context: context,
@@ -390,6 +402,18 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                 child: Text(hasCard() ? l10n.ofShipToChange : l10n.ofPickCard),
               ),
             ]),
+            if (unpriced.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(l10n.rqErrShipPrice(unpriced.take(20).join(', ') + (unpriced.length > 20 ? '…' : '')),
+                  key: const ValueKey('of-confirm-no-price'),
+                  style: TextStyle(color: Theme.of(c).colorScheme.error, fontWeight: FontWeight.w600)),
+            ],
+            if (noRate) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(l10n.rqErrShipRate,
+                  key: const ValueKey('of-confirm-no-rate'),
+                  style: TextStyle(color: Theme.of(c).colorScheme.error, fontWeight: FontWeight.w600)),
+            ],
             const SizedBox(height: AppSpacing.xs),
             CheckboxListTile(
               key: const ValueKey('of-confirm-check'),
@@ -404,7 +428,7 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
             TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.actionCancel)),
             FilledButton(
                 key: const ValueKey('of-confirm-ok'),
-                onPressed: seen && hasCard() ? () => Navigator.pop(c, true) : null,
+                onPressed: seen && hasCard() && unpriced.isEmpty && !noRate ? () => Navigator.pop(c, true) : null,
                 child: Text(l10n.ofConfirm)),
           ],
         ),
@@ -530,6 +554,8 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final async = ref.watch(outboundFileDetailProvider(widget.fileId));
+    // The rules the 出庫した dialog checks, kept loaded (0212).
+    ref.watch(requirementsProvider);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.ofDetailTitle)),
       body: async.when(

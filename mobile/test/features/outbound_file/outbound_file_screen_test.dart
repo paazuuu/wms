@@ -22,6 +22,8 @@ import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
 import '../../support/fake_outbound_file_repository.dart';
 import '../../support/harness.dart';
+import 'package:wms_mobile/features/requirements/requirements_repository.dart';
+import '../../support/fake_requirements_repository.dart';
 
 class _Tab implements HtmlTab {
   final shown = <(int, String)>[];
@@ -78,12 +80,15 @@ const _library = [
 
 void main() {
   Future<FakeOutboundFileRepository> pump(WidgetTester tester,
-      {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html, bool proxy = false, List<(String, Uint8List)>? saved, Uint8List? book, int? warehouse = 1}) async {
+      {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html, bool proxy = false, List<(String, Uint8List)>? saved, Uint8List? book, int? warehouse = 1, bool priced = false}) async {
     await tester.binding.setSurfaceSize(const Size(2600, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final r = repo ?? FakeOutboundFileRepository(matcher: _match);
     await pumpApp(tester, OutboundFileScreen(initialTab: tab, proxy: proxy), overrides: [
       outboundFileRepositoryProvider.overrideWithValue(r),
+      // Rows here mostly carry no prices: the 出荷単価 rule (0212) is off
+      // unless [priced].
+      requirementsRepositoryProvider.overrideWithValue(FakeRequirementsRepository(off: priced ? const {} : {Req.shipPrice})),
       outboundFilePickerProvider.overrideWithValue(() async => (name: '到货明细.xlsx', bytes: book ?? _book())),
       outboundTabOpenerProvider.overrideWithValue(() => html),
       outboundFileSaverProvider.overrideWithValue((n, b) async => saved?.add((n, b))),
@@ -834,6 +839,7 @@ void main() {
       outboundFileRepositoryProvider.overrideWithValue(repo),
       activeWarehouseIdProvider.overrideWith((ref) => null),
       shipDestinationsProvider.overrideWith((ref) async => const [ShipDestination(id: 31, name: 'テスト貿易')]),
+      requirementsRepositoryProvider.overrideWithValue(FakeRequirementsRepository(off: {Req.shipPrice})),
     ]);
     expect(find.byKey(const ValueKey('of-planned-5')), findsOneWidget);
     expect(find.textContaining('2行 · 数量 15'), findsOneWidget);

@@ -38,6 +38,7 @@ import '../domain/outbound_sheet.dart';
 import 'outbound_calendar_tab.dart';
 import 'outbound_file_detail_screen.dart';
 import '../../../core/ui/edit_drawer.dart';
+import '../../requirements/requirements_repository.dart';
 
 /// The shipping list chosen to read (overridden in tests).
 final outboundFilePickerProvider = Provider<Future<({String name, Uint8List bytes})?> Function()>((_) => () async {
@@ -636,8 +637,23 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
       _snack(l10n.ofErrNoLines);
       return;
     }
+    // Shipped or recorded now: each row's price, as the rules ask (0212). A
+    // planned list can still have it put in before it ships.
+    if (!_planning && ref.read(requirementOnProvider(Req.shipPrice))) {
+      final unpriced = [
+        for (final l in plan)
+          if (l.action != OutboundAction.skip &&
+              (l.row.quantity ?? 0) > 0 &&
+              (l.row.priceEx ?? l.row.priceTax ?? l.row.total ?? 0) <= 0)
+            l.row.rowNo
+      ];
+      if (unpriced.isNotEmpty) {
+        _snack(l10n.rqErrShipPrice(unpriced.take(20).join(', ') + (unpriced.length > 20 ? '…' : '')));
+        return;
+      }
+    }
     // 出庫 now needs its 出荷先カード (0210); a planned list can have it later.
-    if (!_proxy && !_planning && _card?.id == null) {
+    if (!_proxy && !_planning && _card?.id == null && ref.read(requirementOnProvider(Req.shipCard))) {
       _snack(l10n.ofPostNeedsCard);
       await _pickCard();
       if (!mounted || _card?.id == null) return;
@@ -928,6 +944,8 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    // The rules 出庫 checks, kept loaded (0212).
+    ref.watch(requirementsProvider);
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;

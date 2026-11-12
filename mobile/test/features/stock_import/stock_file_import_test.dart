@@ -31,6 +31,8 @@ import '../../support/fake_jan_catalog_repository.dart';
 import '../../support/fake_market_name_repository.dart';
 import '../../support/fake_payments_repository.dart';
 import '../../support/harness.dart';
+import 'package:wms_mobile/features/requirements/requirements_repository.dart';
+import '../../support/fake_requirements_repository.dart';
 
 // Synthetic JANs with a correct check digit.
 const _jan1 = '4909999000014';
@@ -204,6 +206,12 @@ Override _signedIn(List<String> permissions) => authControllerProvider.overrideW
     fakeAuthControllerFor(AuthUser(id: 'u1', email: 'a@b.test', name: '倉庫', permissions: permissions)));
 
 
+/// These files mostly carry no prices: the 仕入単価 rule (0212) is off here
+/// unless a test asks for it ([priceRule]).
+bool _priceRule = false;
+Override _receiptPriceRule() =>
+    requirementsRepositoryProvider.overrideWithValue(FakeRequirementsRepository(off: _priceRule ? const {} : {Req.receiptPrice}));
+
 Future<_FakeStock> _pumpCsv(WidgetTester tester, String csv,
     {Map<String, String> products = const {}, Map<String, int> stock = const {}, List<String> perms = const ['inventory.adjust'],
     List<(String, Uint8List)>? saved, MasterImportRepository? reader, String name = 'a.csv',
@@ -212,6 +220,7 @@ Future<_FakeStock> _pumpCsv(WidgetTester tester, String csv,
   addTearDown(() => tester.binding.setSurfaceSize(null));
   final repo = _FakeStock(products, stock: stock)..unplanned = unplanned;
   await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _receiptPriceRule(),
     _signedIn(perms),
     stockImportRepositoryProvider.overrideWithValue(repo),
     if (reader != null) masterImportRepositoryProvider.overrideWithValue(reader),
@@ -503,6 +512,7 @@ void main() {
     final repo = _FakeStock({_jan1: 'テストペン 青'});
     final csv = Uint8List.fromList(utf8.encode('JANコード,品番,メーカー,数量\n$_jan1,TP-1,テスト文具,10\n,XB-1,テスト文具,200\n'));
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _receiptPriceRule(),
       _signedIn(['inventory.adjust']),
       stockImportRepositoryProvider.overrideWithValue(repo),
       stockFilePickerProvider.overrideWithValue(() async => (name: '到着.csv', bytes: csv)),
@@ -529,6 +539,7 @@ void main() {
     final repo = _FakeStock({_jan1: 'テストペン 青', _jan2: 'テストノート'}, stock: {_jan1: 4});
     final csv = Uint8List.fromList(utf8.encode('JANコード,数量\n$_jan1,10\n$_jan2,3\n$_jan3,8\nx,1\n'));
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _receiptPriceRule(),
       _signedIn(['inventory.adjust']),
       stockImportRepositoryProvider.overrideWithValue(repo),
       stockFilePickerProvider.overrideWithValue(() async => (name: '在庫.csv', bytes: csv)),
@@ -570,6 +581,43 @@ void main() {
     expect(find.byKey(const ValueKey('sf-done')), findsOneWidget);
   });
 
+  testWidgets('仕入単価 required (0212): a line without one stops the receipt; with one it goes in, priced', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    _priceRule = true;
+    addTearDown(() => _priceRule = false);
+    Future<_FakeStock> run(String csv) async {
+      final repo = _FakeStock({_jan1: 'テストペン 青'}, stock: {_jan1: 40});
+      await pumpApp(tester, const StockFileImportScreen(), overrides: [
+        _receiptPriceRule(),
+        _signedIn(['inventory.adjust']),
+        stockImportRepositoryProvider.overrideWithValue(repo),
+        stockFilePickerProvider.overrideWithValue(() async => (name: '入荷.csv', bytes: Uint8List.fromList(utf8.encode(csv)))),
+        warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+          warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本社倉庫')],
+          totals: WarehouseTotals(),
+        ))),
+      ]);
+      await tester.tap(find.byKey(const ValueKey('sf-pick')));
+      await tester.pumpAndSettle();
+      await _tick(tester);
+      await tester.tap(find.byKey(const ValueKey('sf-apply')));
+      await tester.pumpAndSettle();
+      return repo;
+    }
+
+    var repo = await run('JANコード,商品名,数量\n$_jan1,テストペン,10\n');
+    expect(find.textContaining('仕入単価がない行があります（2行目）'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-confirm')), findsNothing);
+    expect(repo.applied, isEmpty);
+
+    repo = await run('JANコード,商品名,数量,単価\n$_jan1,テストペン,10,80\n');
+    await tester.tap(find.byKey(const ValueKey('sf-confirm')));
+    await tester.pumpAndSettle();
+    expect(repo.applied.single.$3.single.unitPrice, 80);
+    expect(repo.applied.single.$3.single.toJson()['unit_price'], 80);
+  });
+
   testWidgets('a file adds to the stock there is; its own name for a product does not matter, the JAN does', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -577,6 +625,7 @@ void main() {
     // The supplier calls it something else, twice.
     final csv = Uint8List.fromList(utf8.encode('JANコード,商品名,数量\n$_jan1,ﾃｽﾄﾍﾟﾝ ｱｵ,10\n$_jan1,テストペン(青),5\n'));
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _receiptPriceRule(),
       _signedIn(['inventory.adjust']),
       stockImportRepositoryProvider.overrideWithValue(repo),
       stockFilePickerProvider.overrideWithValue(() async => (name: '入荷.csv', bytes: csv)),
@@ -614,6 +663,7 @@ void main() {
     final csv = Uint8List.fromList(utf8.encode('JAN,品名,メーカー,数量\n$_jan1,ペン,テスト文具,10\n$_jan2,ノート,,6\n$_jan3,テスト消しゴム,テスト文具,2\n'));
     final payments = FakePaymentsRepository();
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _receiptPriceRule(),
       _signedIn(['inventory.adjust', 'product.manage']),
       stockImportRepositoryProvider.overrideWithValue(repo),
       priceBookRepositoryProvider.overrideWithValue(book),
@@ -679,6 +729,7 @@ void main() {
     final csv = Uint8List.fromList(utf8.encode('JAN,品番,品名,メーカー,数量\n$_jan1,TP-1,ペン,テスト文具,1\n'
         '$_jan2,TN-1,,テスト文具,2\n$_jan3,TE-1,,テスト文具,3\n'));
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _receiptPriceRule(),
       _signedIn(['inventory.adjust', 'product.manage']),
       stockImportRepositoryProvider.overrideWithValue(repo),
       priceBookRepositoryProvider.overrideWithValue(book),
@@ -722,6 +773,7 @@ void main() {
     final repo = _FakeStock({_jan1: 'テストペン 青'}, priceBook: book);
     final csv = Uint8List.fromList(utf8.encode('JAN,品名,数量\n$_jan1,ペン,10\n$_jan3,消しゴム,2\n'));
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _receiptPriceRule(),
       _signedIn(['inventory.adjust', 'product.manage']),
       stockImportRepositoryProvider.overrideWithValue(repo),
       priceBookRepositoryProvider.overrideWithValue(book),
@@ -775,6 +827,7 @@ void main() {
       ]),
     );
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _receiptPriceRule(),
       _signedIn(['inventory.adjust']),
       stockImportRepositoryProvider.overrideWithValue(repo),
       masterImportRepositoryProvider.overrideWithValue(reader),
@@ -843,6 +896,7 @@ void main() {
       readResult: const MasterRead(lines: [MasterLine(lineNo: 1, janCode: _jan1, supplierName: 'ペン', quantity: '5')]),
     );
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _receiptPriceRule(),
       _signedIn(['inventory.adjust']),
       stockImportRepositoryProvider.overrideWithValue(_FakeStock({_jan1: 'テストペン 青'})),
       masterImportRepositoryProvider.overrideWithValue(reader),
@@ -880,6 +934,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _receiptPriceRule(),
       _signedIn(['inventory.adjust']),
       stockImportRepositoryProvider.overrideWithValue(_FakeStock({})),
       masterImportRepositoryProvider.overrideWithValue(
@@ -1016,6 +1071,7 @@ void main() {
     final repo = _FakeStock({_jan1: 'テストペン 青'});
     final csv = Uint8List.fromList(utf8.encode('JAN,数量\n$_jan1,10\n'));
     await pumpApp(tester, const StockFileImportScreen(), overrides: [
+    _receiptPriceRule(),
       _signedIn(['inventory.view']),
       stockImportRepositoryProvider.overrideWithValue(repo),
       stockFilePickerProvider.overrideWithValue(() async => (name: 'a.csv', bytes: csv)),

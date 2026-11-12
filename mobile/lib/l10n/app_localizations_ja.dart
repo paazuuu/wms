@@ -16676,4 +16676,140 @@ class AppLocalizationsJa extends AppLocalizations {
   String pfShowMore(int n) {
     return 'ほか $n商品';
   }
+
+  @override
+  String rqErrReceiptPrice(String rows) {
+    return '仕入単価がない行があります（$rows行目）。入荷では仕入単価が必須です（システム管理者が「必須項目の設定」で変えられます）。';
+  }
+
+  @override
+  String rqErrShipPrice(String rows) {
+    return '出荷単価がない行があります（$rows行目）。出庫・在庫外出荷では各行の単価が必須です。「中身を直す」で入れてください。';
+  }
+
+  @override
+  String get rqErrShipRate => '元の行がありますが、レート（1元＝?円）が決まっていません。「通貨・レート」で入れてください。';
+
+  @override
+  String get featRequirements => '必須項目の設定';
+
+  @override
+  String get featRequirementsDesc =>
+      '入荷・出荷などの作業ごとに何が必須かを一覧し、システム管理者が必須の一部をゆるめられます。';
+
+  @override
+  String get rqIntro =>
+      '作業ごとに、登録や出庫の前にそろっている必要があるものです。「固定」はシステムの正しさのために外せないもの、スイッチがあるものはシステム管理者が必須を外せます。外すと、その数字が抜けたまま進めるようになり、月ごとの収益などの計算からその分が漏れます。';
+
+  @override
+  String get rqOnlyAdmin => '変更できるのはシステム管理者だけです。';
+
+  @override
+  String get rqRequired => '必須';
+
+  @override
+  String get rqOptional => '任意';
+
+  @override
+  String get rqFixed => '固定';
+
+  @override
+  String get rqDefault => '初期設定';
+
+  @override
+  String rqChanged(String name, String at) {
+    return '$nameが$atに変更';
+  }
+
+  @override
+  String rqRelaxQ(String item) {
+    return '「$item」を必須から外しますか？';
+  }
+
+  @override
+  String get rqRelaxBody => '外すと、この数字がないままでも作業が進みます。月ごとの収益の計算からその分が漏れます。';
+
+  @override
+  String get rqRelax => '必須から外す';
+
+  @override
+  String rqSaved(String item, String state) {
+    return '「$item」を$stateにしました';
+  }
+
+  @override
+  String get rqOpReceipt => '入荷（仕入先のファイル・発注の取込）';
+
+  @override
+  String get rqOpUnplanned => '予定外の入荷';
+
+  @override
+  String get rqOpInspection => '検品';
+
+  @override
+  String get rqOpPlan => '出庫予定の登録';
+
+  @override
+  String get rqOpShip => '出庫（出庫済みにする）';
+
+  @override
+  String get rqOpProxy => '在庫外出荷';
+
+  @override
+  String get rqOpAdjust => '在庫調整・棚卸';
+
+  @override
+  String get rqReceiptPrice => '各行の仕入単価';
+
+  @override
+  String get rqReceiptPriceHint => '税抜単価（なければ税込単価、金額÷数量）。月ごとの収益の原価になります。';
+
+  @override
+  String get rqShipPrice => '各行の出荷単価';
+
+  @override
+  String get rqShipPriceHint =>
+      '出荷明細の単価（なければ金額）。月ごとの収益の売上になります。出庫済みにする時と、在庫外出荷を記録する時に確かめます。';
+
+  @override
+  String get rqShipRate => '元の行のレート（1元＝?円）';
+
+  @override
+  String get rqShipRateHint => '元で書かれた行を円にするため。出荷明細の「通貨・レート」で入れます。';
+
+  @override
+  String get rqShipCard => '出荷先カード';
+
+  @override
+  String get rqShipCardHint => 'どこへ出したか。国外の仮想在庫やパッキングリスト・輸出書類が使います。';
+
+  @override
+  String get rqFixedWarehouse => '倉庫';
+
+  @override
+  String get rqFixedJan => 'JAN（商品ライブラリーにある商品だけ在庫に入る・出る）';
+
+  @override
+  String get rqFixedQty => '数量（0以上）';
+
+  @override
+  String get rqFixedUnplannedPrice => '仕入単価は後から届く請求書で決まります（請求書待ち）';
+
+  @override
+  String get rqFixedInspect => '検品完了にした数だけ在庫に入る';
+
+  @override
+  String get rqFixedPlanDay => '出庫予定日（未定でも登録できる）';
+
+  @override
+  String get rqFixedShipCheck => '「実際に倉庫から出した」のチェック';
+
+  @override
+  String get rqFixedShipDay => '出庫日は今日以前';
+
+  @override
+  String get rqFixedPrincipal => '依頼元（記録のみ・在庫は動かない）';
+
+  @override
+  String get rqFixedAdjustConfirm => '確認してから反映（取り消せない）';
 }

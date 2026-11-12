@@ -81,6 +81,19 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (rawMessage.contains('outbound_not_editable')) return l10n.ofErrNotEditable;
   if (rawMessage.contains('outbound_ship_day_future')) return l10n.ofErrShipDayFuture;
   if (rawMessage.contains('outbound_card_required')) return l10n.ofErrCardRequired;
+  // 必須項目 (0212): which rows lack what, by their row numbers.
+  final req = RegExp(r'requirement_missing:([\w.]+)(?::([\d,?]+))?').firstMatch(rawMessage);
+  if (req != null) {
+    final rows = (req.group(2) ?? '').replaceAll(',', ', ');
+    switch (req.group(1)) {
+      case 'receipt.unit_price':
+        return l10n.rqErrReceiptPrice(rows);
+      case 'shipment.unit_price':
+        return l10n.rqErrShipPrice(rows);
+      case 'shipment.fx_rate':
+        return l10n.rqErrShipRate;
+    }
+  }
   if (rawMessage.contains('price_required')) return l10n.ppErrPrice;
   if (rawMessage.contains('supplier_required')) return l10n.ppErrSupplier;
   if (rawMessage.contains('memo_too_long')) return l10n.wmErrLong;

@@ -41,6 +41,7 @@ import 'import_view_screen.dart';
 import 'reading_check_screen.dart';
 import 'stock_import_calendar_screen.dart';
 import 'stock_inspection_screen.dart';
+import '../../requirements/requirements_repository.dart';
 
 /// A chosen file: its name and bytes, or null when nothing was chosen.
 typedef PickStockFile = Future<({String name, Uint8List bytes})?> Function();
@@ -542,6 +543,15 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     final l10n = AppLocalizations.of(context);
     final toRegister = register ? _registrable : const <StockFileLine>[];
     final lines = [..._ready, ...toRegister];
+    // A delivery's 仕入単価, as the rules ask (0212): the cost of the profit.
+    if (_mode == StockFileMode.add && ref.read(requirementOnProvider(Req.receiptPrice))) {
+      final unpriced = [for (final l in lines) if (l.quantity > 0 && (l.unitPrice ?? 0) <= 0) l.lineNo];
+      if (unpriced.isNotEmpty) {
+        setState(() => _error =
+            l10n.rqErrReceiptPrice(unpriced.take(20).join(', ') + (unpriced.length > 20 ? '…' : '')));
+        return;
+      }
+    }
     // The same delivery put in twice is the costliest mistake there is.
     if (!await _passesDuplicateCheck(lines)) return;
     if (!mounted) return;
@@ -845,6 +855,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    // The rules a receipt checks, kept loaded (0212).
+    ref.watch(requirementsProvider);
     final canAdjust = ref.watch(authControllerProvider).user?.hasPermission('inventory.adjust') ?? false;
     final warehouses = ref.watch(warehouseOverviewProvider).valueOrNull?.warehouses ?? const <Warehouse>[];
     final active = ref.watch(activeWarehouseIdProvider);

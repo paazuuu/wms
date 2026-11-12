@@ -86,6 +86,30 @@ void main() {
     return repo;
   }
 
+  testWidgets('出荷単価 required (0212): a row without a price holds 出庫した', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(2400, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final f = OutboundFileSummary(
+      id: 5, warehouseId: 1, shippedOn: DateTime(2026, 11, 20), fileName: '明細.xlsx', status: 'planned',
+      destinationId: 31, shipTo: const ShipDestination(id: 31, name: 'テスト貿易'));
+    final repo = FakeOutboundFileRepository(detailOf: (_) => OutboundFileDetail(file: f, lines: const [
+          OutboundFileLine(id: 1, rowNo: 2, action: 'ship', productId: 1, jan: '4909999000014', quantity: 30, unitPrice: 50),
+          OutboundFileLine(id: 2, rowNo: 3, action: 'ship', productId: 2, jan: '4909999000021', quantity: 5),
+        ]));
+    await pumpApp(tester, const OutboundFileDetailScreen(fileId: 5), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(repo),
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: _library)),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(_overview)),
+      writeWarehouseIdProvider.overrideWithValue(1),
+    ]);
+    await tester.tap(find.byKey(const ValueKey('of-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('出荷単価がない行があります（3行目）'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-confirm-check')));
+    await tester.pump();
+    expect(tester.widget<FilledButton>(find.byKey(const ValueKey('of-confirm-ok'))).onPressed, isNull);
+  });
+
   testWidgets('no 出荷先カード yet (0210): said on the list, and chosen while editing', (tester) async {
     final repo = await pumpDetail(tester, _plan);
     expect(find.byKey(const ValueKey('of-card-required')), findsOneWidget);

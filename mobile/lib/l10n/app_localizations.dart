@@ -29290,6 +29290,252 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ほか {n}商品'**
   String pfShowMore(int n);
+
+  /// No description provided for @rqErrReceiptPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入単価がない行があります（{rows}行目）。入荷では仕入単価が必須です（システム管理者が「必須項目の設定」で変えられます）。'**
+  String rqErrReceiptPrice(String rows);
+
+  /// No description provided for @rqErrShipPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷単価がない行があります（{rows}行目）。出庫・在庫外出荷では各行の単価が必須です。「中身を直す」で入れてください。'**
+  String rqErrShipPrice(String rows);
+
+  /// No description provided for @rqErrShipRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'元の行がありますが、レート（1元＝?円）が決まっていません。「通貨・レート」で入れてください。'**
+  String get rqErrShipRate;
+
+  /// No description provided for @featRequirements.
+  ///
+  /// In ja, this message translates to:
+  /// **'必須項目の設定'**
+  String get featRequirements;
+
+  /// No description provided for @featRequirementsDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷・出荷などの作業ごとに何が必須かを一覧し、システム管理者が必須の一部をゆるめられます。'**
+  String get featRequirementsDesc;
+
+  /// No description provided for @rqIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業ごとに、登録や出庫の前にそろっている必要があるものです。「固定」はシステムの正しさのために外せないもの、スイッチがあるものはシステム管理者が必須を外せます。外すと、その数字が抜けたまま進めるようになり、月ごとの収益などの計算からその分が漏れます。'**
+  String get rqIntro;
+
+  /// No description provided for @rqOnlyAdmin.
+  ///
+  /// In ja, this message translates to:
+  /// **'変更できるのはシステム管理者だけです。'**
+  String get rqOnlyAdmin;
+
+  /// No description provided for @rqRequired.
+  ///
+  /// In ja, this message translates to:
+  /// **'必須'**
+  String get rqRequired;
+
+  /// No description provided for @rqOptional.
+  ///
+  /// In ja, this message translates to:
+  /// **'任意'**
+  String get rqOptional;
+
+  /// No description provided for @rqFixed.
+  ///
+  /// In ja, this message translates to:
+  /// **'固定'**
+  String get rqFixed;
+
+  /// No description provided for @rqDefault.
+  ///
+  /// In ja, this message translates to:
+  /// **'初期設定'**
+  String get rqDefault;
+
+  /// No description provided for @rqChanged.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name}が{at}に変更'**
+  String rqChanged(String name, String at);
+
+  /// No description provided for @rqRelaxQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{item}」を必須から外しますか？'**
+  String rqRelaxQ(String item);
+
+  /// No description provided for @rqRelaxBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'外すと、この数字がないままでも作業が進みます。月ごとの収益の計算からその分が漏れます。'**
+  String get rqRelaxBody;
+
+  /// No description provided for @rqRelax.
+  ///
+  /// In ja, this message translates to:
+  /// **'必須から外す'**
+  String get rqRelax;
+
+  /// No description provided for @rqSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{item}」を{state}にしました'**
+  String rqSaved(String item, String state);
+
+  /// No description provided for @rqOpReceipt.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷（仕入先のファイル・発注の取込）'**
+  String get rqOpReceipt;
+
+  /// No description provided for @rqOpUnplanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷'**
+  String get rqOpUnplanned;
+
+  /// No description provided for @rqOpInspection.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品'**
+  String get rqOpInspection;
+
+  /// No description provided for @rqOpPlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定の登録'**
+  String get rqOpPlan;
+
+  /// No description provided for @rqOpShip.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫（出庫済みにする）'**
+  String get rqOpShip;
+
+  /// No description provided for @rqOpProxy.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫外出荷'**
+  String get rqOpProxy;
+
+  /// No description provided for @rqOpAdjust.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫調整・棚卸'**
+  String get rqOpAdjust;
+
+  /// No description provided for @rqReceiptPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'各行の仕入単価'**
+  String get rqReceiptPrice;
+
+  /// No description provided for @rqReceiptPriceHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'税抜単価（なければ税込単価、金額÷数量）。月ごとの収益の原価になります。'**
+  String get rqReceiptPriceHint;
+
+  /// No description provided for @rqShipPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'各行の出荷単価'**
+  String get rqShipPrice;
+
+  /// No description provided for @rqShipPriceHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷明細の単価（なければ金額）。月ごとの収益の売上になります。出庫済みにする時と、在庫外出荷を記録する時に確かめます。'**
+  String get rqShipPriceHint;
+
+  /// No description provided for @rqShipRate.
+  ///
+  /// In ja, this message translates to:
+  /// **'元の行のレート（1元＝?円）'**
+  String get rqShipRate;
+
+  /// No description provided for @rqShipRateHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'元で書かれた行を円にするため。出荷明細の「通貨・レート」で入れます。'**
+  String get rqShipRateHint;
+
+  /// No description provided for @rqShipCard.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カード'**
+  String get rqShipCard;
+
+  /// No description provided for @rqShipCardHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'どこへ出したか。国外の仮想在庫やパッキングリスト・輸出書類が使います。'**
+  String get rqShipCardHint;
+
+  /// No description provided for @rqFixedWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫'**
+  String get rqFixedWarehouse;
+
+  /// No description provided for @rqFixedJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN（商品ライブラリーにある商品だけ在庫に入る・出る）'**
+  String get rqFixedJan;
+
+  /// No description provided for @rqFixedQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量（0以上）'**
+  String get rqFixedQty;
+
+  /// No description provided for @rqFixedUnplannedPrice.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入単価は後から届く請求書で決まります（請求書待ち）'**
+  String get rqFixedUnplannedPrice;
+
+  /// No description provided for @rqFixedInspect.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品完了にした数だけ在庫に入る'**
+  String get rqFixedInspect;
+
+  /// No description provided for @rqFixedPlanDay.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定日（未定でも登録できる）'**
+  String get rqFixedPlanDay;
+
+  /// No description provided for @rqFixedShipCheck.
+  ///
+  /// In ja, this message translates to:
+  /// **'「実際に倉庫から出した」のチェック'**
+  String get rqFixedShipCheck;
+
+  /// No description provided for @rqFixedShipDay.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫日は今日以前'**
+  String get rqFixedShipDay;
+
+  /// No description provided for @rqFixedPrincipal.
+  ///
+  /// In ja, this message translates to:
+  /// **'依頼元（記録のみ・在庫は動かない）'**
+  String get rqFixedPrincipal;
+
+  /// No description provided for @rqFixedAdjustConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認してから反映（取り消せない）'**
+  String get rqFixedAdjustConfirm;
 }
 
 class _AppLocalizationsDelegate

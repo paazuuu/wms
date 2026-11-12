@@ -16558,4 +16558,138 @@ class AppLocalizationsZh extends AppLocalizations {
   String pfShowMore(int n) {
     return '另有 $n 个商品';
   }
+
+  @override
+  String rqErrReceiptPrice(String rows) {
+    return '有些行没有进货单价（第$rows行）。入库时进货单价为必填（系统管理员可在“必填项设置”中更改）。';
+  }
+
+  @override
+  String rqErrShipPrice(String rows) {
+    return '有些行没有出货单价（第$rows行）。出库和库存外出货时每行单价为必填。请在“修改内容”中填写。';
+  }
+
+  @override
+  String get rqErrShipRate => '有人民币的行，但未设定汇率（1元=?日元）。请在“货币・汇率”中设定。';
+
+  @override
+  String get featRequirements => '必填项设置';
+
+  @override
+  String get featRequirementsDesc => '按作业列出必填项，系统管理员可放宽部分必填条件。';
+
+  @override
+  String get rqIntro =>
+      '每项作业在登记或出库前必须具备的内容。“固定”为保证系统正确性而无法取消；带开关的项目可由系统管理员取消必填。取消后，可在缺少该数字的情况下继续，月度收益等计算会漏掉这些部分。';
+
+  @override
+  String get rqOnlyAdmin => '只有系统管理员可以更改。';
+
+  @override
+  String get rqRequired => '必填';
+
+  @override
+  String get rqOptional => '选填';
+
+  @override
+  String get rqFixed => '固定';
+
+  @override
+  String get rqDefault => '默认';
+
+  @override
+  String rqChanged(String name, String at) {
+    return '$name于$at更改';
+  }
+
+  @override
+  String rqRelaxQ(String item) {
+    return '将“$item”改为选填吗？';
+  }
+
+  @override
+  String get rqRelaxBody => '取消后，即使没有该数字作业也能继续，月度收益计算会漏掉这些部分。';
+
+  @override
+  String get rqRelax => '改为选填';
+
+  @override
+  String rqSaved(String item, String state) {
+    return '已将“$item”设为$state';
+  }
+
+  @override
+  String get rqOpReceipt => '入库（供应商文件・订单导入）';
+
+  @override
+  String get rqOpUnplanned => '计划外入库';
+
+  @override
+  String get rqOpInspection => '验货';
+
+  @override
+  String get rqOpPlan => '出库计划登记';
+
+  @override
+  String get rqOpShip => '出库（标记为已出库）';
+
+  @override
+  String get rqOpProxy => '库存外出货';
+
+  @override
+  String get rqOpAdjust => '库存调整・盘点';
+
+  @override
+  String get rqReceiptPrice => '每行的进货单价';
+
+  @override
+  String get rqReceiptPriceHint => '不含税单价（若无则用含税单价或金额÷数量）。作为月度收益的成本。';
+
+  @override
+  String get rqShipPrice => '每行的出货单价';
+
+  @override
+  String get rqShipPriceHint => '出货明细的单价（若无则用金额）。作为月度收益的销售额。在标记已出库和记录库存外出货时检查。';
+
+  @override
+  String get rqShipRate => '人民币行的汇率';
+
+  @override
+  String get rqShipRateHint => '用于将人民币换算为日元，在出货明细的“货币・汇率”中设定。';
+
+  @override
+  String get rqShipCard => '收货方卡片';
+
+  @override
+  String get rqShipCardHint => '发往何处。供国外虚拟库存、装箱单和出口文件使用。';
+
+  @override
+  String get rqFixedWarehouse => '仓库';
+
+  @override
+  String get rqFixedJan => 'JAN（只有商品库中的商品可以出入库）';
+
+  @override
+  String get rqFixedQty => '数量（0以上）';
+
+  @override
+  String get rqFixedUnplannedPrice => '进货单价由之后到达的发票确定（待发票）';
+
+  @override
+  String get rqFixedInspect => '只有标记为验货完成的数量才入库';
+
+  @override
+  String get rqFixedPlanDay => '出库计划日（未定也可登记）';
+
+  @override
+  String get rqFixedShipCheck => '“已实际出库”的勾选';
+
+  @override
+  String get rqFixedShipDay => '出库日为今天或之前';
+
+  @override
+  String get rqFixedPrincipal => '委托方（仅记录・不动库存）';
+
+  @override
+  String get rqFixedAdjustConfirm => '确认后才生效（无法撤销）';
 }

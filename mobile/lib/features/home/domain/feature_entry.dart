@@ -114,6 +114,8 @@ class FeatureEntry {
         return l10n.featUserManagement;
       case 'menu_visibility':
         return l10n.featMenuVisibility;
+      case 'requirements':
+        return l10n.featRequirements;
       case 'company_profile':
         return l10n.featCompanyProfile;
       case 'evidence':
@@ -258,6 +260,8 @@ class FeatureEntry {
         return l10n.featUserManagementDesc;
       case 'menu_visibility':
         return l10n.featMenuVisibilityDesc;
+      case 'requirements':
+        return l10n.featRequirementsDesc;
       case 'company_profile':
         return l10n.featCompanyProfileDesc;
       case 'evidence':

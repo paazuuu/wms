@@ -60,6 +60,7 @@ import '../../warehouse_memos/warehouse_memos_screen.dart';
 import '../../outbound_file/presentation/outbound_calendar_tab.dart' show OutboundCalendarScreen;
 import '../../outbound_file/presentation/outbound_hub_screen.dart';
 import '../../stock_import/presentation/stock_import_calendar_screen.dart';
+import '../../requirements/requirements_screen.dart';
 import '../../system_reset/presentation/system_reset_screen.dart';
 import '../../tax_files/presentation/tax_files_screen.dart';
 import 'feature_entry.dart';
@@ -587,6 +588,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _menuVisibility,
             requiredAnyOf: ['user.manage'],
           ),
+          // 必須項目の設定 (0212): what each step needs; the system
+          // administrator relaxes some of it.
+          FeatureEntry(
+            id: 'requirements',
+            icon: Icons.rule_outlined,
+            status: FeatureStatus.ready,
+            builder: _requirements,
+            requiredAnyOf: ['user.manage'],
+          ),
           FeatureEntry(
             id: 'connectors',
             icon: Icons.hub_outlined,
@@ -744,6 +754,7 @@ Widget _auditLog(BuildContext _) => const AuditLogScreen();
 /// Top-level (const-referenceable) builder for the User Management feature.
 Widget _userManagement(BuildContext _) => const UserManagementScreen();
 Widget _menuVisibility(BuildContext _) => const MenuVisibilityScreen();
+Widget _requirements(BuildContext _) => const RequirementsScreen();
 Widget _aiHealth(BuildContext _) => const AiHealthScreen();
 Widget _companyProfile(BuildContext _) => const CompanyProfileScreen();
 Widget _evidence(BuildContext _) => const EvidenceScreen();

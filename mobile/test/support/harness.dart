@@ -170,6 +170,8 @@ import 'package:wms_mobile/features/stock_history/data/stock_history_repository.
 import 'package:wms_mobile/features/stock_history/domain/stock_history.dart';
 import 'package:wms_mobile/features/profit/data/profit_repository.dart';
 import 'fake_profit_repository.dart';
+import 'package:wms_mobile/features/requirements/requirements_repository.dart';
+import 'fake_requirements_repository.dart';
 
 /// In-memory stand-in for the platform keychain/keystore. The real plugin has
 /// no test-harness implementation and its platform channel simply never
@@ -241,6 +243,8 @@ List<Override> _defaultOverrides() => [
       janCatalogRepositoryProvider.overrideWithValue(FakeJanCatalogRepository()),
       // 月ごとの収益 (0211): nothing shipped.
       profitRepositoryProvider.overrideWithValue(FakeProfitRepository()),
+      // 必須項目 (0212): every rule on.
+      requirementsRepositoryProvider.overrideWithValue(FakeRequirementsRepository()),
       referenceRepositoryProvider.overrideWithValue(FakeReferenceRepository()),
       // Names looked up on the web (0164): none found.
       marketNameRepositoryProvider.overrideWithValue(FakeMarketNameRepository()),

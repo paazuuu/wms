@@ -31,6 +31,7 @@ class StockFileLine extends Equatable {
     this.doubtful = false,
     this.maker,
     this.code,
+    this.unitPrice,
   });
 
   final int lineNo;
@@ -46,6 +47,10 @@ class StockFileLine extends Equatable {
   /// How many of the file's rows had this JAN (their quantities summed).
   final int merged;
 
+  /// What one was bought for (excl. tax; else incl. tax; else amount ÷
+  /// quantity), when the file says: a 仕入単価 the receipt needs (0212).
+  final double? unitPrice;
+
   /// The AI was not sure of this line (its two readings disagreed, or the
   /// JAN's check digit failed): to be looked at before it goes in.
   final bool doubtful;
@@ -59,6 +64,7 @@ class StockFileLine extends Equatable {
         doubtful: doubtful,
         maker: maker,
         code: code,
+        unitPrice: unitPrice,
       );
 
   /// What a product made from this line is called: the file's name for it,
@@ -79,10 +85,11 @@ class StockFileLine extends Equatable {
         if (code != null) 'product_code': code,
       };
 
-  Map<String, dynamic> toJson() => {'line_no': lineNo, 'jan_code': janCode, 'quantity': quantity};
+  Map<String, dynamic> toJson() =>
+      {'line_no': lineNo, 'jan_code': janCode, 'quantity': quantity, if (unitPrice != null) 'unit_price': unitPrice};
 
   @override
-  List<Object?> get props => [lineNo, janCode, quantity, name, merged, doubtful, maker, code];
+  List<Object?> get props => [lineNo, janCode, quantity, name, merged, doubtful, maker, code, unitPrice];
 }
 
 /// A row the file had that cannot be taken: its row number and why.
@@ -242,6 +249,18 @@ class LedgerFields extends Equatable {
   final String unitPriceTax;
   final String amount;
   final String taxRate;
+
+  /// One unit's price from what the file wrote: the unit price excl. tax,
+  /// else incl. tax, else the amount over [quantity]; null when none.
+  double? pricePer(int quantity) {
+    double? n(String t) {
+      final v = double.tryParse(t.replaceAll(RegExp(r'[,，¥￥円\s]'), ''));
+      return v != null && v > 0 ? v : null;
+    }
+
+    final a = n(amount);
+    return n(unitPrice) ?? n(unitPriceTax) ?? (a != null && quantity > 0 ? a / quantity : null);
+  }
   final String orderNumber;
 
   static const _keys = [
@@ -555,6 +574,7 @@ StockSheet parseStockRows(List<List<String>> rows, {List<HeadingMeaning> meaning
       merged: (prev?.merged ?? 0) + 1,
       maker: prev?.maker ?? opt(row, makerCol),
       code: prev?.code ?? opt(row, codeCol),
+      unitPrice: prev?.unitPrice ?? readRow.ledger.pricePer(q),
     );
   }
   return StockSheet(
@@ -635,6 +655,7 @@ StockSheet stockSheetFromRead(List<ReadRow> rows, {bool byAi = true}) {
           (!row.humanChecked && row.flags.any((f) => !_noDoubt.contains(f.split(':').first) && !humanFlags.contains(f))),
       maker: prev?.maker ?? (row.maker.isEmpty ? null : row.maker),
       code: prev?.code ?? (row.code.isEmpty ? null : row.code),
+      unitPrice: prev?.unitPrice ?? row.ledger.pricePer(q),
     );
   }
   return StockSheet(lines: byJan.values.toList(), problems: problems, byAi: byAi, read: rows);

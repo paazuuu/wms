@@ -17001,4 +17001,148 @@ class AppLocalizationsEn extends AppLocalizations {
   String pfShowMore(int n) {
     return '$n more products';
   }
+
+  @override
+  String rqErrReceiptPrice(String rows) {
+    return 'Some rows have no purchase price (rows $rows). A receipt needs one (the system administrator can change this in Required items).';
+  }
+
+  @override
+  String rqErrShipPrice(String rows) {
+    return 'Some rows have no selling price (rows $rows). Each row needs one to ship. Add it under Edit contents.';
+  }
+
+  @override
+  String get rqErrShipRate =>
+      'Some rows are in yuan but no rate is set. Set it under Currency and rate.';
+
+  @override
+  String get featRequirements => 'Required items';
+
+  @override
+  String get featRequirementsDesc =>
+      'See what each step needs, and let the system administrator relax some of it.';
+
+  @override
+  String get rqIntro =>
+      'What each step needs before it goes through. Fixed items keep the system correct and cannot be turned off; the system administrator can turn off the ones with a switch. Turned off, a step goes through without that number, and the profit by month leaves those lines out.';
+
+  @override
+  String get rqOnlyAdmin => 'Only the system administrator can change these.';
+
+  @override
+  String get rqRequired => 'Required';
+
+  @override
+  String get rqOptional => 'Optional';
+
+  @override
+  String get rqFixed => 'Fixed';
+
+  @override
+  String get rqDefault => 'Default';
+
+  @override
+  String rqChanged(String name, String at) {
+    return 'Changed by $name on $at';
+  }
+
+  @override
+  String rqRelaxQ(String item) {
+    return 'Make \"$item\" optional?';
+  }
+
+  @override
+  String get rqRelaxBody =>
+      'Steps will go through without it, and the profit by month will leave those lines out.';
+
+  @override
+  String get rqRelax => 'Make optional';
+
+  @override
+  String rqSaved(String item, String state) {
+    return '\"$item\" is now $state';
+  }
+
+  @override
+  String get rqOpReceipt => 'Receiving (supplier files, orders)';
+
+  @override
+  String get rqOpUnplanned => 'Unplanned receipts';
+
+  @override
+  String get rqOpInspection => 'Inspection';
+
+  @override
+  String get rqOpPlan => 'Planned shipments';
+
+  @override
+  String get rqOpShip => 'Shipping (marking shipped)';
+
+  @override
+  String get rqOpProxy => 'Shipments outside stock';
+
+  @override
+  String get rqOpAdjust => 'Stock adjustment, counts';
+
+  @override
+  String get rqReceiptPrice => 'Each row\'s purchase price';
+
+  @override
+  String get rqReceiptPriceHint =>
+      'Excl. tax (else incl. tax, or amount ÷ qty). The cost in the profit by month.';
+
+  @override
+  String get rqShipPrice => 'Each row\'s selling price';
+
+  @override
+  String get rqShipPriceHint =>
+      'The list\'s unit price (else amount). The sales in the profit by month. Checked when marked shipped and when a shipment outside stock is recorded.';
+
+  @override
+  String get rqShipRate => 'Rate for rows in yuan';
+
+  @override
+  String get rqShipRateHint =>
+      'To put yuan in yen; set under the list\'s currency and rate.';
+
+  @override
+  String get rqShipCard => 'Destination card';
+
+  @override
+  String get rqShipCardHint =>
+      'Where it went; used by overseas stock, packing lists and export papers.';
+
+  @override
+  String get rqFixedWarehouse => 'Warehouse';
+
+  @override
+  String get rqFixedJan => 'JAN (only library products enter or leave stock)';
+
+  @override
+  String get rqFixedQty => 'Quantity (0 or more)';
+
+  @override
+  String get rqFixedUnplannedPrice =>
+      'The purchase price comes later, with the invoice it waits for';
+
+  @override
+  String get rqFixedInspect => 'Only what is marked inspected enters stock';
+
+  @override
+  String get rqFixedPlanDay => 'Planned day (may be undecided)';
+
+  @override
+  String get rqFixedShipCheck => 'The \"it has actually left\" tick';
+
+  @override
+  String get rqFixedShipDay => 'Shipping day today or earlier';
+
+  @override
+  String get rqFixedPrincipal =>
+      'Principal (a record only; stock does not move)';
+
+  @override
+  String get rqFixedAdjustConfirm =>
+      'Confirmed before it applies (cannot be undone)';
 }
