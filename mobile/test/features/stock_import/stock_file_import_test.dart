@@ -608,6 +608,9 @@ void main() {
 
     var repo = await run('JANコード,商品名,数量\n$_jan1,テストペン,10\n');
     expect(find.textContaining('仕入単価がない行があります（2行目）'), findsOneWidget);
+    // Listed before 反映 too, each with its row.
+    expect(find.byKey(const ValueKey('sf-no-price')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-no-price-2')), findsOneWidget);
     expect(find.byKey(const ValueKey('sf-confirm')), findsNothing);
     expect(repo.applied, isEmpty);
 

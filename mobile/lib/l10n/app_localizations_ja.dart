@@ -16812,4 +16812,61 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get rqFixedAdjustConfirm => '確認してから反映（取り消せない）';
+
+  @override
+  String ofSkippedRows(int n, String rows) {
+    return '読み込まなかった行 $n件（$rows行目）：数量・JAN・品番のどれもないため（合計・小計・備考の行など）';
+  }
+
+  @override
+  String get ofSkippedTip => '読み込まなかった行の中身';
+
+  @override
+  String get ofNoHeading => 'このシートに見出しの行が見つかりません（「JAN」「品番」「数量」などの見出しが必要です）。';
+
+  @override
+  String get ofMissingQty => '「数量」の列が見つかりません。';
+
+  @override
+  String get ofMissingJanCode => '「JAN」の列も「品番」の列も見つかりません。';
+
+  @override
+  String get ofNotUsableTail => '列の割り当てで指定するか、別のシートを選んでください。';
+
+  @override
+  String get ofNoRowsUnder => '見出しの下に、数量・JAN・品番のある行がありません。';
+
+  @override
+  String ofFileError(String reason) {
+    return 'このファイルは読み込めませんでした：$reason';
+  }
+
+  @override
+  String get ofFileErrorSheet =>
+      '.xlsx・.csv として開けませんでした。壊れているか、パスワードが付いている可能性があります。Excelで開いて .xlsx で保存し直してください。';
+
+  @override
+  String ofUnpricedPlan(int n, String rows) {
+    return '出荷単価がない行 $n件（$rows行目）：出庫・在庫外出荷までに単価が必要です（必須項目）。';
+  }
+
+  @override
+  String ofUnpricedNow(int n, String rows) {
+    return '出荷単価がない行 $n件（$rows行目）：このままでは出庫・記録できません（必須項目）。';
+  }
+
+  @override
+  String sfNoPriceRows(int n) {
+    return '仕入単価がない行 $n件：このままでは反映できません。ファイルに単価の列を入れるか、システム管理者が「必須項目の設定」で任意にできます。';
+  }
+
+  @override
+  String sfNotItemsRows(int n, String rows) {
+    return '商品ではない行 $n（$rows行目。支店名・住所・空行など。無視します）';
+  }
+
+  @override
+  String rowLabel(int row, String text) {
+    return '$row行目　$text';
+  }
 }

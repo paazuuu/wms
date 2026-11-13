@@ -29536,6 +29536,90 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'確認してから反映（取り消せない）'**
   String get rqFixedAdjustConfirm;
+
+  /// No description provided for @ofSkippedRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込まなかった行 {n}件（{rows}行目）：数量・JAN・品番のどれもないため（合計・小計・備考の行など）'**
+  String ofSkippedRows(int n, String rows);
+
+  /// No description provided for @ofSkippedTip.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み込まなかった行の中身'**
+  String get ofSkippedTip;
+
+  /// No description provided for @ofNoHeading.
+  ///
+  /// In ja, this message translates to:
+  /// **'このシートに見出しの行が見つかりません（「JAN」「品番」「数量」などの見出しが必要です）。'**
+  String get ofNoHeading;
+
+  /// No description provided for @ofMissingQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'「数量」の列が見つかりません。'**
+  String get ofMissingQty;
+
+  /// No description provided for @ofMissingJanCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'「JAN」の列も「品番」の列も見つかりません。'**
+  String get ofMissingJanCode;
+
+  /// No description provided for @ofNotUsableTail.
+  ///
+  /// In ja, this message translates to:
+  /// **'列の割り当てで指定するか、別のシートを選んでください。'**
+  String get ofNotUsableTail;
+
+  /// No description provided for @ofNoRowsUnder.
+  ///
+  /// In ja, this message translates to:
+  /// **'見出しの下に、数量・JAN・品番のある行がありません。'**
+  String get ofNoRowsUnder;
+
+  /// No description provided for @ofFileError.
+  ///
+  /// In ja, this message translates to:
+  /// **'このファイルは読み込めませんでした：{reason}'**
+  String ofFileError(String reason);
+
+  /// No description provided for @ofFileErrorSheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'.xlsx・.csv として開けませんでした。壊れているか、パスワードが付いている可能性があります。Excelで開いて .xlsx で保存し直してください。'**
+  String get ofFileErrorSheet;
+
+  /// No description provided for @ofUnpricedPlan.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷単価がない行 {n}件（{rows}行目）：出庫・在庫外出荷までに単価が必要です（必須項目）。'**
+  String ofUnpricedPlan(int n, String rows);
+
+  /// No description provided for @ofUnpricedNow.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷単価がない行 {n}件（{rows}行目）：このままでは出庫・記録できません（必須項目）。'**
+  String ofUnpricedNow(int n, String rows);
+
+  /// No description provided for @sfNoPriceRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入単価がない行 {n}件：このままでは反映できません。ファイルに単価の列を入れるか、システム管理者が「必須項目の設定」で任意にできます。'**
+  String sfNoPriceRows(int n);
+
+  /// No description provided for @sfNotItemsRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ではない行 {n}（{rows}行目。支店名・住所・空行など。無視します）'**
+  String sfNotItemsRows(int n, String rows);
+
+  /// No description provided for @rowLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'{row}行目　{text}'**
+  String rowLabel(int row, String text);
 }
 
 class _AppLocalizationsDelegate

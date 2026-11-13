@@ -463,6 +463,10 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
       ..showSnackBar(SnackBar(content: Text(t)));
   }
 
+  /// Why the last file chosen could not be read, kept on screen (not only a
+  /// passing message) until another is chosen.
+  String? _fileError;
+
   /// The file was a PDF or a photo, read by the AI (its rows made a sheet).
   bool _aiRead = false;
   bool _aiReading = false;
@@ -478,14 +482,18 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
     switch (r) {
       case ApiSuccess(:final data):
         if (data.lines.isEmpty) {
-          _snack(l10n.rdAiFailed(data.aiFailure == null
+          final why = l10n.rdAiFailed(data.aiFailure == null
               ? l10n.ofNotUsable
-              : masterProblemText(l10n, MasterProblem('ai_unavailable', value: data.aiFailure))));
+              : masterProblemText(l10n, MasterProblem('ai_unavailable', value: data.aiFailure)));
+          _snack(why);
+          setState(() => _fileError = l10n.ofFileError(why));
           return null;
         }
         return [aiReadAsSheet(data.lines)];
       case ApiFailure(:final message):
-        _snack(l10n.rdAiFailed(humanizeApiErrorMessage(l10n, message)));
+        final why = l10n.rdAiFailed(humanizeApiErrorMessage(l10n, message));
+        _snack(why);
+        setState(() => _fileError = l10n.ofFileError(why));
         return null;
     }
   }
@@ -508,10 +516,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
             : [(name: f.name, rows: readStockFile(f.name, f.bytes))];
       } on FormatException {
         _snack(l10n.ofReadFailed);
+        setState(() => _fileError = l10n.ofFileError(l10n.ofFileErrorSheet));
         return;
       }
     }
     setState(() {
+      _fileError = null;
       _aiRead = byAi;
       _file = f;
       _sheets = sheets;
@@ -1019,8 +1029,28 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
               // rows below have the room.
               _fileBar(l10n, parsed, muted, noWarehouse),
             if (parsed != null && _columnsOpen) _columnsPanel(l10n, parsed, muted),
+            // Why nothing (or not everything) could be read: said, not hidden.
+            if (_fileError != null)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Text(_fileError!, key: const ValueKey('of-file-error'), style: TextStyle(color: scheme.error)),
+              ),
             if (parsed != null && !parsed.usable)
-              Text(l10n.ofNotUsable, key: const ValueKey('of-not-usable'), style: TextStyle(color: scheme.error)),
+              Text(
+                [
+                  if (parsed.headerRow < 0) l10n.ofNoHeading,
+                  if (parsed.headerRow >= 0 && !parsed.columns.containsKey(OutboundColumn.quantity)) l10n.ofMissingQty,
+                  if (parsed.headerRow >= 0 &&
+                      !parsed.columns.containsKey(OutboundColumn.jan) &&
+                      !parsed.columns.containsKey(OutboundColumn.code))
+                    l10n.ofMissingJanCode,
+                  l10n.ofNotUsableTail,
+                ].join(' '),
+                key: const ValueKey('of-not-usable'),
+                style: TextStyle(color: scheme.error),
+              )
+            else if (parsed != null && parsed.rows.isEmpty && _manual.isEmpty)
+              Text(l10n.ofNoRowsUnder, key: const ValueKey('of-no-rows'), style: TextStyle(color: scheme.error)),
             if (parsed != null || hasRows) ...[
               const SizedBox(height: AppSpacing.sm),
               // Replacing: the day, 出荷先 and the rest stay as the list has them.
@@ -1540,10 +1570,43 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
     _snack(l10n.ofFileSaved(name));
   }
 
+  String _rowList(List<int> rows) => rows.take(20).join(', ') + (rows.length > 20 ? '…' : '');
+
   Widget _summary(AppLocalizations l10n, OutboundPlanTotals t) {
     final theme = Theme.of(context);
+    final skipped = _parsed?.usable ?? false ? _parsed!.skipped : const <({int rowNo, String text})>[];
+    // Rows with no selling price, as the rules ask (0212).
+    final unpriced = ref.watch(requirementOnProvider(Req.shipPrice))
+        ? [
+            for (final l in _plan)
+              if (l.action != OutboundAction.skip &&
+                  (l.row.quantity ?? 0) > 0 &&
+                  (l.row.priceEx ?? l.row.priceTax ?? l.row.total ?? 0) <= 0)
+                l.row.rowNo
+          ]
+        : const <int>[];
     return Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
       Text(l10n.ofSummary(t.rows, t.ship, t.record, t.skip), key: const ValueKey('of-summary'), style: theme.textTheme.titleSmall),
+      if (unpriced.isNotEmpty)
+        Text(
+          _planning
+              ? l10n.ofUnpricedPlan(unpriced.length, _rowList(unpriced))
+              : l10n.ofUnpricedNow(unpriced.length, _rowList(unpriced)),
+          key: const ValueKey('of-unpriced'),
+          style: TextStyle(color: _planning ? theme.colorScheme.warning : theme.colorScheme.error, fontWeight: FontWeight.w600),
+        ),
+      if (skipped.isNotEmpty)
+        Tooltip(
+          message: [
+            l10n.ofSkippedTip,
+            for (final r in skipped.take(15)) l10n.rowLabel(r.rowNo, r.text),
+          ].join('\n'),
+          child: Text(
+            l10n.ofSkippedRows(skipped.length, _rowList([for (final r in skipped) r.rowNo])),
+            key: const ValueKey('of-skipped'),
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
+        ),
       Text(l10n.ofSummaryShip(t.shipped)),
       // 不足: what must come in for the list to ship (入荷), every row the
       // stock cannot cover — not found ones whole.

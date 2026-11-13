@@ -17145,4 +17145,65 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get rqFixedAdjustConfirm =>
       'Confirmed before it applies (cannot be undone)';
+
+  @override
+  String ofSkippedRows(int n, String rows) {
+    return '$n rows not read (rows $rows): no quantity, JAN or item code (totals, subtotals, notes…)';
+  }
+
+  @override
+  String get ofSkippedTip => 'What the rows not read said';
+
+  @override
+  String get ofNoHeading =>
+      'No heading row was found on this sheet (headings such as JAN, item code, quantity are needed).';
+
+  @override
+  String get ofMissingQty => 'No quantity column was found.';
+
+  @override
+  String get ofMissingJanCode =>
+      'Neither a JAN nor an item code column was found.';
+
+  @override
+  String get ofNotUsableTail =>
+      'Set the columns by hand, or choose another sheet.';
+
+  @override
+  String get ofNoRowsUnder =>
+      'There are no rows with a quantity, JAN or item code under the headings.';
+
+  @override
+  String ofFileError(String reason) {
+    return 'This file could not be read: $reason';
+  }
+
+  @override
+  String get ofFileErrorSheet =>
+      'It could not be opened as .xlsx or .csv: it may be damaged or password-protected. Open it in Excel and save it again as .xlsx.';
+
+  @override
+  String ofUnpricedPlan(int n, String rows) {
+    return '$n rows have no selling price (rows $rows): each needs one before it ships (required item).';
+  }
+
+  @override
+  String ofUnpricedNow(int n, String rows) {
+    return '$n rows have no selling price (rows $rows): they cannot ship or be recorded as they are (required item).';
+  }
+
+  @override
+  String sfNoPriceRows(int n) {
+    return '$n rows have no purchase price: they cannot go in as they are. Add a price column to the file, or the system administrator can make it optional in Required items.';
+  }
+
+  @override
+  String sfNotItemsRows(int n, String rows) {
+    return '$n rows are not products (rows $rows: branch names, addresses, blanks… left out)';
+  }
+
+  @override
+  String rowLabel(int row, String text) {
+    return 'Row $row  $text';
+  }
 }

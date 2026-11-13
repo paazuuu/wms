@@ -5265,5 +5265,19 @@
   "rqFixedShipCheck": "The \"it has actually left\" tick",
   "rqFixedShipDay": "Shipping day today or earlier",
   "rqFixedPrincipal": "Principal (a record only; stock does not move)",
-  "rqFixedAdjustConfirm": "Confirmed before it applies (cannot be undone)"
+  "rqFixedAdjustConfirm": "Confirmed before it applies (cannot be undone)",
+  "ofSkippedRows": "{n} rows not read (rows {rows}): no quantity, JAN or item code (totals, subtotals, notes…)",
+  "ofSkippedTip": "What the rows not read said",
+  "ofNoHeading": "No heading row was found on this sheet (headings such as JAN, item code, quantity are needed).",
+  "ofMissingQty": "No quantity column was found.",
+  "ofMissingJanCode": "Neither a JAN nor an item code column was found.",
+  "ofNotUsableTail": "Set the columns by hand, or choose another sheet.",
+  "ofNoRowsUnder": "There are no rows with a quantity, JAN or item code under the headings.",
+  "ofFileError": "This file could not be read: {reason}",
+  "ofFileErrorSheet": "It could not be opened as .xlsx or .csv: it may be damaged or password-protected. Open it in Excel and save it again as .xlsx.",
+  "ofUnpricedPlan": "{n} rows have no selling price (rows {rows}): each needs one before it ships (required item).",
+  "ofUnpricedNow": "{n} rows have no selling price (rows {rows}): they cannot ship or be recorded as they are (required item).",
+  "sfNoPriceRows": "{n} rows have no purchase price: they cannot go in as they are. Add a price column to the file, or the system administrator can make it optional in Required items.",
+  "sfNotItemsRows": "{n} rows are not products (rows {rows}: branch names, addresses, blanks… left out)",
+  "rowLabel": "Row {row}  {text}"
 }

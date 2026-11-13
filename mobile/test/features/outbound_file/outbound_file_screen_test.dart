@@ -889,4 +889,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.undone, [5]);
   });
+
+  testWidgets('why rows were not read: a total row, rows with no price, and a file that cannot be opened (0213)', (tester) async {
+    final book = buildXlsxBook([
+      const XlsxSheet(name: '明细', headers: ['ジャパンコード', '品番', '数量', '单价（税前）'], rows: [
+        ['4909999000014', 'TS-100', 10, 50], // row 2: priced
+        ['4909999000021', 'TS-110', 5, ''], // row 3: no price
+        ['合计', '', '', ''], // row 4: a total, not read
+      ]),
+    ]);
+    await pump(tester, book: book, priced: true);
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('読み込まなかった行 1件（4行目）'), findsOneWidget);
+    // As a plan: needed before it ships; to ship now: it cannot.
+    await tester.tap(find.text('今すぐ出庫'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('出荷単価がない行 1件（3行目）：このままでは出庫・記録できません'), findsOneWidget);
+  });
+
+  testWidgets('a sheet without the columns says which are missing; an unreadable file says why and stays said', (tester) async {
+    final noQty = buildXlsxBook([
+      const XlsxSheet(name: 'list', headers: ['ジャパンコード', '品名'], rows: [
+        ['4909999000014', 'Pen'],
+      ]),
+    ]);
+    await pump(tester, book: noQty);
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('「数量」の列が見つかりません。'), findsOneWidget);
+
+    await pump(tester, book: Uint8List.fromList([1, 2, 3, 4, 5]));
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('of-file-error')), findsOneWidget);
+    expect(find.textContaining('このファイルは読み込めませんでした'), findsOneWidget);
+  });
 }

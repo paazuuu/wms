@@ -225,6 +225,7 @@ class OutboundSheet extends Equatable {
     required this.columns,
     required this.rows,
     this.janGuessed = false,
+    this.skipped = const [],
   });
 
   final String sheetName;
@@ -238,6 +239,11 @@ class OutboundSheet extends Equatable {
   /// The JAN column was found by what it holds, not by its heading.
   final bool janGuessed;
 
+  /// Rows under the headings that were not read — something written, but
+  /// no quantity, JAN or 品番 (a total, a subtotal, a note) — with what they
+  /// said, so the screen can say which and why.
+  final List<({int rowNo, String text})> skipped;
+
   /// Readable as a list: a quantity and something to find the product by.
   bool get usable =>
       columns.containsKey(OutboundColumn.quantity) &&
@@ -249,7 +255,7 @@ class OutboundSheet extends Equatable {
       };
 
   @override
-  List<Object?> get props => [sheetName, headerRow, headings, columns, rows, janGuessed];
+  List<Object?> get props => [sheetName, headerRow, headings, columns, rows, janGuessed, skipped];
 }
 
 /// The columns of a heading row.
@@ -320,14 +326,19 @@ OutboundSheet parseOutboundSheet(String sheetName, List<List<String>> rows, {Map
   }
 
   final out = <OutboundRow>[];
+  final skipped = <({int rowNo, String text})>[];
   for (var r = head + 1; r < rows.length; r++) {
     final row = rows[r];
     if (row.every((c) => c.trim().isEmpty)) continue;
     final janRaw = at(row, OutboundColumn.jan);
     final qty = _num(at(row, OutboundColumn.quantity));
     final code = text(row, OutboundColumn.code);
-    // A total (合计 under the JAN) or a blank: nothing to ship by.
-    if (qty == null && normalizeOutboundJan(janRaw).isEmpty && code == null) continue;
+    // A total (合计 under the JAN) or a note: nothing to ship by. Kept as
+    // skipped, so the screen can say so.
+    if (qty == null && normalizeOutboundJan(janRaw).isEmpty && code == null) {
+      skipped.add((rowNo: r + 1, text: [for (final c in row) if (c.trim().isNotEmpty) c.trim()].take(4).join(' · ')));
+      continue;
+    }
     out.add(OutboundRow(
       rowNo: r + 1,
       jan: normalizeOutboundJan(janRaw),
@@ -358,6 +369,7 @@ OutboundSheet parseOutboundSheet(String sheetName, List<List<String>> rows, {Map
     columns: cols,
     rows: out,
     janGuessed: guessed && columns == null,
+    skipped: skipped,
   );
 }
 

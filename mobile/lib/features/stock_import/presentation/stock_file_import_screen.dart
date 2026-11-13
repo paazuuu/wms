@@ -877,7 +877,19 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       for (final p in sheet?.problems ?? const <StockFileProblem>[])
         if (p.code != 'not_item') p
     ];
-    final notItems = (sheet?.problems ?? const <StockFileProblem>[]).where((p) => p.code == 'not_item').length;
+    final notItemRows = [
+      for (final p in sheet?.problems ?? const <StockFileProblem>[])
+        if (p.code == 'not_item') p.lineNo
+    ];
+    final notItems = notItemRows.length;
+    // Lines going in with no 仕入単価, as the rules ask (0212): shown before
+    // 反映, each with its row.
+    final unpriced = _mode == StockFileMode.add && ref.watch(requirementOnProvider(Req.receiptPrice))
+        ? [
+            for (final l in [...ready, if (willRegister > 0) ...registrable])
+              if (l.quantity > 0 && (l.unitPrice ?? 0) <= 0) l
+          ]
+        : const <StockFileLine>[];
     final done = _done;
 
     // Where this order is on its way (0173): the file, its check and the
@@ -1303,10 +1315,26 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                       : l10n.sfNotRegistering),
                 ),
             ],
+            if (unpriced.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(l10n.sfNoPriceRows(unpriced.length),
+                  key: const ValueKey('sf-no-price'),
+                  style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.error)),
+              for (final l in unpriced.take(50))
+                ListTile(
+                  key: ValueKey('sf-no-price-${l.lineNo}'),
+                  dense: true,
+                  leading: Icon(Icons.money_off_outlined, color: theme.colorScheme.error, size: 20),
+                  title: Text(l10n.rowLabel(l.lineNo, [l.janCode, if (l.name != null) l.name!].join(' '))),
+                ),
+            ],
             if (notItems > 0)
               Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
-                child: Text(l10n.sfNotItems(notItems), key: const ValueKey('sf-not-items'), style: muted),
+                child: Text(
+                    l10n.sfNotItemsRows(notItems, notItemRows.take(20).join(', ') + (notItemRows.length > 20 ? '…' : '')),
+                    key: const ValueKey('sf-not-items'),
+                    style: muted),
               ),
             // Already received as 予定外の入荷 (0181): tied, not added again.
             if (_unplannedMatches(sheet.lines) case final ties when ties.isNotEmpty)

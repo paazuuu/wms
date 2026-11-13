@@ -16692,4 +16692,61 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rqFixedAdjustConfirm => '确认后才生效（无法撤销）';
+
+  @override
+  String ofSkippedRows(int n, String rows) {
+    return '未读取的行 $n行（第$rows行）：没有数量、JAN和品番（合计、小计、备注行等）';
+  }
+
+  @override
+  String get ofSkippedTip => '未读取行的内容';
+
+  @override
+  String get ofNoHeading => '此工作表中找不到标题行（需要“JAN”“品番”“数量”等标题）。';
+
+  @override
+  String get ofMissingQty => '找不到“数量”列。';
+
+  @override
+  String get ofMissingJanCode => '既找不到“JAN”列也找不到“品番”列。';
+
+  @override
+  String get ofNotUsableTail => '请在列分配中指定，或选择其他工作表。';
+
+  @override
+  String get ofNoRowsUnder => '标题下没有包含数量、JAN或品番的行。';
+
+  @override
+  String ofFileError(String reason) {
+    return '无法读取此文件：$reason';
+  }
+
+  @override
+  String get ofFileErrorSheet =>
+      '无法作为 .xlsx/.csv 打开，可能已损坏或设有密码。请用 Excel 打开后另存为 .xlsx。';
+
+  @override
+  String ofUnpricedPlan(int n, String rows) {
+    return '$n行没有出货单价（第$rows行）：出库或库存外出货前需要单价（必填项）。';
+  }
+
+  @override
+  String ofUnpricedNow(int n, String rows) {
+    return '$n行没有出货单价（第$rows行）：这样无法出库或记录（必填项）。';
+  }
+
+  @override
+  String sfNoPriceRows(int n) {
+    return '$n行没有进货单价：这样无法入库。请在文件中加入单价列，或由系统管理员在“必填项设置”中改为选填。';
+  }
+
+  @override
+  String sfNotItemsRows(int n, String rows) {
+    return '$n行不是商品（第$rows行。分店名、地址、空行等，已忽略）';
+  }
+
+  @override
+  String rowLabel(int row, String text) {
+    return '第$row行　$text';
+  }
 }
