@@ -15045,5 +15045,37 @@
   "ocErrNegative": "マイナスの金額は入れられません",
   "ocFreightImport": "輸送費（円・税抜・任意）",
   "ocFreightImportHint": "見積の金額で構いません。出庫済みになるまでは詳細画面で直せます。請求書が届いたら金額を直し、証拠を付けてください。",
-  "ocCosts": "費用"
+  "ocCosts": "費用",
+  "pfMonth": "月",
+  "pfAllMonths": "すべての月",
+  "pfMonthChip": "{month} だけ表示中",
+  "@pfMonthChip": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "pfTotalsMonth": "{month}の合計　売上 {revenue}　原価 {cost}　収益 {profit}　利益率 {margin}",
+  "@pfTotalsMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "revenue": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "profit": {
+        "type": "String"
+      },
+      "margin": {
+        "type": "String"
+      }
+    }
+  },
+  "pfMonthHint": "グラフの棒や表の月を押すと、その月だけを表示します（もう一度押すと戻ります）",
+  "pfZeroProfit": "仕入値がわかる出荷がまだないため、収益の棒は0のままです。「売上」に切り替えると月ごとの売上が見えます。"
 }

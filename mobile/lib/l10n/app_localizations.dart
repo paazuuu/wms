@@ -29892,6 +29892,43 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'費用'**
   String get ocCosts;
+
+  /// No description provided for @pfMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'月'**
+  String get pfMonth;
+
+  /// No description provided for @pfAllMonths.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての月'**
+  String get pfAllMonths;
+
+  /// No description provided for @pfMonthChip.
+  ///
+  /// In ja, this message translates to:
+  /// **'{month} だけ表示中'**
+  String pfMonthChip(String month);
+
+  /// No description provided for @pfTotalsMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'{month}の合計　売上 {revenue}　原価 {cost}　収益 {profit}　利益率 {margin}'**
+  String pfTotalsMonth(
+      String month, String revenue, String cost, String profit, String margin);
+
+  /// No description provided for @pfMonthHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'グラフの棒や表の月を押すと、その月だけを表示します（もう一度押すと戻ります）'**
+  String get pfMonthHint;
+
+  /// No description provided for @pfZeroProfit.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入値がわかる出荷がまだないため、収益の棒は0のままです。「売上」に切り替えると月ごとの売上が見えます。'**
+  String get pfZeroProfit;
 }
 
 class _AppLocalizationsDelegate

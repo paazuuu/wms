@@ -21,11 +21,17 @@ class BarDatum {
 /// a tooltip over the whole column. A single series, so the title names it
 /// and there is no legend; the numbers are also in the table under it.
 class BarChart extends StatelessWidget {
-  const BarChart({super.key, required this.bars, required this.format, this.height = 220});
+  const BarChart({super.key, required this.bars, required this.format, this.height = 220, this.selected, this.onTap});
 
   final List<BarDatum> bars;
   final String Function(double v) format;
   final double height;
+
+  /// The column picked out (the others fade), if any.
+  final int? selected;
+
+  /// A column clicked: the bars become something to choose by.
+  final void Function(int index)? onTap;
 
   /// A round step for the grid: 1, 2 or 5 × a power of ten.
   static double _nice(double v) {
@@ -87,8 +93,21 @@ class BarChart extends StatelessWidget {
                 message: b.tooltip ?? '${b.label}: ${format(b.value)}',
                 // The whole column answers the pointer, not only the bar.
                 child: MouseRegion(
-                  cursor: SystemMouseCursors.basic,
+                  cursor: onTap == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
+                  child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onTap == null ? null : () => onTap!(i),
                   child: Stack(children: [
+                    if (selected == i)
+                      Positioned.fill(
+                        bottom: labelH,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: scheme.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
                     if (b.value != 0)
                       Positioned(
                         left: (slot - barW) / 2,
@@ -97,7 +116,8 @@ class BarChart extends StatelessWidget {
                         height: math.max(1.0, (y(0) - y(b.value)).abs()),
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                            color: b.value >= 0 ? up : down,
+                            color: (b.value >= 0 ? up : down)
+                                .withValues(alpha: selected != null && selected != i ? 0.35 : 1),
                             // Round at the data end, square at the baseline.
                             borderRadius: b.value >= 0
                                 ? const BorderRadius.vertical(top: Radius.circular(4))
@@ -109,9 +129,16 @@ class BarChart extends StatelessWidget {
                       left: 0,
                       right: 0,
                       top: height + 4,
-                      child: Text(b.label, textAlign: TextAlign.center, style: axis, maxLines: 1, overflow: TextOverflow.clip),
+                      child: Text(b.label,
+                          textAlign: TextAlign.center,
+                          style: selected == i
+                              ? axis?.copyWith(color: scheme.primary, fontWeight: FontWeight.w700)
+                              : axis,
+                          maxLines: 1,
+                          overflow: TextOverflow.clip),
                     ),
                   ]),
+                  ),
                 ),
               ),
             ),

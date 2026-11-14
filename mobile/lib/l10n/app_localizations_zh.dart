@@ -16907,4 +16907,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ocCosts => '费用';
+
+  @override
+  String get pfMonth => '月份';
+
+  @override
+  String get pfAllMonths => '全部月份';
+
+  @override
+  String pfMonthChip(String month) {
+    return '仅显示 $month';
+  }
+
+  @override
+  String pfTotalsMonth(
+      String month, String revenue, String cost, String profit, String margin) {
+    return '$month合计　销售额 $revenue　成本 $cost　收益 $profit　利润率 $margin';
+  }
+
+  @override
+  String get pfMonthHint => '点击图表的柱或表格中的月份，即可只显示该月（再次点击恢复）';
+
+  @override
+  String get pfZeroProfit => '目前还没有已知进货价的出货，因此收益柱状图为0。切换到「销售额」可以查看每月的销售额。';
 }

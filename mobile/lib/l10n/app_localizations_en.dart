@@ -17369,4 +17369,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ocCosts => 'Costs';
+
+  @override
+  String get pfMonth => 'Month';
+
+  @override
+  String get pfAllMonths => 'All months';
+
+  @override
+  String pfMonthChip(String month) {
+    return 'Showing $month only';
+  }
+
+  @override
+  String pfTotalsMonth(
+      String month, String revenue, String cost, String profit, String margin) {
+    return '$month total  sales $revenue  cost $cost  profit $profit  margin $margin';
+  }
+
+  @override
+  String get pfMonthHint =>
+      'Click a bar or a month in the table to show that month only (click again to go back)';
+
+  @override
+  String get pfZeroProfit =>
+      'No shipment has a known purchase price yet, so the profit bars stay at 0. Switch to \"Sales\" to see each month’s sales.';
 }

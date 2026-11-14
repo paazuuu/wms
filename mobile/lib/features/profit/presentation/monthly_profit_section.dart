@@ -32,6 +32,10 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
   ProfitMeasure _measure = ProfitMeasure.profit;
   String? _maker;
   String? _product; // ProfitRow.key
+
+  /// One month picked ('YYYY-MM'): the totals and the products are that
+  /// month's; null for the whole period.
+  String? _month;
   final _search = TextEditingController();
   int _productsShown = 10;
 
@@ -106,11 +110,18 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
     final muted = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
     final makers = {for (final r in rows) if (r.maker != null) r.maker!}.toList()..sort();
     final byMonth = profitByMonth(months, rows, _keep);
+    final month = months.contains(_month) ? _month : null;
+    bool inMonth(ProfitRow r) => month == null || r.month == month;
     final total = ProfitMonth('');
-    for (final r in rows.where(_keep)) {
+    for (final r in rows.where((r) => _keep(r) && inMonth(r))) {
       total.add(r);
     }
-    final products = profitByProduct(rows, (r) => _maker == null || (r.maker ?? '') == _maker);
+    final products = profitByProduct(
+        rows, (r) => inMonth(r) && (_kind == null || r.kind == _kind) && (_maker == null || (r.maker ?? '') == _maker));
+    // Months with something shipped, newest first, to pick from.
+    final shippedMonths = [for (final m in byMonth.reversed) if (m.quantity > 0) m.month];
+    void pick(String? m) => setState(() => _month = m == null || m == month ? null : m);
+    String label(String m) => m.replaceFirst('-', '/');
     final q = _search.text.trim().toLowerCase();
     final listed = [
       for (final p in products)
@@ -126,7 +137,25 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
           key: const ValueKey('pf-period'),
           segments: [for (final n in const [6, 12, 24]) ButtonSegment(value: n, label: Text(l10n.pfPeriod(n)))],
           selected: {_months},
-          onSelectionChanged: (v) => setState(() => _months = v.first),
+          onSelectionChanged: (v) => setState(() {
+            _months = v.first;
+            _month = null;
+          }),
+        ),
+        // One month, or the whole period.
+        SizedBox(
+          width: 160,
+          child: DropdownButtonFormField<String?>(
+            key: ValueKey('pf-month-$month'),
+            initialValue: shippedMonths.contains(month) ? month : null,
+            isExpanded: true,
+            decoration: InputDecoration(labelText: l10n.pfMonth, isDense: true),
+            items: [
+              DropdownMenuItem(value: null, child: Text(l10n.pfAllMonths)),
+              for (final m in shippedMonths) DropdownMenuItem(value: m, child: Text(label(m))),
+            ],
+            onChanged: (v) => setState(() => _month = v),
+          ),
         ),
         // From our warehouse, or 在庫外出荷 (another company's, for a fee).
         SegmentedButton<String>(
@@ -187,21 +216,38 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
             label: Text(l10n.pfClear),
           ),
       ]),
-      if (_product != null)
+      if (_product != null || month != null)
         Padding(
           padding: const EdgeInsets.only(top: AppSpacing.sm),
-          child: InputChip(
-            key: const ValueKey('pf-product-chip'),
-            label: Text(products.firstWhere((p) => p.first.key == _product, orElse: () => products.first).first.name),
-            onDeleted: () => setState(() => _product = null),
-          ),
+          child: Wrap(spacing: AppSpacing.sm, children: [
+            if (month != null)
+              InputChip(
+                key: const ValueKey('pf-month-chip'),
+                avatar: const Icon(Icons.calendar_month_outlined, size: 18),
+                label: Text(l10n.pfMonthChip(label(month))),
+                onDeleted: () => pick(null),
+              ),
+            if (_product != null)
+              InputChip(
+                key: const ValueKey('pf-product-chip'),
+                label: Text(products
+                    .firstWhere((p) => p.first.key == _product,
+                        orElse: () => profitByProduct(rows, (r) => r.key == _product).first)
+                    .first
+                    .name),
+                onDeleted: () => setState(() => _product = null),
+              ),
+          ]),
         ),
       const SizedBox(height: AppSpacing.md),
       if (rows.isEmpty)
         Text(l10n.pfEmpty, key: const ValueKey('pf-empty'), style: muted)
       else ...[
         Text(
-          l10n.pfTotals(yen(total.revenue), yen(total.costAll), yen(total.profit), pct(total.margin)) +
+          (month == null
+                  ? l10n.pfTotals(yen(total.revenue), yen(total.costAll), yen(total.profit), pct(total.margin))
+                  : l10n.pfTotalsMonth(
+                      label(month), yen(total.revenue), yen(total.costAll), yen(total.profit), pct(total.margin))) +
               (total.fee > 0 ? l10n.pfTotalsFee(yen(total.fee)) : '') +
               (total.freight > 0 ? l10n.pfTotalsFreight(yen(total.freight)) : ''),
           key: const ValueKey('pf-totals'),
@@ -210,10 +256,20 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
         // Both kinds shown: how much each made.
         if (_kind == null && rows.any((r) => r.proxy))
           Text(l10n.pfSplit(yen(total.profitStock), yen(total.profitProxy)), key: const ValueKey('pf-split'), style: muted),
+        // Sold, but nothing priced: the profit bars would all be 0.
+        if (_measure == ProfitMeasure.profit && total.revenue > 0 && total.revenueCosted == 0)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xs),
+            child: Text(l10n.pfZeroProfit, key: const ValueKey('pf-zero-profit'), style: TextStyle(color: scheme.warning)),
+          ),
         const SizedBox(height: AppSpacing.md),
+        Text(l10n.pfMonthHint, style: muted),
+        const SizedBox(height: AppSpacing.xs),
         BarChart(
           key: const ValueKey('pf-chart'),
           format: (v) => v == 0 ? '0' : compact.format(v),
+          selected: month == null ? null : months.indexOf(month),
+          onTap: (i) => pick(byMonth[i].month),
           bars: [
             for (final m in byMonth)
               BarDatum(
@@ -238,6 +294,7 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
           scrollDirection: Axis.horizontal,
           child: DataTable(
             key: const ValueKey('pf-table'),
+            showCheckboxColumn: false,
             headingRowHeight: 36,
             dataRowMinHeight: 32,
             dataRowMaxHeight: 40,
@@ -255,7 +312,10 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
             rows: [
               for (final m in byMonth.reversed)
                 if (m.quantity > 0)
-                  DataRow(cells: [
+                  DataRow(
+                    selected: m.month == month,
+                    onSelectChanged: (_) => pick(m.month),
+                    cells: [
                     DataCell(Text(m.month.replaceFirst('-', '/'), key: ValueKey('pf-row-${m.month}'))),
                     DataCell(Text(_yen.format(m.quantity))),
                     DataCell(Text(yen(m.revenue))),

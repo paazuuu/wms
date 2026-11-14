@@ -5324,5 +5324,11 @@
   "ocErrNegative": "The amount cannot be negative",
   "ocFreightImport": "Freight (yen, before tax; optional)",
   "ocFreightImportHint": "An estimate is fine. It can be corrected in the detail until the list is shipped; when the bill comes, correct it and attach the bill.",
-  "ocCosts": "Costs"
+  "ocCosts": "Costs",
+  "pfMonth": "Month",
+  "pfAllMonths": "All months",
+  "pfMonthChip": "Showing {month} only",
+  "pfTotalsMonth": "{month} total  sales {revenue}  cost {cost}  profit {profit}  margin {margin}",
+  "pfMonthHint": "Click a bar or a month in the table to show that month only (click again to go back)",
+  "pfZeroProfit": "No shipment has a known purchase price yet, so the profit bars stay at 0. Switch to \"Sales\" to see each month’s sales."
 }

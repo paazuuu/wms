@@ -5324,5 +5324,11 @@
   "ocErrNegative": "金额不能为负数",
   "ocFreightImport": "运费（日元・不含税・选填）",
   "ocFreightImportHint": "可以先填报价金额。出库完成前可以在详情画面修改。收到账单后请修正金额并附上凭证。",
-  "ocCosts": "费用"
+  "ocCosts": "费用",
+  "pfMonth": "月份",
+  "pfAllMonths": "全部月份",
+  "pfMonthChip": "仅显示 {month}",
+  "pfTotalsMonth": "{month}合计　销售额 {revenue}　成本 {cost}　收益 {profit}　利润率 {margin}",
+  "pfMonthHint": "点击图表的柱或表格中的月份，即可只显示该月（再次点击恢复）",
+  "pfZeroProfit": "目前还没有已知进货价的出货，因此收益柱状图为0。切换到「销售额」可以查看每月的销售额。"
 }

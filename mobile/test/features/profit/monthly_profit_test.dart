@@ -145,6 +145,64 @@ void main() {
     expect(ProfitRow.fromJson({'month': thisMonth, 'product_name': 'x', 'freight': '12.5'}).freight, 12.5);
   });
 
+  testWidgets('one month picked from a bar, the table or the list; the products follow it', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(
+      tester,
+      const Scaffold(body: SingleChildScrollView(child: MonthlyProfitSection())),
+      overrides: [profitRepositoryProvider.overrideWithValue(FakeProfitRepository(rows))],
+    );
+    String totals() => tester.widget<Text>(find.byKey(const ValueKey('pf-totals'))).data!;
+    final last = lastMonth.replaceFirst('-', '/');
+    final current = thisMonth.replaceFirst('-', '/');
+
+    // A bar clicked: that month alone, and its products only.
+    await tester.tap(find.byKey(ValueKey('pf-bar-$lastMonth')));
+    await tester.pumpAndSettle();
+    expect(totals(), startsWith('$lastの合計'));
+    expect(totals(), contains('売上 ¥1,150'));
+    expect(find.text('$last だけ表示中'), findsOneWidget);
+    expect(find.byKey(const ValueKey('pf-product-p3')), findsNothing, reason: 'the eraser sold this month only');
+    // Clicked again: the whole period.
+    await tester.tap(find.byKey(ValueKey('pf-bar-$lastMonth')));
+    await tester.pumpAndSettle();
+    expect(totals(), contains('売上 ¥3,450'));
+
+    // From the table.
+    await tester.tap(find.byKey(ValueKey('pf-row-$thisMonth')));
+    await tester.pumpAndSettle();
+    expect(totals(), startsWith('$currentの合計'));
+    expect(totals(), contains('売上 ¥2,300'));
+    expect(find.byKey(const ValueKey('pf-product-p3')), findsOneWidget);
+
+    // From the list, back to every month.
+    await tester.tap(find.byKey(ValueKey('pf-month-$thisMonth')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('すべての月').last);
+    await tester.pumpAndSettle();
+    expect(totals(), startsWith('期間の合計'));
+    expect(find.byKey(const ValueKey('pf-month-chip')), findsNothing);
+  });
+
+  testWidgets('sold with no purchase price at all: says why the profit bars are 0', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(
+      tester,
+      const Scaffold(body: SingleChildScrollView(child: MonthlyProfitSection())),
+      overrides: [
+        profitRepositoryProvider.overrideWithValue(FakeProfitRepository([
+          ProfitRow(month: thisMonth, productId: 2, name: 'テストノート', quantity: 3, revenue: 150, revenueCosted: 0, cost: 0, qtyNoCost: 3),
+        ])),
+      ],
+    );
+    expect(find.byKey(const ValueKey('pf-zero-profit')), findsOneWidget);
+    await tester.tap(find.text('売上').first);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pf-zero-profit')), findsNothing);
+  });
+
   testWidgets('nothing shipped yet says so', (tester) async {
     await pumpApp(tester, const Scaffold(body: SingleChildScrollView(child: MonthlyProfitSection())));
     expect(find.byKey(const ValueKey('pf-empty')), findsOneWidget);

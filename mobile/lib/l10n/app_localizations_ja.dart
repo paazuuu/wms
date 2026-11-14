@@ -17028,4 +17028,28 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ocCosts => '費用';
+
+  @override
+  String get pfMonth => '月';
+
+  @override
+  String get pfAllMonths => 'すべての月';
+
+  @override
+  String pfMonthChip(String month) {
+    return '$month だけ表示中';
+  }
+
+  @override
+  String pfTotalsMonth(
+      String month, String revenue, String cost, String profit, String margin) {
+    return '$monthの合計　売上 $revenue　原価 $cost　収益 $profit　利益率 $margin';
+  }
+
+  @override
+  String get pfMonthHint => 'グラフの棒や表の月を押すと、その月だけを表示します（もう一度押すと戻ります）';
+
+  @override
+  String get pfZeroProfit =>
+      '仕入値がわかる出荷がまだないため、収益の棒は0のままです。「売上」に切り替えると月ごとの売上が見えます。';
 }
