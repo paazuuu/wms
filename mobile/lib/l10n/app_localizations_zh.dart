@@ -14244,7 +14244,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prTabList => '库存外发货记录';
 
   @override
-  String get prPrincipal => '委托方・安排方（可选）';
+  String get prPrincipal => '委托方（负责出货的其他公司・选填）';
 
   @override
   String get prAddRow => '添加行';
@@ -14310,7 +14310,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String prPrincipalLabel(String name) {
-    return '委托方：$name';
+    return '委托方: $name';
   }
 
   @override
@@ -16505,7 +16505,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pfMeasureRevenue => '销售额';
 
   @override
-  String get pfMeasureCost => '成本';
+  String get pfMeasureCost => '费用（进货＋手续费）';
 
   @override
   String get pfAllMakers => '所有厂家';
@@ -16688,7 +16688,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rqFixedShipDay => '出库日为今天或之前';
 
   @override
-  String get rqFixedPrincipal => '委托方（仅记录・不动库存）';
+  String get rqFixedPrincipal => '委托方（从其他公司仓库出货・自有库存不变）';
 
   @override
   String get rqFixedAdjustConfirm => '确认后才生效（无法撤销）';
@@ -16749,4 +16749,55 @@ class AppLocalizationsZh extends AppLocalizations {
   String rowLabel(int row, String text) {
     return '第$row行　$text';
   }
+
+  @override
+  String get pfKindAll => '全部';
+
+  @override
+  String get pfKindStock => '自有库存';
+
+  @override
+  String get pfKindProxy => '库存外出货';
+
+  @override
+  String get pfColBuy => '进货成本';
+
+  @override
+  String get pfColFee => '委托手续费';
+
+  @override
+  String pfTotalsFee(String fee) {
+    return '　委托手续费 $fee（含在费用中）';
+  }
+
+  @override
+  String pfSplit(String stock, String proxy) {
+    return '明细　自有库存 $stock　库存外出货 $proxy（扣除委托手续费后）';
+  }
+
+  @override
+  String pfTooltip2(
+      String month, String revenue, String cost, String fee, String profit) {
+    return '$month\n销售额 $revenue\n进货成本 $cost\n委托手续费 $fee\n收益 $profit';
+  }
+
+  @override
+  String get prFee => '委托手续费（日元・选填）';
+
+  @override
+  String prFeeLabel(String fee) {
+    return '委托手续费: $fee';
+  }
+
+  @override
+  String get prFeeNone => '委托手续费: 未填写';
+
+  @override
+  String get prFeeEdit => '填写手续费';
+
+  @override
+  String get prFeeHint => '支付给其他公司的出货手续费。在月度收益中作为费用扣除（按各行销售额比例分摊）。';
+
+  @override
+  String get prFeeSaved => '已保存委托手续费';
 }

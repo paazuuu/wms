@@ -90,6 +90,34 @@ void main() {
     expect(find.byKey(const ValueKey('pf-chart')), findsOneWidget);
   });
 
+  testWidgets('在庫外出荷 apart (0213): its fee is a cost, and each kind can be shown alone', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final rows = [
+      ProfitRow(month: thisMonth, productId: 1, name: 'テストペン', maker: 'テスト文具',
+          quantity: 10, revenue: 1000, revenueCosted: 1000, cost: 600),
+      ProfitRow(month: thisMonth, productId: 1, name: 'テストペン', maker: 'テスト文具',
+          quantity: 10, revenue: 1000, revenueCosted: 1000, cost: 600, kind: 'proxy', fee: 150),
+    ];
+    await pumpApp(
+      tester,
+      const Scaffold(body: SingleChildScrollView(child: MonthlyProfitSection())),
+      overrides: [profitRepositoryProvider.overrideWithValue(FakeProfitRepository(rows))],
+    );
+    String totals() => tester.widget<Text>(find.byKey(const ValueKey('pf-totals'))).data!;
+    expect(totals(), contains('収益 ¥650'));
+    expect(totals(), contains('委託手数料 ¥150'));
+    expect(find.textContaining('自社在庫から ¥400　在庫外出荷 ¥250'), findsOneWidget);
+
+    await tester.tap(find.text('在庫外出荷').first);
+    await tester.pumpAndSettle();
+    expect(totals(), contains('収益 ¥250'));
+    await tester.tap(find.text('自社在庫から'));
+    await tester.pumpAndSettle();
+    expect(totals(), contains('収益 ¥400'));
+    expect(totals(), isNot(contains('委託手数料')));
+  });
+
   testWidgets('nothing shipped yet says so', (tester) async {
     await pumpApp(tester, const Scaffold(body: SingleChildScrollView(child: MonthlyProfitSection())));
     expect(find.byKey(const ValueKey('pf-empty')), findsOneWidget);

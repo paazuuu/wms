@@ -86,6 +86,27 @@ void main() {
     return repo;
   }
 
+  testWidgets('委託手数料 (0213): a 在庫外出荷 shows its fee and takes one typed in', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(2400, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final f = OutboundFileSummary(
+        id: 7, warehouseId: 1, shippedOn: DateTime(2026, 11, 20), fileName: '手入力', kind: 'proxy', principal: 'テスト物流');
+    final repo = FakeOutboundFileRepository(detailOf: (_) => OutboundFileDetail(file: f, lines: _lines));
+    await pumpApp(tester, const OutboundFileDetailScreen(fileId: 7), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(repo),
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: _library)),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(_overview)),
+      writeWarehouseIdProvider.overrideWithValue(1),
+    ]);
+    expect(find.text('委託手数料: 未入力'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('of-fee-edit')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('of-fee-field')), '¥2,500');
+    await tester.tap(find.byKey(const ValueKey('of-fee-save')));
+    await tester.pumpAndSettle();
+    expect(repo.fees, [(7, 2500.0)]);
+  });
+
   testWidgets('出荷単価 required (0212): a row without a price holds 出庫した', (tester) async {
     await tester.binding.setSurfaceSize(const Size(2400, 1800));
     addTearDown(() => tester.binding.setSurfaceSize(null));

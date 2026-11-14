@@ -12849,7 +12849,7 @@
   "prTitle": "在庫外出荷",
   "prTabRecord": "記録する",
   "prTabList": "在庫外出荷の記録",
-  "prPrincipal": "依頼元・手配元（任意）",
+  "prPrincipal": "委託先（出荷する他社・任意）",
   "prAddRow": "行を追加",
   "prAddRowTitle": "代理出荷の行を追加",
   "prName": "商品名",
@@ -12911,7 +12911,7 @@
       }
     }
   },
-  "prPrincipalLabel": "依頼元: {name}",
+  "prPrincipalLabel": "委託先: {name}",
   "@prPrincipalLabel": {
     "placeholders": {
       "name": {
@@ -14664,7 +14664,7 @@
   },
   "pfMeasureProfit": "収益",
   "pfMeasureRevenue": "売上",
-  "pfMeasureCost": "原価",
+  "pfMeasureCost": "費用（仕入＋手数料）",
   "pfAllMakers": "すべてのメーカー",
   "pfSearch": "商品で絞り込む（名前・JAN）",
   "pfTotals": "期間の合計　売上 {revenue}　原価 {cost}　収益 {profit}　利益率 {margin}",
@@ -14815,7 +14815,7 @@
   "rqFixedPlanDay": "出庫予定日（未定でも登録できる）",
   "rqFixedShipCheck": "「実際に倉庫から出した」のチェック",
   "rqFixedShipDay": "出庫日は今日以前",
-  "rqFixedPrincipal": "依頼元（記録のみ・在庫は動かない）",
+  "rqFixedPrincipal": "委託先（他社の倉庫から出荷・自社の在庫は動かない）",
   "rqFixedAdjustConfirm": "確認してから反映（取り消せない）",
   "ofSkippedRows": "読み込まなかった行 {n}件（{rows}行目）：数量・JAN・品番のどれもないため（合計・小計・備考の行など）",
   "@ofSkippedRows": {
@@ -14894,5 +14894,62 @@
         "type": "String"
       }
     }
-  }
+  },
+  "pfKindAll": "すべて",
+  "pfKindStock": "自社在庫から",
+  "pfKindProxy": "在庫外出荷",
+  "pfColBuy": "仕入原価",
+  "pfColFee": "委託手数料",
+  "pfTotalsFee": "　委託手数料 {fee}（費用に含む）",
+  "@pfTotalsFee": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "pfSplit": "内訳　自社在庫から {stock}　在庫外出荷 {proxy}（委託手数料を引いた後）",
+  "@pfSplit": {
+    "placeholders": {
+      "stock": {
+        "type": "String"
+      },
+      "proxy": {
+        "type": "String"
+      }
+    }
+  },
+  "pfTooltip2": "{month}\n売上 {revenue}\n仕入原価 {cost}\n委託手数料 {fee}\n収益 {profit}",
+  "@pfTooltip2": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "revenue": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      },
+      "profit": {
+        "type": "String"
+      }
+    }
+  },
+  "prFee": "委託手数料（円・任意）",
+  "prFeeLabel": "委託手数料: {fee}",
+  "@prFeeLabel": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "prFeeNone": "委託手数料: 未入力",
+  "prFeeEdit": "手数料を入れる",
+  "prFeeHint": "他社に払う出荷の手数料です。月ごとの収益で費用として引かれます（行の売上の割合で商品に振り分け）。",
+  "prFeeSaved": "委託手数料を保存しました"
 }

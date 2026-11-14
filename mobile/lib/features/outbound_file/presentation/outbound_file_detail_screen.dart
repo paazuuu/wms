@@ -296,6 +296,29 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
     }
   }
 
+  /// 委託手数料 (0213): what the other company was paid for shipping a
+  /// 在庫外出荷, typed in yen.
+  Future<void> _editFee(OutboundFileSummary f) async {
+    final l10n = AppLocalizations.of(context);
+    final v = await showDialog<String>(
+      context: context,
+      builder: (_) => _FeeDialog(initial: f.feeJpy == null ? '' : outboundMoney(f.feeJpy)),
+    );
+    if (v == null || !mounted) return;
+    final t = v.replaceAll(RegExp(r'[,，¥￥円\s]'), '');
+    final fee = t.isEmpty ? null : double.tryParse(t);
+    if (t.isNotEmpty && (fee == null || fee < 0)) return;
+    final r = await ref.read(outboundFileRepositoryProvider).setFee(f.id, fee);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        _refreshAll();
+        _snack(l10n.prFeeSaved);
+      case ApiFailure(:final message):
+        _snack(humanizeApiErrorMessage(l10n, message));
+    }
+  }
+
   Future<void> _setCard(OutboundFileSummary f) async {
     final l10n = AppLocalizations.of(context);
     final d = await pickDestinationCard(context);
@@ -721,6 +744,25 @@ class _OutboundFileDetailScreenState extends ConsumerState<OutboundFileDetailScr
                   ),
                 ],
               ]),
+              // 委託手数料 (0213): beside the rest, for a 在庫外出荷.
+              if (f.proxy && ref.watch(showPricesProvider))
+                Row(key: const ValueKey('of-fee'), children: [
+                  Icon(Icons.payments_outlined, size: 18, color: scheme.onSurfaceVariant),
+                  const SizedBox(width: AppSpacing.xs),
+                  Flexible(
+                    child: Text(
+                      f.feeJpy == null ? l10n.prFeeNone : l10n.prFeeLabel('¥${outboundMoney(f.feeJpy)}'),
+                      style: theme.textTheme.bodyMedium?.copyWith(color: f.feeJpy == null ? scheme.warning : null),
+                    ),
+                  ),
+                  if (!f.undone)
+                    TextButton.icon(
+                      key: const ValueKey('of-fee-edit'),
+                      onPressed: _busy ? null : () => _editFee(f),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: Text(l10n.prFeeEdit),
+                    ),
+                ]),
               if (f.shipTo != null && _cardOpen)
                 Padding(
                   padding: const EdgeInsets.only(left: 26, top: AppSpacing.xs, bottom: AppSpacing.xs),
@@ -1151,6 +1193,51 @@ class _CurrencyEditDialogState extends State<_CurrencyEditDialog> {
           onPressed: () => Navigator.pop(context, (all: _all, rate: double.tryParse(_fx.text.trim().replaceAll(',', '')))),
           child: Text(l10n.ofCurrencyDone),
         ),
+      ],
+    );
+  }
+}
+
+/// 委託手数料 typed in yen (0213); its field's controller lives with it.
+class _FeeDialog extends StatefulWidget {
+  const _FeeDialog({required this.initial});
+
+  final String initial;
+
+  @override
+  State<_FeeDialog> createState() => _FeeDialogState();
+}
+
+class _FeeDialogState extends State<_FeeDialog> {
+  late final _c = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.prFee),
+      content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(l10n.prFeeHint, style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: AppSpacing.sm),
+        TextField(
+          key: const ValueKey('of-fee-field'),
+          controller: _c,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(prefixText: '¥ '),
+          onSubmitted: (t) => Navigator.pop(context, t),
+        ),
+      ]),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(
+            key: const ValueKey('of-fee-save'), onPressed: () => Navigator.pop(context, _c.text), child: Text(l10n.actionSave)),
       ],
     );
   }

@@ -101,6 +101,14 @@ class FakeOutboundFileRepository implements OutboundFileRepository {
     return const ApiSuccess(true);
   }
 
+  final List<(int, double?)> fees = [];
+
+  @override
+  Future<ApiResult<bool>> setFee(int fileId, double? fee) async {
+    fees.add((fileId, fee));
+    return const ApiSuccess(true);
+  }
+
   @override
   Future<ApiResult<bool>> setDestination(int fileId, int? destinationId) async {
     destinations.add((fileId, destinationId));

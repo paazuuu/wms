@@ -14335,7 +14335,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get prTabList => '在庫外出荷の記録';
 
   @override
-  String get prPrincipal => '依頼元・手配元（任意）';
+  String get prPrincipal => '委託先（出荷する他社・任意）';
 
   @override
   String get prAddRow => '行を追加';
@@ -14401,7 +14401,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String prPrincipalLabel(String name) {
-    return '依頼元: $name';
+    return '委託先: $name';
   }
 
   @override
@@ -16623,7 +16623,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pfMeasureRevenue => '売上';
 
   @override
-  String get pfMeasureCost => '原価';
+  String get pfMeasureCost => '費用（仕入＋手数料）';
 
   @override
   String get pfAllMakers => 'すべてのメーカー';
@@ -16808,7 +16808,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get rqFixedShipDay => '出庫日は今日以前';
 
   @override
-  String get rqFixedPrincipal => '依頼元（記録のみ・在庫は動かない）';
+  String get rqFixedPrincipal => '委託先（他社の倉庫から出荷・自社の在庫は動かない）';
 
   @override
   String get rqFixedAdjustConfirm => '確認してから反映（取り消せない）';
@@ -16869,4 +16869,55 @@ class AppLocalizationsJa extends AppLocalizations {
   String rowLabel(int row, String text) {
     return '$row行目　$text';
   }
+
+  @override
+  String get pfKindAll => 'すべて';
+
+  @override
+  String get pfKindStock => '自社在庫から';
+
+  @override
+  String get pfKindProxy => '在庫外出荷';
+
+  @override
+  String get pfColBuy => '仕入原価';
+
+  @override
+  String get pfColFee => '委託手数料';
+
+  @override
+  String pfTotalsFee(String fee) {
+    return '　委託手数料 $fee（費用に含む）';
+  }
+
+  @override
+  String pfSplit(String stock, String proxy) {
+    return '内訳　自社在庫から $stock　在庫外出荷 $proxy（委託手数料を引いた後）';
+  }
+
+  @override
+  String pfTooltip2(
+      String month, String revenue, String cost, String fee, String profit) {
+    return '$month\n売上 $revenue\n仕入原価 $cost\n委託手数料 $fee\n収益 $profit';
+  }
+
+  @override
+  String get prFee => '委託手数料（円・任意）';
+
+  @override
+  String prFeeLabel(String fee) {
+    return '委託手数料: $fee';
+  }
+
+  @override
+  String get prFeeNone => '委託手数料: 未入力';
+
+  @override
+  String get prFeeEdit => '手数料を入れる';
+
+  @override
+  String get prFeeHint => '他社に払う出荷の手数料です。月ごとの収益で費用として引かれます（行の売上の割合で商品に振り分け）。';
+
+  @override
+  String get prFeeSaved => '委託手数料を保存しました';
 }

@@ -247,6 +247,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
   bool get wantKeepAlive => true;
 
   final _destination = TextEditingController();
+  final _fee = TextEditingController();
   final _note = TextEditingController();
   final _principal = TextEditingController();
   ({String name, Uint8List bytes})? _file;
@@ -294,6 +295,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
   @override
   void dispose() {
     _destination.dispose();
+    _fee.dispose();
     _note.dispose();
     _principal.dispose();
     _fx.dispose();
@@ -763,6 +765,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
         await _saveCurrency(data);
         // What was read, kept as Excel beside the file (0208).
         await _keepRead(data, warehouseId, plan);
+        // 委託手数料 (0213), as typed with a 在庫外出荷.
+        final fee = double.tryParse(_fee.text.replaceAll(RegExp(r'[,，¥￥円\s]'), ''));
+        if (_proxy && fee != null && fee >= 0) {
+          final set = await repo.setFee(data, fee);
+          if (set case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
+        }
         final card = _card;
         // 出庫 now took its card in the same step.
         if (card?.id != null && (_proxy || _planning)) {
@@ -790,6 +798,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
           _destination.clear();
           _note.clear();
           _principal.clear();
+          _fee.clear();
           _plannedOn = null;
           _currency = {};
           _card = null;
@@ -1442,15 +1451,29 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
                 if (d != null) setState(() => _shippedOn = d);
               },
             ),
-          if (_proxy)
+          if (_proxy) ...[
             SizedBox(
-              width: 220,
+              width: 240,
               child: TextField(
                 key: const ValueKey('pr-principal'),
                 controller: _principal,
                 decoration: InputDecoration(labelText: l10n.prPrincipal, isDense: true, contentPadding: _denseField),
               ),
             ),
+            // 委託手数料 (0213): what the other company is paid for shipping it.
+            SizedBox(
+              width: 200,
+              child: Tooltip(
+                message: l10n.prFeeHint,
+                child: TextField(
+                  key: const ValueKey('pr-fee'),
+                  controller: _fee,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(labelText: l10n.prFee, isDense: true, contentPadding: _denseField),
+                ),
+              ),
+            ),
+          ],
           if (_card == null)
             Tooltip(
               message: !_proxy && !_planning ? l10n.ofCardRequiredHint : '',

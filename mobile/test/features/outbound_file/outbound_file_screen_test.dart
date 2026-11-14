@@ -460,6 +460,8 @@ void main() {
     expect(find.byKey(const ValueKey('of-row-3')), findsNothing);
 
     await tester.enterText(find.byKey(const ValueKey('pr-principal')), 'テスト依頼元');
+    // 委託手数料 (0213), kept with the record.
+    await tester.enterText(find.byKey(const ValueKey('pr-fee')), '1,200');
     await tester.tap(find.byKey(const ValueKey('of-post')));
     await tester.pumpAndSettle();
     expect(find.text('2行（数量 6）を記録します。在庫は動きません。'), findsOneWidget);
@@ -477,6 +479,7 @@ void main() {
     expect(p.lines.first.unitPriceTax, 330);
     expect(p.lines.first.unitPrice, 300);
     expect(repo.markedUndecided, hasLength(1), reason: 'kept with its day 未定');
+    expect(repo.fees, [(1, 1200.0)]);
   });
 
   testWidgets('在庫外出荷 from a file: every row a record, typed rows numbered after the file\'s', (tester) async {
@@ -514,7 +517,7 @@ void main() {
     await pump(tester, repo: repo, tab: 1);
     expect(find.byKey(const ValueKey('of-file-1')), findsOneWidget);
     expect(find.byKey(const ValueKey('of-proxy-2')), findsOneWidget);
-    expect(find.text('依頼元: テスト依頼元'), findsOneWidget);
+    expect(find.text('委託先: テスト依頼元'), findsOneWidget);
     expect(find.textContaining('2行 · 数量 6'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('of-cal-kind-proxy')));

@@ -25292,7 +25292,7 @@ abstract class AppLocalizations {
   /// No description provided for @prPrincipal.
   ///
   /// In ja, this message translates to:
-  /// **'依頼元・手配元（任意）'**
+  /// **'委託先（出荷する他社・任意）'**
   String get prPrincipal;
 
   /// No description provided for @prAddRow.
@@ -25406,7 +25406,7 @@ abstract class AppLocalizations {
   /// No description provided for @prPrincipalLabel.
   ///
   /// In ja, this message translates to:
-  /// **'依頼元: {name}'**
+  /// **'委託先: {name}'**
   String prPrincipalLabel(String name);
 
   /// No description provided for @prErrQty.
@@ -29204,7 +29204,7 @@ abstract class AppLocalizations {
   /// No description provided for @pfMeasureCost.
   ///
   /// In ja, this message translates to:
-  /// **'原価'**
+  /// **'費用（仕入＋手数料）'**
   String get pfMeasureCost;
 
   /// No description provided for @pfAllMakers.
@@ -29528,7 +29528,7 @@ abstract class AppLocalizations {
   /// No description provided for @rqFixedPrincipal.
   ///
   /// In ja, this message translates to:
-  /// **'依頼元（記録のみ・在庫は動かない）'**
+  /// **'委託先（他社の倉庫から出荷・自社の在庫は動かない）'**
   String get rqFixedPrincipal;
 
   /// No description provided for @rqFixedAdjustConfirm.
@@ -29620,6 +29620,91 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{row}行目　{text}'**
   String rowLabel(int row, String text);
+
+  /// No description provided for @pfKindAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて'**
+  String get pfKindAll;
+
+  /// No description provided for @pfKindStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'自社在庫から'**
+  String get pfKindStock;
+
+  /// No description provided for @pfKindProxy.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫外出荷'**
+  String get pfKindProxy;
+
+  /// No description provided for @pfColBuy.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入原価'**
+  String get pfColBuy;
+
+  /// No description provided for @pfColFee.
+  ///
+  /// In ja, this message translates to:
+  /// **'委託手数料'**
+  String get pfColFee;
+
+  /// No description provided for @pfTotalsFee.
+  ///
+  /// In ja, this message translates to:
+  /// **'　委託手数料 {fee}（費用に含む）'**
+  String pfTotalsFee(String fee);
+
+  /// No description provided for @pfSplit.
+  ///
+  /// In ja, this message translates to:
+  /// **'内訳　自社在庫から {stock}　在庫外出荷 {proxy}（委託手数料を引いた後）'**
+  String pfSplit(String stock, String proxy);
+
+  /// No description provided for @pfTooltip2.
+  ///
+  /// In ja, this message translates to:
+  /// **'{month}\n売上 {revenue}\n仕入原価 {cost}\n委託手数料 {fee}\n収益 {profit}'**
+  String pfTooltip2(
+      String month, String revenue, String cost, String fee, String profit);
+
+  /// No description provided for @prFee.
+  ///
+  /// In ja, this message translates to:
+  /// **'委託手数料（円・任意）'**
+  String get prFee;
+
+  /// No description provided for @prFeeLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'委託手数料: {fee}'**
+  String prFeeLabel(String fee);
+
+  /// No description provided for @prFeeNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'委託手数料: 未入力'**
+  String get prFeeNone;
+
+  /// No description provided for @prFeeEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'手数料を入れる'**
+  String get prFeeEdit;
+
+  /// No description provided for @prFeeHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'他社に払う出荷の手数料です。月ごとの収益で費用として引かれます（行の売上の割合で商品に振り分け）。'**
+  String get prFeeHint;
+
+  /// No description provided for @prFeeSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'委託手数料を保存しました'**
+  String get prFeeSaved;
 }
 
 class _AppLocalizationsDelegate

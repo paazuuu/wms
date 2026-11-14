@@ -14619,7 +14619,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prTabList => 'Records';
 
   @override
-  String get prPrincipal => 'Ordered by / arranged by (optional)';
+  String get prPrincipal => 'Shipping partner (the other company; optional)';
 
   @override
   String get prAddRow => 'Add a row';
@@ -14686,7 +14686,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String prPrincipalLabel(String name) {
-    return 'Ordered by: $name';
+    return 'Shipped by: $name';
   }
 
   @override
@@ -16947,7 +16947,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pfMeasureRevenue => 'Sales';
 
   @override
-  String get pfMeasureCost => 'Cost';
+  String get pfMeasureCost => 'Cost (purchase + fee)';
 
   @override
   String get pfAllMakers => 'All makers';
@@ -17140,7 +17140,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rqFixedPrincipal =>
-      'Principal (a record only; stock does not move)';
+      'Shipping partner (shipped from another company\'s warehouse; our stock does not move)';
 
   @override
   String get rqFixedAdjustConfirm =>
@@ -17206,4 +17206,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String rowLabel(int row, String text) {
     return 'Row $row  $text';
   }
+
+  @override
+  String get pfKindAll => 'All';
+
+  @override
+  String get pfKindStock => 'From our stock';
+
+  @override
+  String get pfKindProxy => 'Shipped by others';
+
+  @override
+  String get pfColBuy => 'Purchase cost';
+
+  @override
+  String get pfColFee => 'Shipping fee';
+
+  @override
+  String pfTotalsFee(String fee) {
+    return '  shipping fee $fee (in the cost)';
+  }
+
+  @override
+  String pfSplit(String stock, String proxy) {
+    return 'Of which: from our stock $stock, shipped by others $proxy (after the fee)';
+  }
+
+  @override
+  String pfTooltip2(
+      String month, String revenue, String cost, String fee, String profit) {
+    return '$month\nSales $revenue\nPurchase cost $cost\nShipping fee $fee\nProfit $profit';
+  }
+
+  @override
+  String get prFee => 'Shipping fee (yen; optional)';
+
+  @override
+  String prFeeLabel(String fee) {
+    return 'Shipping fee: $fee';
+  }
+
+  @override
+  String get prFeeNone => 'Shipping fee: not entered';
+
+  @override
+  String get prFeeEdit => 'Enter fee';
+
+  @override
+  String get prFeeHint =>
+      'What is paid to the other company for shipping; taken off as a cost in the profit by month (shared out by each row\'s sales).';
+
+  @override
+  String get prFeeSaved => 'Shipping fee saved';
 }

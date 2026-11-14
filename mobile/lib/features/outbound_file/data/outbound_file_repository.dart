@@ -220,6 +220,7 @@ class OutboundFileSummary extends Equatable {
     this.undoneAt,
     this.kind = 'stock',
     this.principal,
+    this.feeJpy,
     this.destinationId,
     this.shipTo,
     this.status = 'shipped',
@@ -289,6 +290,10 @@ class OutboundFileSummary extends Equatable {
   /// 代理出荷's 依頼元: on whose behalf it was shipped.
   final String? principal;
 
+  /// What was paid for this list's shipping (委託手数料, 0213): for 在庫外出荷,
+  /// the other company's fee.
+  final double? feeJpy;
+
   bool get proxy => kind == 'proxy';
   final int warehouseId;
   final String? warehouseName;
@@ -339,6 +344,7 @@ class OutboundFileSummary extends Equatable {
         undoneAt: DateTime.tryParse('${j['undone_at'] ?? ''}')?.toLocal(),
         kind: _s(j['kind']) ?? 'stock',
         principal: _s(j['principal']),
+        feeJpy: _nd(j['fee_jpy']),
         destinationId: _ni(j['destination_id']),
         status: _s(j['status']) ?? 'shipped',
         plannedOn: _day(j['planned_on']),
@@ -572,6 +578,9 @@ abstract class OutboundFileRepository {
   /// The 出荷先カード a posted list went to (null: none), kept as it is now.
   Future<ApiResult<bool>> setDestination(int fileId, int? destinationId);
 
+  /// 委託手数料 (0213): what was paid for this list's shipping, in yen.
+  Future<ApiResult<bool>> setFee(int fileId, double? fee);
+
   Future<ApiResult<Uint8List>> fileBytes(String storagePath);
 
   /// The reading kept as Excel beside list [id]'s file (0208).
@@ -762,6 +771,16 @@ class OutboundFileRepositoryImpl implements OutboundFileRepository {
   Future<ApiResult<bool>> reschedule(int id, DateTime day) async {
     try {
       await _rest.post('/rpc/outbound_file_reschedule', data: {'p_id': id, 'p_day': outboundDayWire(day)});
+      return const ApiSuccess(true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setFee(int fileId, double? fee) async {
+    try {
+      await _rest.post('/rpc/outbound_file_set_fee', data: {'p_id': fileId, 'p_fee': fee});
       return const ApiSuccess(true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);

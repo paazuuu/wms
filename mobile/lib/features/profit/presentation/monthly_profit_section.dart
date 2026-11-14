@@ -41,7 +41,11 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
     super.dispose();
   }
 
+  /// null: both; 'stock' or 'proxy' (在庫外出荷, 0213).
+  String? _kind;
+
   bool _keep(ProfitRow r) {
+    if (_kind != null && r.kind != _kind) return false;
     if (_maker != null && (r.maker ?? '') != _maker) return false;
     if (_product != null && r.key != _product) return false;
     final q = _search.text.trim().toLowerCase();
@@ -52,7 +56,7 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
   double _value(ProfitMonth m) => switch (_measure) {
         ProfitMeasure.profit => m.profit,
         ProfitMeasure.revenue => m.revenue,
-        ProfitMeasure.cost => m.cost,
+        ProfitMeasure.cost => m.cost + m.fee,
       };
 
   @override
@@ -124,6 +128,17 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
           selected: {_months},
           onSelectionChanged: (v) => setState(() => _months = v.first),
         ),
+        // From our warehouse, or 在庫外出荷 (another company's, for a fee).
+        SegmentedButton<String>(
+          key: const ValueKey('pf-kind'),
+          segments: [
+            ButtonSegment(value: '', label: Text(l10n.pfKindAll)),
+            ButtonSegment(value: 'stock', label: Text(l10n.pfKindStock)),
+            ButtonSegment(value: 'proxy', label: Text(l10n.pfKindProxy)),
+          ],
+          selected: {_kind ?? ''},
+          onSelectionChanged: (v) => setState(() => _kind = v.first.isEmpty ? null : v.first),
+        ),
         SegmentedButton<ProfitMeasure>(
           key: const ValueKey('pf-measure'),
           segments: [
@@ -186,10 +201,14 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
         Text(l10n.pfEmpty, key: const ValueKey('pf-empty'), style: muted)
       else ...[
         Text(
-          l10n.pfTotals(yen(total.revenue), yen(total.cost), yen(total.profit), pct(total.margin)),
+          l10n.pfTotals(yen(total.revenue), yen(total.cost + total.fee), yen(total.profit), pct(total.margin)) +
+              (total.fee > 0 ? l10n.pfTotalsFee(yen(total.fee)) : ''),
           key: const ValueKey('pf-totals'),
           style: theme.textTheme.titleSmall,
         ),
+        // Both kinds shown: how much each made.
+        if (_kind == null && rows.any((r) => r.proxy))
+          Text(l10n.pfSplit(yen(total.profitStock), yen(total.profitProxy)), key: const ValueKey('pf-split'), style: muted),
         const SizedBox(height: AppSpacing.md),
         BarChart(
           key: const ValueKey('pf-chart'),
@@ -200,7 +219,8 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
                 key: ValueKey('pf-bar-${m.month}'),
                 label: m.month.endsWith('-01') || m == byMonth.first ? m.month.replaceFirst('-', '/') : m.month.substring(5),
                 value: _value(m),
-                tooltip: l10n.pfTooltip(m.month.replaceFirst('-', '/'), yen(m.revenue), yen(m.cost), yen(m.profit)),
+                tooltip: l10n.pfTooltip2(
+                    m.month.replaceFirst('-', '/'), yen(m.revenue), yen(m.cost), yen(m.fee), yen(m.profit)),
               ),
           ],
         ),
@@ -224,7 +244,8 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
               DataColumn(label: Text(l10n.pfColMonth)),
               DataColumn(label: Text(l10n.pfColQty), numeric: true),
               DataColumn(label: Text(l10n.pfMeasureRevenue), numeric: true),
-              DataColumn(label: Text(l10n.pfMeasureCost), numeric: true),
+              DataColumn(label: Text(l10n.pfColBuy), numeric: true),
+              DataColumn(label: Text(l10n.pfColFee), numeric: true),
               DataColumn(label: Text(l10n.pfMeasureProfit), numeric: true),
               DataColumn(label: Text(l10n.pfColMargin), numeric: true),
               DataColumn(label: Text(l10n.pfColNoCost), numeric: true),
@@ -237,6 +258,7 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
                     DataCell(Text(_yen.format(m.quantity))),
                     DataCell(Text(yen(m.revenue))),
                     DataCell(Text(yen(m.cost))),
+                    DataCell(Text(m.fee == 0 ? '—' : yen(m.fee))),
                     DataCell(Text(yen(m.profit),
                         style: TextStyle(fontWeight: FontWeight.w700, color: m.profit < 0 ? scheme.error : null))),
                     DataCell(Text(pct(m.margin))),
