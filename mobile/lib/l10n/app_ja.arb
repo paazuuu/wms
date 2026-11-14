@@ -30,7 +30,7 @@
   "menu": "メニュー",
   "cameraScan": "カメラでスキャン",
   "groupFieldOperations": "現場作業",
-  "groupManagement": "管理",
+  "groupManagement": "システム管理",
   "featInspection": "検品",
   "featInspectionDesc": "バーコード・数量照合、NG記録",
   "featStockAdjustment": "在庫調整",
@@ -15077,5 +15077,9 @@
     }
   },
   "pfMonthHint": "グラフの棒や表の月を押すと、その月だけを表示します（もう一度押すと戻ります）",
-  "pfZeroProfit": "仕入値がわかる出荷がまだないため、収益の棒は0のままです。「売上」に切り替えると月ごとの売上が見えます。"
+  "pfZeroProfit": "仕入値がわかる出荷がまだないため、収益の棒は0のままです。「売上」に切り替えると月ごとの売上が見えます。",
+  "groupAdministration": "管理",
+  "groupAdminOnly": "システム管理者のみ",
+  "groupAdminOnlyHint": "このカテゴリーはシステム管理者だけに表示され、使えます",
+  "mvAdminOnly": "システム管理者のみ（変更できません）"
 }

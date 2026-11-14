@@ -386,6 +386,10 @@ class FeatureGroup {
   final String id;
   final List<FeatureEntry> entries;
 
+  /// システム管理: shown to and used by the system administrator only
+  /// (not a company admin, not a manager); the menu marks it so.
+  bool get adminOnly => id == 'management';
+
   /// Entries in this group [permissions] unlock. A group that comes back
   /// empty (every entry gated on something this user lacks) is meant to be
   /// dropped entirely by the caller, not shown as an empty heading.
@@ -405,6 +409,8 @@ class FeatureGroup {
         return l10n.groupSupplyChain;
       case 'accounting':
         return l10n.groupAccounting;
+      case 'administration':
+        return l10n.groupAdministration;
       case 'management':
         return l10n.groupManagement;
       default:

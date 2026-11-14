@@ -79,13 +79,25 @@ final currentUserTierProvider = Provider<UserTier?>((ref) {
   return user == null ? null : UserTier.of(user.roles);
 });
 
+/// Whether the signed-in user is the system administrator (system_admin).
+final isSystemAdminProvider = Provider<bool>((ref) {
+  if (!ref.exists(authControllerProvider)) return false;
+  return ref.watch(authControllerProvider).user?.roles.contains('system_admin') ?? false;
+});
+
 /// The menu entries (and content) hidden from the signed-in user by their
 /// tier. Only what is offered: permissions still decide what is allowed.
 final hiddenFeaturesProvider = Provider<Set<String>>((ref) {
   final tier = ref.watch(currentUserTierProvider);
-  if (tier == null || tier == UserTier.admin) return const {};
+  if (tier == null) return const {};
+  // システム管理: the system administrator's only, whatever the tier.
+  final adminOnly = ref.watch(isSystemAdminProvider)
+      ? const <String>{}
+      : {for (final g in buildFeatureCatalog()) if (g.adminOnly) for (final e in g.entries) e.id};
+  if (tier == UserTier.admin) return adminOnly;
   final settings = ref.watch(menuVisibilitySettingsProvider).valueOrNull ?? const <String, bool>{};
   return {
+    ...adminOnly,
     for (final g in buildFeatureCatalog())
       for (final e in g.entries)
         if (!tierSees(settings, e.id, g.id, tier)) e.id,

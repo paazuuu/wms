@@ -365,7 +365,7 @@ void main() {
 
       expect(inSidebar('Inspection'), findsOneWidget);
       expect(inSidebar('FIELD OPERATIONS'), findsOneWidget);
-      expect(inSidebar('MANAGEMENT'), findsOneWidget);
+      expect(inSidebar('SYSTEM ADMINISTRATION'), findsOneWidget);
 
       await tester.enterText(find.byKey(menuFilterKey), 'inspection');
       await tester.pumpAndSettle();
@@ -374,7 +374,7 @@ void main() {
       expect(inSidebar('Picking'), findsNothing);
       // A group with no surviving entry disappears with them, rather than
       // leaving a heading over nothing.
-      expect(inSidebar('MANAGEMENT'), findsNothing);
+      expect(inSidebar('SYSTEM ADMINISTRATION'), findsNothing);
       expect(inSidebar('FIELD OPERATIONS'), findsOneWidget);
       // The dashboard entry is filtered too, so this narrows the whole menu
       // and not everything-but-the-first-item.

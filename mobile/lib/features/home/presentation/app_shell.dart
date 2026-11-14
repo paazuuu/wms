@@ -847,14 +847,34 @@ class _SidebarState extends State<_Sidebar> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(AppSpacing.md,
                             AppSpacing.md, AppSpacing.md, AppSpacing.xs),
-                        child: Text(
-                          group.title(l10n).toUpperCase(),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                            letterSpacing: 0.8,
-                            fontWeight: FontWeight.w700,
+                        child: Row(children: [
+                          Flexible(
+                            child: Text(
+                              group.title(l10n).toUpperCase(),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                letterSpacing: 0.8,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
-                        ),
+                          // システム管理: marked as the system administrator's.
+                          if (group.adminOnly) ...[
+                            const SizedBox(width: AppSpacing.xs),
+                            Tooltip(
+                              message: l10n.groupAdminOnlyHint,
+                              child: Row(
+                                  key: ValueKey('group-admin-only-${group.id}'),
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.lock_outline, size: 12, color: scheme.onSurfaceVariant),
+                                    const SizedBox(width: 2),
+                                    Text(l10n.groupAdminOnly,
+                                        style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant)),
+                                  ]),
+                            ),
+                          ],
+                        ]),
                       ),
                     for (final entry in visible)
                       if (!entry.more)

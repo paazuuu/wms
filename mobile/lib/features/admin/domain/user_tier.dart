@@ -34,7 +34,7 @@ const contentPrices = 'content.prices';
 /// The groups each tier sees unless set otherwise: a user the floor's work
 /// (現場作業) only; a manager the products, the floor and shipping, with the
 /// management screens a warehouse runs on.
-const _managerGroups = {'products_master', 'field_operations', 'shipping'};
+const _managerGroups = {'products_master', 'field_operations', 'shipping', 'administration'};
 const _managerExtras = {'reports', 'locations', 'partners', 'stock_reconciliation', 'reservations', contentPrices};
 
 /// Whether [tier] sees [featureId] (in [groupId]) when nobody has set it.

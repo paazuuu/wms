@@ -58,6 +58,29 @@ void main() {
     expect(await _hiddenFor(const []), isEmpty, reason: 'no role: no permission to show anything anyway');
   });
 
+  test('システム管理 is the system administrator\'s only; 管理 is a manager\'s too', () async {
+    final groups = {for (final g in buildFeatureCatalog()) g.id: g};
+    final system = groups['management']!;
+    expect(system.adminOnly, isTrue);
+    expect(groups['administration']!.adminOnly, isFalse);
+    expect(groups['administration']!.entries.map((e) => e.id), ['company_profile', 'partners', 'locations', 'reports']);
+    final systemIds = system.entries.map((e) => e.id).toSet();
+    expect(systemIds, containsAll(['audit_log', 'user_management', 'requirements', 'system_reset']));
+    expect(systemIds, isNot(contains('reports')));
+
+    // A company admin sees everything else, but not システム管理.
+    final company = await _hiddenFor(['company_admin']);
+    expect(company, systemIds);
+    // A manager: 管理 by default, never システム管理.
+    final manager = await _hiddenFor(['warehouse_manager'], settings: {
+      visibilityKey('user_management', UserTier.manager): true,
+    });
+    expect(manager, containsAll(systemIds));
+    expect(manager, isNot(contains('company_profile')));
+    expect(manager, isNot(contains('partners')));
+    expect(await _hiddenFor(['system_admin']), isEmpty);
+  });
+
   test('what ADMIN set wins over the default', () async {
     final hidden = await _hiddenFor(['picker'], settings: {
       visibilityKey('outbound', UserTier.user): true,

@@ -140,7 +140,7 @@ void main() {
   test('会計 holds 税理士用ファイル; 発注 is the stock file import, under 商品', () {
     final groups = buildFeatureCatalog();
     final accounting = groups.firstWhere((g) => g.id == 'accounting');
-    expect(accounting.entries.where((e) => e.inMenu).map((e) => e.id), ['tax_files']);
+    expect(accounting.entries.where((e) => e.inMenu).map((e) => e.id), ['tax_files', 'sc_dashboard']);
     final products = groups.firstWhere((g) => g.id == 'products_master');
     final order = products.entries.firstWhere((e) => e.id == 'stock_file_import');
     expect(order.icon, Icons.add_shopping_cart_outlined);

@@ -178,6 +178,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _taxFiles,
             requiredAnyOf: ['inventory.adjust', 'report.view', 'user.manage'],
           ),
+          // 収益ダッシュボード: what is left from buying to selling — money, so
+          // beside the 税理士用ファイル rather than under サプライチェーン.
+          FeatureEntry(
+            id: 'sc_dashboard',
+            icon: Icons.stacked_line_chart,
+            status: FeatureStatus.ready,
+            builder: _scDashboard,
+            requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
+          ),
         ],
       ),
       FeatureGroup(
@@ -482,13 +491,6 @@ List<FeatureGroup> buildFeatureCatalog() => const [
         id: 'supply_chain',
         entries: [
           FeatureEntry(
-            id: 'sc_dashboard',
-            icon: Icons.stacked_line_chart,
-            status: FeatureStatus.ready,
-            builder: _scDashboard,
-            requiredAnyOf: ['supply_chain.view', 'supply_chain.manage'],
-          ),
-          FeatureEntry(
             id: 'sc_suppliers',
             icon: Icons.compare_arrows,
             status: FeatureStatus.ready,
@@ -546,6 +548,44 @@ List<FeatureGroup> buildFeatureCatalog() => const [
           ),
         ],
       ),
+      // 管理: what a warehouse's people in charge use day to day — who we
+      // are, who we trade with, where things are kept, and reports.
+      FeatureGroup(
+        id: 'administration',
+        entries: [
+          // Who we are (0131): the addressee on every document, told from
+          // the supplier that issued it.
+          FeatureEntry(
+            id: 'company_profile',
+            icon: Icons.apartment_outlined,
+            status: FeatureStatus.ready,
+            builder: _companyProfile,
+            requiredAnyOf: ['user.manage', 'receiving.confirm', 'product.manage'],
+          ),
+          FeatureEntry(
+            id: 'partners',
+            icon: Icons.handshake_outlined,
+            status: FeatureStatus.ready,
+            builder: _partners,
+            requiredAnyOf: ['partner.view', 'partner.manage'],
+          ),
+          FeatureEntry(
+            id: 'locations',
+            icon: Icons.account_tree_outlined,
+            status: FeatureStatus.ready,
+            builder: _locations,
+            requiredAnyOf: ['warehouse.view', 'warehouse.manage'],
+          ),
+          FeatureEntry(
+            id: 'reports',
+            icon: Icons.table_chart_outlined,
+            status: FeatureStatus.ready,
+            builder: _reports,
+            requiredAnyOf: ['report.view', 'report.manage'],
+          ),
+        ],
+      ),
+      // システム管理: the system administrator's only (FeatureGroup.adminOnly).
       FeatureGroup(
         id: 'management',
         entries: [
@@ -555,15 +595,6 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _auditLog,
             requiredAnyOf: ['audit.view'],
-          ),
-          // Who we are (0131): the addressee on every document, told from
-          // the supplier that issued it.
-          FeatureEntry(
-            id: 'company_profile',
-            icon: Icons.apartment_outlined,
-            status: FeatureStatus.ready,
-            builder: _companyProfile,
-            requiredAnyOf: ['user.manage', 'receiving.confirm', 'product.manage'],
           ),
           // Every uploaded file, kept as evidence and downloadable (0132).
           FeatureEntry(
@@ -668,20 +699,6 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             inMenu: false,
           ),
           FeatureEntry(
-            id: 'partners',
-            icon: Icons.handshake_outlined,
-            status: FeatureStatus.ready,
-            builder: _partners,
-            requiredAnyOf: ['partner.view', 'partner.manage'],
-          ),
-          FeatureEntry(
-            id: 'locations',
-            icon: Icons.account_tree_outlined,
-            status: FeatureStatus.ready,
-            builder: _locations,
-            requiredAnyOf: ['warehouse.view', 'warehouse.manage'],
-          ),
-          FeatureEntry(
             id: 'reservations',
             icon: Icons.bookmark_border,
             status: FeatureStatus.ready,
@@ -699,13 +716,6 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _stockReconciliation,
             requiredAnyOf: ['inventory.view'],
             inMenu: false,
-          ),
-          FeatureEntry(
-            id: 'reports',
-            icon: Icons.table_chart_outlined,
-            status: FeatureStatus.ready,
-            builder: _reports,
-            requiredAnyOf: ['report.view', 'report.manage'],
           ),
           // Teaching each trading company's way of writing before its goods
           // arrive (0105/0106): sample files read, checked and learned.

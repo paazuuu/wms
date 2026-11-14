@@ -30,7 +30,7 @@
   "menu": "菜单",
   "cameraScan": "使用相机扫描",
   "groupFieldOperations": "现场作业",
-  "groupManagement": "管理",
+  "groupManagement": "系统管理",
   "featInspection": "验货",
   "featInspectionDesc": "条码与数量核对、不良记录",
   "featStockAdjustment": "库存调整",
@@ -5330,5 +5330,9 @@
   "pfMonthChip": "仅显示 {month}",
   "pfTotalsMonth": "{month}合计　销售额 {revenue}　成本 {cost}　收益 {profit}　利润率 {margin}",
   "pfMonthHint": "点击图表的柱或表格中的月份，即可只显示该月（再次点击恢复）",
-  "pfZeroProfit": "目前还没有已知进货价的出货，因此收益柱状图为0。切换到「销售额」可以查看每月的销售额。"
+  "pfZeroProfit": "目前还没有已知进货价的出货，因此收益柱状图为0。切换到「销售额」可以查看每月的销售额。",
+  "groupAdministration": "管理",
+  "groupAdminOnly": "仅限系统管理员",
+  "groupAdminOnlyHint": "此类别仅系统管理员可见、可用",
+  "mvAdminOnly": "仅限系统管理员（不可更改）"
 }

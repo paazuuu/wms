@@ -110,7 +110,7 @@ class _MenuVisibilityScreenState extends ConsumerState<MenuVisibilityScreen> {
         error: (e, _) => ErrorStateView(message: '$e', onRetry: () => ref.invalidate(menuVisibilitySettingsProvider)),
         data: (saved) {
           final draft = _draft ??= _resolve(saved);
-          Widget row(String id, String title, {String? subtitle}) => Padding(
+          Widget row(String id, String title, {String? subtitle, bool adminOnly = false}) => Padding(
                 key: ValueKey('mv-row-$id'),
                 padding: const EdgeInsets.symmetric(vertical: 2),
                 child: Row(children: [
@@ -122,6 +122,17 @@ class _MenuVisibilityScreenState extends ConsumerState<MenuVisibilityScreen> {
                     ]),
                   ),
                   const SizedBox(width: 72, child: Center(child: Icon(Icons.check, size: 18))),
+                  // システム管理: fixed to the system administrator.
+                  if (adminOnly)
+                    SizedBox(
+                      width: 96.0 * _tiers.length,
+                      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        Icon(Icons.lock_outline, size: 16, color: theme.colorScheme.onSurfaceVariant),
+                        const SizedBox(width: 4),
+                        Flexible(child: Text(l10n.mvAdminOnly, style: theme.textTheme.bodySmall)),
+                      ]),
+                    ),
+                  if (!adminOnly)
                   for (final t in _tiers)
                     SizedBox(
                       width: 96,
@@ -163,9 +174,9 @@ class _MenuVisibilityScreenState extends ConsumerState<MenuVisibilityScreen> {
               row(contentPrices, l10n.mvPrices, subtitle: l10n.mvPricesHint),
               for (final g in buildFeatureCatalog())
                 if (g.entries.any((e) => e.inMenu)) ...[
-                  head(g.title(l10n)),
+                  head(g.adminOnly ? '${g.title(l10n)}（${l10n.groupAdminOnly}）' : g.title(l10n)),
                   for (final FeatureEntry e in g.entries)
-                    if (e.inMenu) row(e.id, e.label(l10n), subtitle: e.description(l10n)),
+                    if (e.inMenu) row(e.id, e.label(l10n), subtitle: e.description(l10n), adminOnly: g.adminOnly),
                 ],
             ],
           );

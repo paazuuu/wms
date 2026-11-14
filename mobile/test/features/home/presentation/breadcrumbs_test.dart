@@ -40,7 +40,7 @@ void main() {
     // The second group, to prove the trail reads the containing group rather
     // than hardcoding the first one.
     expect(crumbsFor(l10n, 'reports').map((c) => c.label),
-        ['Dashboard', 'Management', 'Report builder']);
+        ['Dashboard', 'Administration', 'Report builder']);
   });
 
   test('search and a scanned lookup hang directly off the dashboard',

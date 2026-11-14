@@ -101,7 +101,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get groupFieldOperations => '現場作業';
 
   @override
-  String get groupManagement => '管理';
+  String get groupManagement => 'システム管理';
 
   @override
   String get featInspection => '検品';
@@ -17052,4 +17052,16 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get pfZeroProfit =>
       '仕入値がわかる出荷がまだないため、収益の棒は0のままです。「売上」に切り替えると月ごとの売上が見えます。';
+
+  @override
+  String get groupAdministration => '管理';
+
+  @override
+  String get groupAdminOnly => 'システム管理者のみ';
+
+  @override
+  String get groupAdminOnlyHint => 'このカテゴリーはシステム管理者だけに表示され、使えます';
+
+  @override
+  String get mvAdminOnly => 'システム管理者のみ（変更できません）';
 }

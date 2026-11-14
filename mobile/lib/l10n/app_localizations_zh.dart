@@ -100,7 +100,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get groupFieldOperations => '现场作业';
 
   @override
-  String get groupManagement => '管理';
+  String get groupManagement => '系统管理';
 
   @override
   String get featInspection => '验货';
@@ -16930,4 +16930,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pfZeroProfit => '目前还没有已知进货价的出货，因此收益柱状图为0。切换到「销售额」可以查看每月的销售额。';
+
+  @override
+  String get groupAdministration => '管理';
+
+  @override
+  String get groupAdminOnly => '仅限系统管理员';
+
+  @override
+  String get groupAdminOnlyHint => '此类别仅系统管理员可见、可用';
+
+  @override
+  String get mvAdminOnly => '仅限系统管理员（不可更改）';
 }

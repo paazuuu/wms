@@ -103,7 +103,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupFieldOperations => 'Field Operations';
 
   @override
-  String get groupManagement => 'Management';
+  String get groupManagement => 'System administration';
 
   @override
   String get featInspection => 'Inspection';
@@ -17394,4 +17394,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pfZeroProfit =>
       'No shipment has a known purchase price yet, so the profit bars stay at 0. Switch to \"Sales\" to see each month’s sales.';
+
+  @override
+  String get groupAdministration => 'Administration';
+
+  @override
+  String get groupAdminOnly => 'System admin only';
+
+  @override
+  String get groupAdminOnlyHint =>
+      'Only the system administrator sees and uses this category';
+
+  @override
+  String get mvAdminOnly => 'System admin only (fixed)';
 }

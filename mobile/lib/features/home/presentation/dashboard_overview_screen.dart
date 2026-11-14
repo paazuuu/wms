@@ -124,7 +124,7 @@ class DashboardOverviewScreen extends ConsumerWidget {
         if (groups.every((g) => g.visibleEntries(permissions, hidden: hidden).isEmpty)) const _NoRoleCard(),
         for (final group in groups)
           if (group.visibleEntries(permissions, hidden: hidden) case final visible when visible.isNotEmpty) ...[
-            _SectionLabel(group.title(l10n)),
+            _SectionLabel(group.adminOnly ? '${group.title(l10n)}（${l10n.groupAdminOnly}）' : group.title(l10n)),
             const SizedBox(height: AppSpacing.md),
             _FeatureGrid(
               entries: visible,

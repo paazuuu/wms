@@ -283,7 +283,7 @@ abstract class AppLocalizations {
   /// No description provided for @groupManagement.
   ///
   /// In ja, this message translates to:
-  /// **'管理'**
+  /// **'システム管理'**
   String get groupManagement;
 
   /// No description provided for @featInspection.
@@ -29929,6 +29929,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'仕入値がわかる出荷がまだないため、収益の棒は0のままです。「売上」に切り替えると月ごとの売上が見えます。'**
   String get pfZeroProfit;
+
+  /// No description provided for @groupAdministration.
+  ///
+  /// In ja, this message translates to:
+  /// **'管理'**
+  String get groupAdministration;
+
+  /// No description provided for @groupAdminOnly.
+  ///
+  /// In ja, this message translates to:
+  /// **'システム管理者のみ'**
+  String get groupAdminOnly;
+
+  /// No description provided for @groupAdminOnlyHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'このカテゴリーはシステム管理者だけに表示され、使えます'**
+  String get groupAdminOnlyHint;
+
+  /// No description provided for @mvAdminOnly.
+  ///
+  /// In ja, this message translates to:
+  /// **'システム管理者のみ（変更できません）'**
+  String get mvAdminOnly;
 }
 
 class _AppLocalizationsDelegate
