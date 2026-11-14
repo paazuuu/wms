@@ -56,7 +56,7 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
   double _value(ProfitMonth m) => switch (_measure) {
         ProfitMeasure.profit => m.profit,
         ProfitMeasure.revenue => m.revenue,
-        ProfitMeasure.cost => m.cost + m.fee,
+        ProfitMeasure.cost => m.costAll,
       };
 
   @override
@@ -201,8 +201,9 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
         Text(l10n.pfEmpty, key: const ValueKey('pf-empty'), style: muted)
       else ...[
         Text(
-          l10n.pfTotals(yen(total.revenue), yen(total.cost + total.fee), yen(total.profit), pct(total.margin)) +
-              (total.fee > 0 ? l10n.pfTotalsFee(yen(total.fee)) : ''),
+          l10n.pfTotals(yen(total.revenue), yen(total.costAll), yen(total.profit), pct(total.margin)) +
+              (total.fee > 0 ? l10n.pfTotalsFee(yen(total.fee)) : '') +
+              (total.freight > 0 ? l10n.pfTotalsFreight(yen(total.freight)) : ''),
           key: const ValueKey('pf-totals'),
           style: theme.textTheme.titleSmall,
         ),
@@ -219,8 +220,8 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
                 key: ValueKey('pf-bar-${m.month}'),
                 label: m.month.endsWith('-01') || m == byMonth.first ? m.month.replaceFirst('-', '/') : m.month.substring(5),
                 value: _value(m),
-                tooltip: l10n.pfTooltip2(
-                    m.month.replaceFirst('-', '/'), yen(m.revenue), yen(m.cost), yen(m.fee), yen(m.profit)),
+                tooltip: l10n.pfTooltip3(m.month.replaceFirst('-', '/'), yen(m.revenue), yen(m.cost), yen(m.fee),
+                    yen(m.freight), yen(m.profit)),
               ),
           ],
         ),
@@ -246,6 +247,7 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
               DataColumn(label: Text(l10n.pfMeasureRevenue), numeric: true),
               DataColumn(label: Text(l10n.pfColBuy), numeric: true),
               DataColumn(label: Text(l10n.pfColFee), numeric: true),
+              DataColumn(label: Text(l10n.pfColFreight), numeric: true),
               DataColumn(label: Text(l10n.pfMeasureProfit), numeric: true),
               DataColumn(label: Text(l10n.pfColMargin), numeric: true),
               DataColumn(label: Text(l10n.pfColNoCost), numeric: true),
@@ -259,6 +261,7 @@ class _MonthlyProfitSectionState extends ConsumerState<MonthlyProfitSection> {
                     DataCell(Text(yen(m.revenue))),
                     DataCell(Text(yen(m.cost))),
                     DataCell(Text(m.fee == 0 ? '—' : yen(m.fee))),
+                    DataCell(Text(m.freight == 0 ? '—' : yen(m.freight))),
                     DataCell(Text(yen(m.profit),
                         style: TextStyle(fontWeight: FontWeight.w700, color: m.profit < 0 ? scheme.error : null))),
                     DataCell(Text(pct(m.margin))),

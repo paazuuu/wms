@@ -29204,7 +29204,7 @@ abstract class AppLocalizations {
   /// No description provided for @pfMeasureCost.
   ///
   /// In ja, this message translates to:
-  /// **'費用（仕入＋手数料）'**
+  /// **'費用（仕入＋手数料＋輸送費）'**
   String get pfMeasureCost;
 
   /// No description provided for @pfAllMakers.
@@ -29660,7 +29660,7 @@ abstract class AppLocalizations {
   /// No description provided for @pfSplit.
   ///
   /// In ja, this message translates to:
-  /// **'内訳　自社在庫から {stock}　在庫外出荷 {proxy}（委託手数料を引いた後）'**
+  /// **'内訳　自社在庫から {stock}　在庫外出荷 {proxy}（手数料・輸送費を引いた後）'**
   String pfSplit(String stock, String proxy);
 
   /// No description provided for @pfTooltip2.
@@ -29705,6 +29705,193 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'委託手数料を保存しました'**
   String get prFeeSaved;
+
+  /// No description provided for @pfColFreight.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸送費'**
+  String get pfColFreight;
+
+  /// No description provided for @pfTotalsFreight.
+  ///
+  /// In ja, this message translates to:
+  /// **'　輸送費 {freight}（費用に含む）'**
+  String pfTotalsFreight(String freight);
+
+  /// No description provided for @pfTooltip3.
+  ///
+  /// In ja, this message translates to:
+  /// **'{month}\n売上 {revenue}\n仕入原価 {cost}\n委託手数料 {fee}\n輸送費 {freight}\n収益 {profit}'**
+  String pfTooltip3(String month, String revenue, String cost, String fee,
+      String freight, String profit);
+
+  /// No description provided for @ocFreightLabel.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸送費: {amount}'**
+  String ocFreightLabel(String amount);
+
+  /// No description provided for @ocFreightNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸送費: 未入力'**
+  String get ocFreightNone;
+
+  /// No description provided for @ocEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額・証拠'**
+  String get ocEdit;
+
+  /// No description provided for @ocFreightField.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸送費（円・税抜）'**
+  String get ocFreightField;
+
+  /// No description provided for @ocFeeField.
+  ///
+  /// In ja, this message translates to:
+  /// **'委託手数料（円・税抜）'**
+  String get ocFeeField;
+
+  /// No description provided for @ocFreightHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'運送会社などに払う出荷の費用です（税抜）。月ごとの収益で費用として引かれます（行の売上の割合で商品に振り分け）。出庫済みになるまでは変更できます。請求書が届いたら金額を直して、証拠を付けてください。'**
+  String get ocFreightHint;
+
+  /// No description provided for @ocEvidence.
+  ///
+  /// In ja, this message translates to:
+  /// **'証拠（請求書・見積書など）'**
+  String get ocEvidence;
+
+  /// No description provided for @ocEvidenceNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'証拠のファイルはまだありません'**
+  String get ocEvidenceNone;
+
+  /// No description provided for @ocAddFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを追加'**
+  String get ocAddFile;
+
+  /// No description provided for @ocOpen.
+  ///
+  /// In ja, this message translates to:
+  /// **'開く'**
+  String get ocOpen;
+
+  /// No description provided for @ocDownload.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダウンロード'**
+  String get ocDownload;
+
+  /// No description provided for @ocRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額を読み取る'**
+  String get ocRead;
+
+  /// No description provided for @ocRemove.
+  ///
+  /// In ja, this message translates to:
+  /// **'外す'**
+  String get ocRemove;
+
+  /// No description provided for @ocRemoveConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'この証拠を外しますか？（ファイルは記録として残ります）'**
+  String get ocRemoveConfirm;
+
+  /// No description provided for @ocReading.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額を読み取っています…'**
+  String get ocReading;
+
+  /// No description provided for @ocReadDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取った金額: 税抜 {subtotal}／税込 {total}。{used}を入れました。確認して保存してください。'**
+  String ocReadDone(String subtotal, String total, String used);
+
+  /// No description provided for @ocUsedSubtotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'税抜'**
+  String get ocUsedSubtotal;
+
+  /// No description provided for @ocUsedTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'税込（税抜が見つからないため）'**
+  String get ocUsedTotal;
+
+  /// No description provided for @ocReadNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額を読み取れませんでした。手で入れてください。'**
+  String get ocReadNone;
+
+  /// No description provided for @ocLocked.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫済みのため、費用と証拠を変えられるのはシステム管理者だけです。'**
+  String get ocLocked;
+
+  /// No description provided for @ocAdminAfterShip.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫済みです。システム管理者として変更します（記録に残ります）。'**
+  String get ocAdminAfterShip;
+
+  /// No description provided for @ocSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました'**
+  String get ocSaved;
+
+  /// No description provided for @ocUploaded.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を証拠に追加しました'**
+  String ocUploaded(String name);
+
+  /// No description provided for @ocFiles.
+  ///
+  /// In ja, this message translates to:
+  /// **'証拠 {count}件'**
+  String ocFiles(int count);
+
+  /// No description provided for @ocErrNegative.
+  ///
+  /// In ja, this message translates to:
+  /// **'マイナスの金額は入れられません'**
+  String get ocErrNegative;
+
+  /// No description provided for @ocFreightImport.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸送費（円・税抜・任意）'**
+  String get ocFreightImport;
+
+  /// No description provided for @ocFreightImportHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'見積の金額で構いません。出庫済みになるまでは詳細画面で直せます。請求書が届いたら金額を直し、証拠を付けてください。'**
+  String get ocFreightImportHint;
+
+  /// No description provided for @ocCosts.
+  ///
+  /// In ja, this message translates to:
+  /// **'費用'**
+  String get ocCosts;
 }
 
 class _AppLocalizationsDelegate

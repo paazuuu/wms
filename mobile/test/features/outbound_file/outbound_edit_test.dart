@@ -5,7 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
 import 'package:wms_mobile/features/outbound/data/outbound_repository.dart' show shipDestinationsProvider;
 import 'package:wms_mobile/features/outbound/domain/outbound.dart' show ShipDestination;
+import 'package:wms_mobile/features/outbound_file/data/outbound_costs_repository.dart';
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
+import 'package:wms_mobile/features/outbound_file/presentation/outbound_costs_panel.dart' show costFilePickerProvider;
 import 'package:wms_mobile/features/outbound_file/domain/outbound_plan.dart';
 import 'package:wms_mobile/features/outbound_file/domain/outbound_sheet.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_detail_screen.dart';
@@ -15,6 +17,7 @@ import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
+import '../../support/fake_outbound_costs_repository.dart';
 import '../../support/fake_outbound_file_repository.dart';
 import '../../support/harness.dart';
 
@@ -105,6 +108,94 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('of-fee-save')));
     await tester.pumpAndSettle();
     expect(repo.fees, [(7, 2500.0)]);
+  });
+
+  testWidgets('輸送費 (0214): typed, read off a bill kept as evidence, the bill opened and taken off', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(2400, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeOutboundFileRepository(detailOf: (_) => OutboundFileDetail(file: _plan, lines: _lines));
+    final costs = FakeOutboundCostsRepository(read: (subtotal: 3000, tax: 300, total: 3300));
+    final saved = <String>[];
+    await pumpApp(tester, const OutboundFileDetailScreen(fileId: 5), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(repo),
+      outboundCostsRepositoryProvider.overrideWithValue(costs),
+      costFilePickerProvider.overrideWithValue(() async => [(name: '運賃請求書.pdf', bytes: Uint8List.fromList(const [1, 2]))]),
+      outboundTabOpenerProvider.overrideWithValue(() => null),
+      outboundFileSaverProvider.overrideWithValue((n, b) async => saved.add(n)),
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: _library)),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(_overview)),
+      writeWarehouseIdProvider.overrideWithValue(1),
+    ]);
+    expect(find.text('輸送費: 未入力'), findsOneWidget);
+    // A list of our own stock has no 委託手数料.
+    expect(find.byKey(const ValueKey('of-fee')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('of-freight-edit')));
+    await tester.pumpAndSettle();
+    expect(find.text('証拠のファイルはまだありません'), findsOneWidget);
+
+    // A bill added: kept, and with no amount yet, read at once.
+    await tester.tap(find.byKey(const ValueKey('oc-add')));
+    await tester.pumpAndSettle();
+    expect(costs.added.single.name, '運賃請求書.pdf');
+    expect(costs.added.single.kind, OutboundCostKind.freight);
+    expect(costs.reads, [100]);
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('of-freight-field'))).controller!.text, '3,000');
+    expect(find.textContaining('税抜 ¥3,000／税込 ¥3,300'), findsOneWidget);
+
+    // Opened on the spot (saved where no tab opens) and downloaded.
+    await tester.tap(find.byKey(const ValueKey('oc-open-100')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('oc-download-100')));
+    await tester.pumpAndSettle();
+    expect(saved, ['運賃請求書.pdf', '運賃請求書.pdf']);
+
+    // Taken off after a confirm.
+    await tester.tap(find.byKey(const ValueKey('oc-remove-100')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('oc-remove-ok')));
+    await tester.pumpAndSettle();
+    expect(costs.removed, [100]);
+    expect(find.byKey(const ValueKey('oc-file-100')), findsNothing);
+
+    // A wrong amount is not sent.
+    await tester.enterText(find.byKey(const ValueKey('of-freight-field')), '-5');
+    await tester.tap(find.byKey(const ValueKey('of-freight-save')));
+    await tester.pumpAndSettle();
+    expect(find.text('マイナスの金額は入れられません'), findsOneWidget);
+    expect(costs.freights, isEmpty);
+    await tester.enterText(find.byKey(const ValueKey('of-freight-field')), '¥3,200');
+    await tester.tap(find.byKey(const ValueKey('of-freight-save')));
+    await tester.pumpAndSettle();
+    expect(costs.freights, [(5, 3200.0)]);
+    expect(find.byKey(const ValueKey('of-freight-field')), findsNothing);
+  });
+
+  testWidgets('輸送費 (0214): once 出庫済み the costs are shown with their bills but not changed', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(2400, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final shipped = OutboundFileSummary(
+        id: 6, warehouseId: 1, shippedOn: DateTime(2026, 11, 20), fileName: '明細.xlsx', freightJpy: 4500);
+    final costs = FakeOutboundCostsRepository();
+    final saved = <String>[];
+    await pumpApp(tester, const OutboundFileDetailScreen(fileId: 6), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository(
+          detailOf: (_) => OutboundFileDetail(file: shipped, lines: _lines, costsEditable: false, costFiles: const [
+                OutboundCostFile(id: 9, kind: OutboundCostKind.freight, storagePath: '1/6/9-bill.pdf', fileName: '請求書.pdf'),
+              ]))),
+      outboundCostsRepositoryProvider.overrideWithValue(costs),
+      outboundTabOpenerProvider.overrideWithValue(() => null),
+      outboundFileSaverProvider.overrideWithValue((n, b) async => saved.add(n)),
+      productRepositoryProvider.overrideWithValue(FakeProductRepository(products: _library)),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(_overview)),
+      writeWarehouseIdProvider.overrideWithValue(1),
+    ]);
+    expect(find.text('輸送費: ¥4,500'), findsOneWidget);
+    expect(find.byKey(const ValueKey('of-freight-edit')), findsNothing);
+    expect(find.byKey(const ValueKey('oc-locked')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('oc-chip-9')));
+    await tester.pumpAndSettle();
+    expect(costs.fetched, ['1/6/9-bill.pdf']);
+    expect(saved, ['請求書.pdf']);
   });
 
   testWidgets('出荷単価 required (0212): a row without a price holds 出庫した', (tester) async {

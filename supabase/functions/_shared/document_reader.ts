@@ -1748,6 +1748,30 @@ export async function readPayee(
   };
 }
 
+/** 費用の証拠 (0214): the amounts on a bill for shipping or a fee — a
+ *  spreadsheet's words are read too, not only pictures and PDFs. */
+export async function readBillTotals(
+  bytes: Uint8Array,
+  mime: string,
+  fileName = "",
+  ask: (parts: unknown[], schema: unknown) => Promise<Record<string, unknown>> = (p, sc) => gemini(p, sc, "payee"),
+): Promise<PayeeReading["totals"]> {
+  if (/\.(xlsx|xlsm|xls|csv)$/i.test(fileName)) {
+    let text = "";
+    try {
+      text = sheetText(bytes);
+    } catch (_) {
+      text = "";
+    }
+    if (!text.trim()) return null;
+    const r = await ask([{ text: PAYEE_PROMPT + "\n\n" + text.slice(0, 30000) }], PAYEE_SCHEMA);
+    const total = toNum(r.total);
+    return total === null && toNum(r.subtotal) === null ? null
+      : { doc_subtotal: toNum(r.subtotal), doc_tax: toNum(r.tax), doc_total: total };
+  }
+  return (await readPayee(bytes, mime, fileName, ask)).totals;
+}
+
 export function dropTotalsLines(lines: ReadLine[]): ReadLine[] {
   const loose = (l: ReadLine) =>
     !l.raw_jan_code && !l.planned_quantity && l.unit_price === null && l.amount !== null && l.amount !== 0;

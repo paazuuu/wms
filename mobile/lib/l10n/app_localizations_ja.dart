@@ -16623,7 +16623,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pfMeasureRevenue => '売上';
 
   @override
-  String get pfMeasureCost => '費用（仕入＋手数料）';
+  String get pfMeasureCost => '費用（仕入＋手数料＋輸送費）';
 
   @override
   String get pfAllMakers => 'すべてのメーカー';
@@ -16892,7 +16892,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String pfSplit(String stock, String proxy) {
-    return '内訳　自社在庫から $stock　在庫外出荷 $proxy（委託手数料を引いた後）';
+    return '内訳　自社在庫から $stock　在庫外出荷 $proxy（手数料・輸送費を引いた後）';
   }
 
   @override
@@ -16920,4 +16920,112 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get prFeeSaved => '委託手数料を保存しました';
+
+  @override
+  String get pfColFreight => '輸送費';
+
+  @override
+  String pfTotalsFreight(String freight) {
+    return '　輸送費 $freight（費用に含む）';
+  }
+
+  @override
+  String pfTooltip3(String month, String revenue, String cost, String fee,
+      String freight, String profit) {
+    return '$month\n売上 $revenue\n仕入原価 $cost\n委託手数料 $fee\n輸送費 $freight\n収益 $profit';
+  }
+
+  @override
+  String ocFreightLabel(String amount) {
+    return '輸送費: $amount';
+  }
+
+  @override
+  String get ocFreightNone => '輸送費: 未入力';
+
+  @override
+  String get ocEdit => '金額・証拠';
+
+  @override
+  String get ocFreightField => '輸送費（円・税抜）';
+
+  @override
+  String get ocFeeField => '委託手数料（円・税抜）';
+
+  @override
+  String get ocFreightHint =>
+      '運送会社などに払う出荷の費用です（税抜）。月ごとの収益で費用として引かれます（行の売上の割合で商品に振り分け）。出庫済みになるまでは変更できます。請求書が届いたら金額を直して、証拠を付けてください。';
+
+  @override
+  String get ocEvidence => '証拠（請求書・見積書など）';
+
+  @override
+  String get ocEvidenceNone => '証拠のファイルはまだありません';
+
+  @override
+  String get ocAddFile => 'ファイルを追加';
+
+  @override
+  String get ocOpen => '開く';
+
+  @override
+  String get ocDownload => 'ダウンロード';
+
+  @override
+  String get ocRead => '金額を読み取る';
+
+  @override
+  String get ocRemove => '外す';
+
+  @override
+  String get ocRemoveConfirm => 'この証拠を外しますか？（ファイルは記録として残ります）';
+
+  @override
+  String get ocReading => '金額を読み取っています…';
+
+  @override
+  String ocReadDone(String subtotal, String total, String used) {
+    return '読み取った金額: 税抜 $subtotal／税込 $total。$usedを入れました。確認して保存してください。';
+  }
+
+  @override
+  String get ocUsedSubtotal => '税抜';
+
+  @override
+  String get ocUsedTotal => '税込（税抜が見つからないため）';
+
+  @override
+  String get ocReadNone => '金額を読み取れませんでした。手で入れてください。';
+
+  @override
+  String get ocLocked => '出庫済みのため、費用と証拠を変えられるのはシステム管理者だけです。';
+
+  @override
+  String get ocAdminAfterShip => '出庫済みです。システム管理者として変更します（記録に残ります）。';
+
+  @override
+  String get ocSaved => '保存しました';
+
+  @override
+  String ocUploaded(String name) {
+    return '$name を証拠に追加しました';
+  }
+
+  @override
+  String ocFiles(int count) {
+    return '証拠 $count件';
+  }
+
+  @override
+  String get ocErrNegative => 'マイナスの金額は入れられません';
+
+  @override
+  String get ocFreightImport => '輸送費（円・税抜・任意）';
+
+  @override
+  String get ocFreightImportHint =>
+      '見積の金額で構いません。出庫済みになるまでは詳細画面で直せます。請求書が届いたら金額を直し、証拠を付けてください。';
+
+  @override
+  String get ocCosts => '費用';
 }

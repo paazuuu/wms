@@ -9,6 +9,7 @@ import 'package:wms_mobile/core/export/xlsx.dart';
 import 'package:wms_mobile/core/ui/open_window.dart';
 import 'package:wms_mobile/features/outbound/data/outbound_repository.dart' show shipDestinationsProvider;
 import 'package:wms_mobile/features/outbound/domain/outbound.dart';
+import 'package:wms_mobile/features/outbound_file/data/outbound_costs_repository.dart';
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
 import 'package:wms_mobile/features/outbound_file/domain/outbound_currency.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_detail_screen.dart';
@@ -20,6 +21,7 @@ import 'package:wms_mobile/features/product/domain/product.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
+import '../../support/fake_outbound_costs_repository.dart';
 import '../../support/fake_outbound_file_repository.dart';
 import '../../support/harness.dart';
 import 'package:wms_mobile/features/requirements/requirements_repository.dart';
@@ -80,12 +82,13 @@ const _library = [
 
 void main() {
   Future<FakeOutboundFileRepository> pump(WidgetTester tester,
-      {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html, bool proxy = false, List<(String, Uint8List)>? saved, Uint8List? book, int? warehouse = 1, bool priced = false}) async {
+      {FakeOutboundFileRepository? repo, int tab = 0, _Tab? html, bool proxy = false, List<(String, Uint8List)>? saved, Uint8List? book, int? warehouse = 1, bool priced = false, FakeOutboundCostsRepository? costs}) async {
     await tester.binding.setSurfaceSize(const Size(2600, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final r = repo ?? FakeOutboundFileRepository(matcher: _match);
     await pumpApp(tester, OutboundFileScreen(initialTab: tab, proxy: proxy), overrides: [
       outboundFileRepositoryProvider.overrideWithValue(r),
+      if (costs != null) outboundCostsRepositoryProvider.overrideWithValue(costs),
       // Rows here mostly carry no prices: the 出荷単価 rule (0212) is off
       // unless [priced].
       requirementsRepositoryProvider.overrideWithValue(FakeRequirementsRepository(off: priced ? const {} : {Req.shipPrice})),
@@ -403,7 +406,8 @@ void main() {
 
   testWidgets('在庫外出荷: rows typed in, kept as a record with 依頼元, nothing shipped', (tester) async {
     final saved = <(String, Uint8List)>[];
-    final repo = await pump(tester, proxy: true, saved: saved);
+    final costs = FakeOutboundCostsRepository();
+    final repo = await pump(tester, proxy: true, saved: saved, costs: costs);
     expect(find.text('在庫外出荷'), findsWidgets);
 
     Future<void> add(Map<String, String> fields) async {
@@ -462,6 +466,8 @@ void main() {
     await tester.enterText(find.byKey(const ValueKey('pr-principal')), 'テスト依頼元');
     // 委託手数料 (0213), kept with the record.
     await tester.enterText(find.byKey(const ValueKey('pr-fee')), '1,200');
+    // 輸送費 (0214) too.
+    await tester.enterText(find.byKey(const ValueKey('of-freight')), '¥800');
     await tester.tap(find.byKey(const ValueKey('of-post')));
     await tester.pumpAndSettle();
     expect(find.text('2行（数量 6）を記録します。在庫は動きません。'), findsOneWidget);
@@ -480,6 +486,7 @@ void main() {
     expect(p.lines.first.unitPrice, 300);
     expect(repo.markedUndecided, hasLength(1), reason: 'kept with its day 未定');
     expect(repo.fees, [(1, 1200.0)]);
+    expect(costs.freights, [(1, 800.0)]);
   });
 
   testWidgets('在庫外出荷 from a file: every row a record, typed rows numbered after the file\'s', (tester) async {

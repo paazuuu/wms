@@ -160,12 +160,14 @@ import 'package:wms_mobile/features/payments/data/payments_repository.dart' show
 import 'fake_payments_repository.dart';
 import 'fake_purchase_price_repository.dart';
 import 'fake_outbound_file_repository.dart';
+import 'fake_outbound_costs_repository.dart';
 import 'package:wms_mobile/features/product/data/purchase_price_repository.dart';
 import 'package:wms_mobile/features/admin/data/menu_visibility_repository.dart';
 import 'package:wms_mobile/features/outbound_file/domain/outbound_currency.dart';
 import 'package:wms_mobile/features/packing/data/packing_repository.dart' show packingRepositoryProvider;
 import 'package:wms_mobile/features/product/presentation/purchase_price_card.dart' show canRecordPurchasePriceProvider;
 import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.dart';
+import 'package:wms_mobile/features/outbound_file/data/outbound_costs_repository.dart';
 import 'package:wms_mobile/features/stock_history/data/stock_history_repository.dart';
 import 'package:wms_mobile/features/stock_history/domain/stock_history.dart';
 import 'package:wms_mobile/features/profit/data/profit_repository.dart';
@@ -253,6 +255,7 @@ List<Override> _defaultOverrides() => [
       // 仕入れ値の履歴 (0187) and 出荷リストで出庫 (0188): none.
       purchasePriceRepositoryProvider.overrideWithValue(FakePurchasePriceRepository()),
       outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository()),
+      outboundCostsRepositoryProvider.overrideWithValue(FakeOutboundCostsRepository()),
       // 出荷明細の通貨 (0197): the AI judges nothing unless a test says so.
       priceCurrencyRepositoryProvider.overrideWithValue(FakePriceCurrencyRepository()),
       // 表示設定 (0193): nothing set, the defaults apply.

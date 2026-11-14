@@ -15,6 +15,7 @@ class ProfitRow {
     this.qtyNoPrice = 0,
     this.kind = 'stock',
     this.fee = 0,
+    this.freight = 0,
   });
 
   /// 'YYYY-MM'.
@@ -46,9 +47,12 @@ class ProfitRow {
   /// This row's share of the fee paid for shipping its list (委託手数料).
   final double fee;
 
+  /// This row's share of the list's 輸送費 (0214), shared out the same way.
+  final double freight;
+
   bool get proxy => kind == 'proxy';
 
-  double get profit => revenueCosted - cost - fee;
+  double get profit => revenueCosted - cost - fee - freight;
 
   /// How this row is told apart from others: the product, or its JAN or name.
   String get key => productId != null ? 'p$productId' : 'n${jan ?? name}';
@@ -70,6 +74,7 @@ class ProfitRow {
       qtyNoPrice: i(j['qty_no_price']),
       kind: (j['kind'] as String?) ?? 'stock',
       fee: d(j['fee']),
+      freight: d(j['freight']),
     );
   }
 }
@@ -90,11 +95,18 @@ class ProfitMonth {
   /// 委託手数料 paid for 在庫外出荷: a cost of the profit.
   double fee = 0;
 
-  /// The profit of what left our warehouse, and of 在庫外出荷 (after its fee).
+  /// 輸送費 (0214): a cost of the profit too.
+  double freight = 0;
+
+  /// The purchase cost, the fee and the freight together.
+  double get costAll => cost + fee + freight;
+
+  /// The profit of what left our warehouse, and of 在庫外出荷 (after the fee
+  /// and the freight).
   double profitStock = 0;
   double profitProxy = 0;
 
-  double get profit => revenueCosted - cost - fee;
+  double get profit => revenueCosted - cost - fee - freight;
 
   /// Profit over what it was set against; null with nothing priced.
   double? get margin => revenueCosted == 0 ? null : profit / revenueCosted;
@@ -108,6 +120,7 @@ class ProfitMonth {
     revenueNoCost += r.revenue - r.revenueCosted;
     qtyNoPrice += r.qtyNoPrice;
     fee += r.fee;
+    freight += r.freight;
     if (r.proxy) {
       profitProxy += r.profit;
     } else {

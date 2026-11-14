@@ -29,6 +29,8 @@ import '../../outbound/domain/outbound.dart' show ShipDestination;
 import '../../outbound/presentation/ship_destinations_screen.dart' show pickDestinationCard;
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/domain/warehouse.dart' show Warehouse;
+import '../data/outbound_costs_repository.dart';
+import '../../admin/data/menu_visibility_repository.dart' show showPricesProvider;
 import '../data/outbound_file_repository.dart';
 import '../data/inbound_proposal_export.dart';
 import '../data/outbound_plan_export.dart';
@@ -248,6 +250,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
 
   final _destination = TextEditingController();
   final _fee = TextEditingController();
+  final _freight = TextEditingController();
   final _note = TextEditingController();
   final _principal = TextEditingController();
   ({String name, Uint8List bytes})? _file;
@@ -296,6 +299,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
   void dispose() {
     _destination.dispose();
     _fee.dispose();
+    _freight.dispose();
     _note.dispose();
     _principal.dispose();
     _fx.dispose();
@@ -771,6 +775,12 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
           final set = await repo.setFee(data, fee);
           if (set case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
         }
+        // 輸送費 (0214), as typed with a plan or a 在庫外出荷.
+        final freight = double.tryParse(_freight.text.replaceAll(RegExp(r'[,，¥￥円\s]'), ''));
+        if ((_proxy || _planning) && freight != null && freight >= 0) {
+          final set = await ref.read(outboundCostsRepositoryProvider).setFreight(data, freight);
+          if (set case ApiFailure(:final message)) _snack(humanizeApiErrorMessage(l10n, message));
+        }
         final card = _card;
         // 出庫 now took its card in the same step.
         if (card?.id != null && (_proxy || _planning)) {
@@ -799,6 +809,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
           _note.clear();
           _principal.clear();
           _fee.clear();
+          _freight.clear();
           _plannedOn = null;
           _currency = {};
           _card = null;
@@ -1474,6 +1485,20 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
               ),
             ),
           ],
+          // 輸送費 (0214): an estimate is fine; it stays open until 出庫済み.
+          if ((_proxy || _planning) && ref.watch(showPricesProvider))
+            SizedBox(
+              width: 200,
+              child: Tooltip(
+                message: l10n.ocFreightImportHint,
+                child: TextField(
+                  key: const ValueKey('of-freight'),
+                  controller: _freight,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(labelText: l10n.ocFreightImport, isDense: true, contentPadding: _denseField),
+                ),
+              ),
+            ),
           if (_card == null)
             Tooltip(
               message: !_proxy && !_planning ? l10n.ofCardRequiredHint : '',

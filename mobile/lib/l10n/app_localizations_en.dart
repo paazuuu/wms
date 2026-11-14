@@ -16947,7 +16947,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pfMeasureRevenue => 'Sales';
 
   @override
-  String get pfMeasureCost => 'Cost (purchase + fee)';
+  String get pfMeasureCost => 'Cost (purchase + fee + freight)';
 
   @override
   String get pfAllMakers => 'All makers';
@@ -17229,7 +17229,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String pfSplit(String stock, String proxy) {
-    return 'Of which: from our stock $stock, shipped by others $proxy (after the fee)';
+    return 'Of which: from our stock $stock, shipped by others $proxy (after fees and freight)';
   }
 
   @override
@@ -17258,4 +17258,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prFeeSaved => 'Shipping fee saved';
+
+  @override
+  String get pfColFreight => 'Freight';
+
+  @override
+  String pfTotalsFreight(String freight) {
+    return '  freight $freight (in the cost)';
+  }
+
+  @override
+  String pfTooltip3(String month, String revenue, String cost, String fee,
+      String freight, String profit) {
+    return '$month\nSales $revenue\nPurchase cost $cost\nShipping fee $fee\nFreight $freight\nProfit $profit';
+  }
+
+  @override
+  String ocFreightLabel(String amount) {
+    return 'Freight: $amount';
+  }
+
+  @override
+  String get ocFreightNone => 'Freight: not entered';
+
+  @override
+  String get ocEdit => 'Amount & evidence';
+
+  @override
+  String get ocFreightField => 'Freight (yen, before tax)';
+
+  @override
+  String get ocFeeField => 'Shipping fee (yen, before tax)';
+
+  @override
+  String get ocFreightHint =>
+      'What shipping costs, paid to the carrier (before tax). Taken off as a cost in the profit by month (shared out by each row\'s sales). It can be changed until the list is shipped; when the bill comes, correct the amount and attach it.';
+
+  @override
+  String get ocEvidence => 'Evidence (bills, quotes …)';
+
+  @override
+  String get ocEvidenceNone => 'No evidence yet';
+
+  @override
+  String get ocAddFile => 'Add a file';
+
+  @override
+  String get ocOpen => 'Open';
+
+  @override
+  String get ocDownload => 'Download';
+
+  @override
+  String get ocRead => 'Read the amount';
+
+  @override
+  String get ocRemove => 'Remove';
+
+  @override
+  String get ocRemoveConfirm =>
+      'Take this evidence off? (The file stays on record.)';
+
+  @override
+  String get ocReading => 'Reading the amount…';
+
+  @override
+  String ocReadDone(String subtotal, String total, String used) {
+    return 'Read: before tax $subtotal / with tax $total. Filled in $used; check it and save.';
+  }
+
+  @override
+  String get ocUsedSubtotal => 'the amount before tax';
+
+  @override
+  String get ocUsedTotal => 'the amount with tax (none before tax was found)';
+
+  @override
+  String get ocReadNone => 'No amount could be read; please type it.';
+
+  @override
+  String get ocLocked =>
+      'The list is shipped: only a system admin can change its costs and evidence.';
+
+  @override
+  String get ocAdminAfterShip =>
+      'Already shipped: you change it as a system admin (it is recorded).';
+
+  @override
+  String get ocSaved => 'Saved';
+
+  @override
+  String ocUploaded(String name) {
+    return '$name added as evidence';
+  }
+
+  @override
+  String ocFiles(int count) {
+    return '$count evidence files';
+  }
+
+  @override
+  String get ocErrNegative => 'The amount cannot be negative';
+
+  @override
+  String get ocFreightImport => 'Freight (yen, before tax; optional)';
+
+  @override
+  String get ocFreightImportHint =>
+      'An estimate is fine. It can be corrected in the detail until the list is shipped; when the bill comes, correct it and attach the bill.';
+
+  @override
+  String get ocCosts => 'Costs';
 }

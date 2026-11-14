@@ -74,6 +74,7 @@ import {
   lookupMarketNames,
   mapColumns,
   readDocument,
+  readBillTotals,
   readPayee,
   dropNonItemLines,
   settlePayee,
@@ -796,6 +797,33 @@ Deno.serve(async (req) => {
           await noteEvidence(admin, doc.id as number, fields);
         }
         return json({ data: { payee: read.payee, totals: read.totals, by: read.by, saved: !!doc } });
+      }
+      // 費用の証拠 (0214): the amount on a shipping or fee bill kept with a
+      // shipment list, read for a person to check and save. Nothing is saved
+      // here.
+      if (str(b.mode) === "read_cost") {
+        if (!(await clientPermitted(supabase, "ship.complete"))) {
+          return json({ message: notPermittedMessage("ship.complete") }, 403);
+        }
+        const costFileId = Number(b.cost_file_id);
+        if (!Number.isFinite(costFileId) || costFileId <= 0) return json({ message: "cost_file_id is required" }, 400);
+        const { data: cf } = await admin.from("outbound_cost_files")
+          .select("id, file_id, storage_path, file_name, content_type, removed_at").eq("id", costFileId).maybeSingle();
+        if (!cf || cf.removed_at) return json({ message: `cost file ${costFileId} not found` }, 404);
+        const { data: mayEdit } = await supabase.rpc("outbound_costs_editable", { p_id: cf.file_id });
+        if (mayEdit !== true) return json({ message: "outbound_costs_locked" }, 403);
+        const { data: blob, error: dlErr } = await admin.storage.from("cost-evidence").download(cf.storage_path as string);
+        if (dlErr || !blob) return json({ message: `file not readable: ${dlErr?.message ?? "missing"}` }, 404);
+        const fileName = (cf.file_name ?? cf.storage_path) as string;
+        const mime = (cf.content_type ?? "") as string ||
+          (fileName.toLowerCase().endsWith(".pdf") ? "application/pdf" : "image/jpeg");
+        resetAiFailures();
+        try {
+          const totals = await readBillTotals(new Uint8Array(await blob.arrayBuffer()), mime, fileName);
+          return json({ data: { totals, ai_failure: aiFailure() } });
+        } catch (e) {
+          return json({ message: String((e as Error)?.message ?? e), ai_failure: aiFailure() }, 502);
+        }
       }
       // 見出しの意味 (0163): a sheet the device reads itself names its JAN and
       // quantity, but other headings it does not know — what each one is,

@@ -14664,7 +14664,7 @@
   },
   "pfMeasureProfit": "収益",
   "pfMeasureRevenue": "売上",
-  "pfMeasureCost": "費用（仕入＋手数料）",
+  "pfMeasureCost": "費用（仕入＋手数料＋輸送費）",
   "pfAllMakers": "すべてのメーカー",
   "pfSearch": "商品で絞り込む（名前・JAN）",
   "pfTotals": "期間の合計　売上 {revenue}　原価 {cost}　収益 {profit}　利益率 {margin}",
@@ -14908,7 +14908,7 @@
       }
     }
   },
-  "pfSplit": "内訳　自社在庫から {stock}　在庫外出荷 {proxy}（委託手数料を引いた後）",
+  "pfSplit": "内訳　自社在庫から {stock}　在庫外出荷 {proxy}（手数料・輸送費を引いた後）",
   "@pfSplit": {
     "placeholders": {
       "stock": {
@@ -14951,5 +14951,99 @@
   "prFeeNone": "委託手数料: 未入力",
   "prFeeEdit": "手数料を入れる",
   "prFeeHint": "他社に払う出荷の手数料です。月ごとの収益で費用として引かれます（行の売上の割合で商品に振り分け）。",
-  "prFeeSaved": "委託手数料を保存しました"
+  "prFeeSaved": "委託手数料を保存しました",
+  "pfColFreight": "輸送費",
+  "pfTotalsFreight": "　輸送費 {freight}（費用に含む）",
+  "@pfTotalsFreight": {
+    "placeholders": {
+      "freight": {
+        "type": "String"
+      }
+    }
+  },
+  "pfTooltip3": "{month}\n売上 {revenue}\n仕入原価 {cost}\n委託手数料 {fee}\n輸送費 {freight}\n収益 {profit}",
+  "@pfTooltip3": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "revenue": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      },
+      "freight": {
+        "type": "String"
+      },
+      "profit": {
+        "type": "String"
+      }
+    }
+  },
+  "ocFreightLabel": "輸送費: {amount}",
+  "@ocFreightLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ocFreightNone": "輸送費: 未入力",
+  "ocEdit": "金額・証拠",
+  "ocFreightField": "輸送費（円・税抜）",
+  "ocFeeField": "委託手数料（円・税抜）",
+  "ocFreightHint": "運送会社などに払う出荷の費用です（税抜）。月ごとの収益で費用として引かれます（行の売上の割合で商品に振り分け）。出庫済みになるまでは変更できます。請求書が届いたら金額を直して、証拠を付けてください。",
+  "ocEvidence": "証拠（請求書・見積書など）",
+  "ocEvidenceNone": "証拠のファイルはまだありません",
+  "ocAddFile": "ファイルを追加",
+  "ocOpen": "開く",
+  "ocDownload": "ダウンロード",
+  "ocRead": "金額を読み取る",
+  "ocRemove": "外す",
+  "ocRemoveConfirm": "この証拠を外しますか？（ファイルは記録として残ります）",
+  "ocReading": "金額を読み取っています…",
+  "ocReadDone": "読み取った金額: 税抜 {subtotal}／税込 {total}。{used}を入れました。確認して保存してください。",
+  "@ocReadDone": {
+    "placeholders": {
+      "subtotal": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "used": {
+        "type": "String"
+      }
+    }
+  },
+  "ocUsedSubtotal": "税抜",
+  "ocUsedTotal": "税込（税抜が見つからないため）",
+  "ocReadNone": "金額を読み取れませんでした。手で入れてください。",
+  "ocLocked": "出庫済みのため、費用と証拠を変えられるのはシステム管理者だけです。",
+  "ocAdminAfterShip": "出庫済みです。システム管理者として変更します（記録に残ります）。",
+  "ocSaved": "保存しました",
+  "ocUploaded": "{name} を証拠に追加しました",
+  "@ocUploaded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ocFiles": "証拠 {count}件",
+  "@ocFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ocErrNegative": "マイナスの金額は入れられません",
+  "ocFreightImport": "輸送費（円・税抜・任意）",
+  "ocFreightImportHint": "見積の金額で構いません。出庫済みになるまでは詳細画面で直せます。請求書が届いたら金額を直し、証拠を付けてください。",
+  "ocCosts": "費用"
 }

@@ -9,6 +9,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/export/save_bytes.dart' show mimeTypeFor;
 import '../../delivery/application/delivery_providers.dart';
 import '../../outbound/domain/outbound.dart' show ShipDestination;
+import 'outbound_costs_repository.dart' show OutboundCostFile;
 
 /// The bucket shipping lists are kept in (0188): <warehouse id>/<file>.
 const outboundFileBucket = 'outbound-files';
@@ -221,6 +222,7 @@ class OutboundFileSummary extends Equatable {
     this.kind = 'stock',
     this.principal,
     this.feeJpy,
+    this.freightJpy,
     this.destinationId,
     this.shipTo,
     this.status = 'shipped',
@@ -294,6 +296,10 @@ class OutboundFileSummary extends Equatable {
   /// the other company's fee.
   final double? feeJpy;
 
+  /// What shipping this list cost (輸送費, 0214): the estimate, then the
+  /// billed amount.
+  final double? freightJpy;
+
   bool get proxy => kind == 'proxy';
   final int warehouseId;
   final String? warehouseName;
@@ -345,6 +351,7 @@ class OutboundFileSummary extends Equatable {
         kind: _s(j['kind']) ?? 'stock',
         principal: _s(j['principal']),
         feeJpy: _nd(j['fee_jpy']),
+        freightJpy: _nd(j['freight_jpy']),
         destinationId: _ni(j['destination_id']),
         status: _s(j['status']) ?? 'shipped',
         plannedOn: _day(j['planned_on']),
@@ -500,7 +507,17 @@ class OutboundFileDetail extends Equatable {
     this.shippedByName,
     this.shippedAt,
     this.shortage = const [],
+    this.costFiles = const [],
+    this.costsEditable = true,
   });
+
+  /// The bills behind the freight and the fee (0214).
+  final List<OutboundCostFile> costFiles;
+
+  /// Whether this person may change the freight, the fee and their bills:
+  /// until the list is 出庫済み, then only a system admin (a 在庫外出荷's
+  /// stay open).
+  final bool costsEditable;
 
   /// A planned list's products against the stock (0201); empty otherwise.
   final List<OutboundShortage> shortage;
@@ -521,6 +538,11 @@ class OutboundFileDetail extends Equatable {
         undoneByName: _s(j['undone_by_name']),
         shippedByName: _s(j['shipped_by_name']),
         shippedAt: DateTime.tryParse('${j['shipped_at'] ?? ''}')?.toLocal(),
+        costsEditable: j['costs_editable'] != false,
+        costFiles: [
+          for (final e in (j['cost_files'] as List? ?? const []).whereType<Map>())
+            OutboundCostFile.fromJson(e.cast<String, dynamic>()),
+        ],
         shortage: [
           for (final e in ((j['shortage'] is Map ? (j['shortage'] as Map)['products'] : null) as List? ?? const [])
               .whereType<Map>())
@@ -532,7 +554,7 @@ class OutboundFileDetail extends Equatable {
       );
 
   @override
-  List<Object?> get props => [file, lines];
+  List<Object?> get props => [file, lines, costFiles, costsEditable];
 }
 
 /// 出荷リストで出庫 (0188).

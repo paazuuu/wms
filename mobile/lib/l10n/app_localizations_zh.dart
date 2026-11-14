@@ -16505,7 +16505,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pfMeasureRevenue => '销售额';
 
   @override
-  String get pfMeasureCost => '费用（进货＋手续费）';
+  String get pfMeasureCost => '费用（进货＋手续费＋运费）';
 
   @override
   String get pfAllMakers => '所有厂家';
@@ -16772,7 +16772,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String pfSplit(String stock, String proxy) {
-    return '明细　自有库存 $stock　库存外出货 $proxy（扣除委托手续费后）';
+    return '明细　自有库存 $stock　库存外出货 $proxy（扣除手续费・运费后）';
   }
 
   @override
@@ -16800,4 +16800,111 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get prFeeSaved => '已保存委托手续费';
+
+  @override
+  String get pfColFreight => '运费';
+
+  @override
+  String pfTotalsFreight(String freight) {
+    return '　运费 $freight（含在费用中）';
+  }
+
+  @override
+  String pfTooltip3(String month, String revenue, String cost, String fee,
+      String freight, String profit) {
+    return '$month\n销售额 $revenue\n进货成本 $cost\n委托手续费 $fee\n运费 $freight\n收益 $profit';
+  }
+
+  @override
+  String ocFreightLabel(String amount) {
+    return '运费: $amount';
+  }
+
+  @override
+  String get ocFreightNone => '运费: 未填写';
+
+  @override
+  String get ocEdit => '金额・凭证';
+
+  @override
+  String get ocFreightField => '运费（日元・不含税）';
+
+  @override
+  String get ocFeeField => '委托手续费（日元・不含税）';
+
+  @override
+  String get ocFreightHint =>
+      '支付给运输公司等的出货费用（不含税）。在月度收益中作为费用扣除（按各行销售额比例分摊）。出库完成前可以修改。收到账单后请修正金额并附上凭证。';
+
+  @override
+  String get ocEvidence => '凭证（账单・报价单等）';
+
+  @override
+  String get ocEvidenceNone => '还没有凭证文件';
+
+  @override
+  String get ocAddFile => '添加文件';
+
+  @override
+  String get ocOpen => '打开';
+
+  @override
+  String get ocDownload => '下载';
+
+  @override
+  String get ocRead => '读取金额';
+
+  @override
+  String get ocRemove => '移除';
+
+  @override
+  String get ocRemoveConfirm => '要移除这个凭证吗？（文件会作为记录保留）';
+
+  @override
+  String get ocReading => '正在读取金额…';
+
+  @override
+  String ocReadDone(String subtotal, String total, String used) {
+    return '读取的金额：不含税 $subtotal／含税 $total。已填入$used，请确认后保存。';
+  }
+
+  @override
+  String get ocUsedSubtotal => '不含税金额';
+
+  @override
+  String get ocUsedTotal => '含税金额（未找到不含税金额）';
+
+  @override
+  String get ocReadNone => '未能读取金额，请手动输入。';
+
+  @override
+  String get ocLocked => '已出库：只有系统管理员可以修改费用和凭证。';
+
+  @override
+  String get ocAdminAfterShip => '已出库：您将以系统管理员身份修改（会留下记录）。';
+
+  @override
+  String get ocSaved => '已保存';
+
+  @override
+  String ocUploaded(String name) {
+    return '已将 $name 添加为凭证';
+  }
+
+  @override
+  String ocFiles(int count) {
+    return '凭证 $count个';
+  }
+
+  @override
+  String get ocErrNegative => '金额不能为负数';
+
+  @override
+  String get ocFreightImport => '运费（日元・不含税・选填）';
+
+  @override
+  String get ocFreightImportHint => '可以先填报价金额。出库完成前可以在详情画面修改。收到账单后请修正金额并附上凭证。';
+
+  @override
+  String get ocCosts => '费用';
 }

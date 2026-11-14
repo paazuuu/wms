@@ -23,7 +23,7 @@ class ProfitRepositoryImpl implements ProfitRepository {
   @override
   Future<ApiResult<List<ProfitRow>>> byMonth({required DateTime from, required DateTime to, int? warehouseId}) async {
     try {
-      final r = await _rest.post('/rpc/profit_by_month_split',
+      final r = await _rest.post('/rpc/profit_by_month_costs',
           data: {'p_from': _day(from), 'p_to': _day(to), 'p_warehouse_id': warehouseId});
       final list = r.data is List ? r.data as List : const [];
       return ApiSuccess([for (final e in list.whereType<Map>()) ProfitRow.fromJson(e.cast<String, dynamic>())]);
