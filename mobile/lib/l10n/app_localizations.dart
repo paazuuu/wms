@@ -29953,6 +29953,138 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'システム管理者のみ（変更できません）'**
   String get mvAdminOnly;
+
+  /// No description provided for @reportMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'月'**
+  String get reportMonth;
+
+  /// No description provided for @reportMonthAny.
+  ///
+  /// In ja, this message translates to:
+  /// **'月を指定しない（日付で選ぶ）'**
+  String get reportMonthAny;
+
+  /// No description provided for @reportColumnFilter.
+  ///
+  /// In ja, this message translates to:
+  /// **'列で絞り込む'**
+  String get reportColumnFilter;
+
+  /// No description provided for @reportFilterAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて選ぶ'**
+  String get reportFilterAll;
+
+  /// No description provided for @reportFilterNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべて外す'**
+  String get reportFilterNone;
+
+  /// No description provided for @reportFilterSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'値を検索'**
+  String get reportFilterSearch;
+
+  /// No description provided for @reportFilterApply.
+  ///
+  /// In ja, this message translates to:
+  /// **'絞り込む'**
+  String get reportFilterApply;
+
+  /// No description provided for @reportFilterReset.
+  ///
+  /// In ja, this message translates to:
+  /// **'絞り込みを解除'**
+  String get reportFilterReset;
+
+  /// No description provided for @reportFiltered.
+  ///
+  /// In ja, this message translates to:
+  /// **'{shown} / {all} 件（列で絞り込み中）'**
+  String reportFiltered(int shown, int all);
+
+  /// No description provided for @reportExcel.
+  ///
+  /// In ja, this message translates to:
+  /// **'Excelでダウンロード'**
+  String get reportExcel;
+
+  /// No description provided for @reportPdf.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDFでダウンロード'**
+  String get reportPdf;
+
+  /// No description provided for @reportPdfMaking.
+  ///
+  /// In ja, this message translates to:
+  /// **'PDFを作っています…'**
+  String get reportPdfMaking;
+
+  /// No description provided for @reportFileSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を保存しました'**
+  String reportFileSaved(String name);
+
+  /// No description provided for @reportDocTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'{source}レポート'**
+  String reportDocTitle(String source);
+
+  /// No description provided for @reportCondPeriod.
+  ///
+  /// In ja, this message translates to:
+  /// **'期間: {from} 〜 {to}'**
+  String reportCondPeriod(String from, String to);
+
+  /// No description provided for @reportCondItem.
+  ///
+  /// In ja, this message translates to:
+  /// **'{label}: {value}'**
+  String reportCondItem(String label, String value);
+
+  /// No description provided for @reportCondColumn.
+  ///
+  /// In ja, this message translates to:
+  /// **'絞り込み（{column}）: {values}'**
+  String reportCondColumn(String column, String values);
+
+  /// No description provided for @reportPreviewHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'A4縦で表示しています。ダウンロードするPDFも同じ形です。'**
+  String get reportPreviewHint;
+
+  /// No description provided for @reportPageOf.
+  ///
+  /// In ja, this message translates to:
+  /// **'{page} / {pages}'**
+  String reportPageOf(int page, int pages);
+
+  /// No description provided for @reportTotal.
+  ///
+  /// In ja, this message translates to:
+  /// **'合計'**
+  String get reportTotal;
+
+  /// No description provided for @reportMadeAt.
+  ///
+  /// In ja, this message translates to:
+  /// **'作成 {when}'**
+  String reportMadeAt(String when);
+
+  /// No description provided for @reportCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件'**
+  String reportCount(int count);
 }
 
 class _AppLocalizationsDelegate

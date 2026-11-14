@@ -32,7 +32,8 @@ void main() {
 
     expect(find.text('1 件'), findsOneWidget);
     expect(find.text('4988601001053'), findsOneWidget);
-    expect(find.text('7'), findsOneWidget);
+    // The cell, and the column's total under it.
+    expect(find.text('7'), findsWidgets);
 
     await tester.binding.setSurfaceSize(null);
   });

@@ -17064,4 +17064,88 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mvAdminOnly => 'システム管理者のみ（変更できません）';
+
+  @override
+  String get reportMonth => '月';
+
+  @override
+  String get reportMonthAny => '月を指定しない（日付で選ぶ）';
+
+  @override
+  String get reportColumnFilter => '列で絞り込む';
+
+  @override
+  String get reportFilterAll => 'すべて選ぶ';
+
+  @override
+  String get reportFilterNone => 'すべて外す';
+
+  @override
+  String get reportFilterSearch => '値を検索';
+
+  @override
+  String get reportFilterApply => '絞り込む';
+
+  @override
+  String get reportFilterReset => '絞り込みを解除';
+
+  @override
+  String reportFiltered(int shown, int all) {
+    return '$shown / $all 件（列で絞り込み中）';
+  }
+
+  @override
+  String get reportExcel => 'Excelでダウンロード';
+
+  @override
+  String get reportPdf => 'PDFでダウンロード';
+
+  @override
+  String get reportPdfMaking => 'PDFを作っています…';
+
+  @override
+  String reportFileSaved(String name) {
+    return '$name を保存しました';
+  }
+
+  @override
+  String reportDocTitle(String source) {
+    return '$sourceレポート';
+  }
+
+  @override
+  String reportCondPeriod(String from, String to) {
+    return '期間: $from 〜 $to';
+  }
+
+  @override
+  String reportCondItem(String label, String value) {
+    return '$label: $value';
+  }
+
+  @override
+  String reportCondColumn(String column, String values) {
+    return '絞り込み（$column）: $values';
+  }
+
+  @override
+  String get reportPreviewHint => 'A4縦で表示しています。ダウンロードするPDFも同じ形です。';
+
+  @override
+  String reportPageOf(int page, int pages) {
+    return '$page / $pages';
+  }
+
+  @override
+  String get reportTotal => '合計';
+
+  @override
+  String reportMadeAt(String when) {
+    return '作成 $when';
+  }
+
+  @override
+  String reportCount(int count) {
+    return '$count件';
+  }
 }

@@ -16942,4 +16942,88 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mvAdminOnly => '仅限系统管理员（不可更改）';
+
+  @override
+  String get reportMonth => '月份';
+
+  @override
+  String get reportMonthAny => '不指定月份（按日期选择）';
+
+  @override
+  String get reportColumnFilter => '按列筛选';
+
+  @override
+  String get reportFilterAll => '全选';
+
+  @override
+  String get reportFilterNone => '全部取消';
+
+  @override
+  String get reportFilterSearch => '搜索值';
+
+  @override
+  String get reportFilterApply => '筛选';
+
+  @override
+  String get reportFilterReset => '清除筛选';
+
+  @override
+  String reportFiltered(int shown, int all) {
+    return '$shown / $all 条（按列筛选中）';
+  }
+
+  @override
+  String get reportExcel => '下载Excel';
+
+  @override
+  String get reportPdf => '下载PDF';
+
+  @override
+  String get reportPdfMaking => '正在生成PDF…';
+
+  @override
+  String reportFileSaved(String name) {
+    return '已保存 $name';
+  }
+
+  @override
+  String reportDocTitle(String source) {
+    return '$source报表';
+  }
+
+  @override
+  String reportCondPeriod(String from, String to) {
+    return '期间: $from 〜 $to';
+  }
+
+  @override
+  String reportCondItem(String label, String value) {
+    return '$label: $value';
+  }
+
+  @override
+  String reportCondColumn(String column, String values) {
+    return '筛选（$column）: $values';
+  }
+
+  @override
+  String get reportPreviewHint => '以A4纵向显示，下载的PDF也是同样版式。';
+
+  @override
+  String reportPageOf(int page, int pages) {
+    return '$page / $pages';
+  }
+
+  @override
+  String get reportTotal => '合计';
+
+  @override
+  String reportMadeAt(String when) {
+    return '生成 $when';
+  }
+
+  @override
+  String reportCount(int count) {
+    return '$count条';
+  }
 }

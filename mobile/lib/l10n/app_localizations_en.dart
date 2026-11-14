@@ -17407,4 +17407,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mvAdminOnly => 'System admin only (fixed)';
+
+  @override
+  String get reportMonth => 'Month';
+
+  @override
+  String get reportMonthAny => 'No month (pick dates)';
+
+  @override
+  String get reportColumnFilter => 'Filter by column';
+
+  @override
+  String get reportFilterAll => 'Select all';
+
+  @override
+  String get reportFilterNone => 'Clear all';
+
+  @override
+  String get reportFilterSearch => 'Search values';
+
+  @override
+  String get reportFilterApply => 'Apply';
+
+  @override
+  String get reportFilterReset => 'Clear filters';
+
+  @override
+  String reportFiltered(int shown, int all) {
+    return '$shown of $all rows (filtered by column)';
+  }
+
+  @override
+  String get reportExcel => 'Download Excel';
+
+  @override
+  String get reportPdf => 'Download PDF';
+
+  @override
+  String get reportPdfMaking => 'Making the PDF…';
+
+  @override
+  String reportFileSaved(String name) {
+    return 'Saved $name';
+  }
+
+  @override
+  String reportDocTitle(String source) {
+    return '$source report';
+  }
+
+  @override
+  String reportCondPeriod(String from, String to) {
+    return 'Period: $from – $to';
+  }
+
+  @override
+  String reportCondItem(String label, String value) {
+    return '$label: $value';
+  }
+
+  @override
+  String reportCondColumn(String column, String values) {
+    return 'Filter ($column): $values';
+  }
+
+  @override
+  String get reportPreviewHint =>
+      'Shown as A4 portrait pages; the PDF is laid out the same way.';
+
+  @override
+  String reportPageOf(int page, int pages) {
+    return '$page / $pages';
+  }
+
+  @override
+  String get reportTotal => 'Total';
+
+  @override
+  String reportMadeAt(String when) {
+    return 'Made $when';
+  }
+
+  @override
+  String reportCount(int count) {
+    return '$count rows';
+  }
 }

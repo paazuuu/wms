@@ -9,6 +9,8 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../../warehouse_context/presentation/warehouse_overview_screen.dart' show countryLabel;
 import '../application/report_providers.dart';
 import '../domain/report.dart';
+import '../../warehouse_context/domain/warehouse.dart' show Warehouse;
+import 'report_view.dart';
 
 /// Custom/saved report builder (spec §46 checklist item 10, 0037) — pick a
 /// fixed data source, filter it, run it, and optionally save the
@@ -34,6 +36,10 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
   final _category = TextEditingController();
   DateTime? _dateFrom;
   DateTime? _dateTo;
+
+  /// The month picked ('YYYY-MM'), which sets both dates; null when the
+  /// dates were picked by hand.
+  String? _month;
 
   bool _running = false;
   ReportResult? _result;
@@ -62,9 +68,35 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
         if (_status.text.trim().isNotEmpty) 'status': _status.text.trim(),
         if (_janCode.text.trim().isNotEmpty) 'jan_code': _janCode.text.trim(),
         if (_category.text.trim().isNotEmpty) 'category': _category.text.trim(),
-        if (_dateFrom != null) 'date_from': _dateFrom!.toIso8601String(),
-        if (_dateTo != null) 'date_to': _dateTo!.toIso8601String(),
+        // From the day's start to its very end, in this device's time, so
+        // the last day is in the report.
+        if (_dateFrom != null)
+          'date_from': DateTime(_dateFrom!.year, _dateFrom!.month, _dateFrom!.day).toUtc().toIso8601String(),
+        if (_dateTo != null)
+          'date_to': DateTime(_dateTo!.year, _dateTo!.month, _dateTo!.day, 23, 59, 59, 999).toUtc().toIso8601String(),
       };
+
+  void _pickMonth(String? m) => setState(() {
+        _month = m;
+        if (m == null) return;
+        final y = int.parse(m.substring(0, 4)), mo = int.parse(m.substring(5));
+        _dateFrom = DateTime(y, mo);
+        _dateTo = DateTime(y, mo + 1, 0);
+      });
+
+  /// The conditions as lines for the page, the Excel and the PDF.
+  List<String> _conditions(AppLocalizations l10n, List<Warehouse> warehouses) => [
+        if (_dateFrom != null || _dateTo != null) l10n.reportCondPeriod(_fmtDate(_dateFrom), _fmtDate(_dateTo)),
+        l10n.reportCondItem(
+            l10n.reportWarehouse,
+            _warehouseId == null
+                ? l10n.reportAllWarehouses
+                : warehouses.where((w) => w.id == _warehouseId).map((w) => w.name).firstOrNull ?? '$_warehouseId'),
+        if (_countryCode != null) l10n.reportCondItem(l10n.reportCountry, countryLabel(l10n, _countryCode!)),
+        if (_status.text.trim().isNotEmpty) l10n.reportCondItem(l10n.reportFilterStatus, _status.text.trim()),
+        if (_janCode.text.trim().isNotEmpty) l10n.reportCondItem(l10n.reportFilterJan, _janCode.text.trim()),
+        if (_category.text.trim().isNotEmpty) l10n.reportCondItem(l10n.reportFilterCategory, _category.text.trim()),
+      ];
 
   Future<void> _run() async {
     final l10n = AppLocalizations.of(context);
@@ -114,8 +146,9 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
       _status.text = (def.filters['status'] ?? '').toString();
       _janCode.text = (def.filters['jan_code'] ?? '').toString();
       _category.text = (def.filters['category'] ?? '').toString();
-      _dateFrom = DateTime.tryParse('${def.filters['date_from']}');
-      _dateTo = DateTime.tryParse('${def.filters['date_to']}');
+      _dateFrom = DateTime.tryParse('${def.filters['date_from']}')?.toLocal();
+      _dateTo = DateTime.tryParse('${def.filters['date_to']}')?.toLocal();
+      _month = null;
     });
     await _run();
   }
@@ -152,6 +185,7 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
     );
     if (picked == null) return;
     setState(() {
+      _month = null;
       if (isFrom) {
         _dateFrom = picked;
       } else {
@@ -161,7 +195,7 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
   }
 
   String _fmtDate(DateTime? d) =>
-      d == null ? '—' : '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+      d == null ? '—' : '${d.year}/${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) {
@@ -248,6 +282,23 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
             decoration: InputDecoration(labelText: l10n.reportFilterCategory),
           ),
           const SizedBox(height: AppSpacing.lg),
+          // A month at once: the 1st to its last day.
+          DropdownButtonFormField<String?>(
+            key: ValueKey('report-month-$_month'),
+            initialValue: _month,
+            decoration: InputDecoration(labelText: l10n.reportMonth, prefixIcon: const Icon(Icons.calendar_month_outlined)),
+            items: [
+              DropdownMenuItem(value: null, child: Text(l10n.reportMonthAny)),
+              for (var i = 0; i < 24; i++)
+                () {
+                  final d = DateTime(DateTime.now().year, DateTime.now().month - i);
+                  final v = '${d.year}-${d.month.toString().padLeft(2, '0')}';
+                  return DropdownMenuItem(value: v, child: Text('${d.year}/${d.month.toString().padLeft(2, '0')}'));
+                }(),
+            ],
+            onChanged: _pickMonth,
+          ),
+          const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
               Expanded(
@@ -295,8 +346,6 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          if (_result != null) _ResultTable(result: _result!),
-          const SizedBox(height: AppSpacing.xl),
           Text(l10n.reportSavedTitle, style: theme.textTheme.titleMedium),
           const SizedBox(height: AppSpacing.sm),
           savedAsync.when(
@@ -333,61 +382,16 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
                     ],
                   ),
           ),
+          const SizedBox(height: AppSpacing.xl),
+          if (_result != null)
+            ReportView(
+              key: ValueKey(_result),
+              result: _result!,
+              title: l10n.reportDocTitle(_sourceLabel(l10n, _result!.source)),
+              conditions: _conditions(l10n, warehouseAsync.valueOrNull?.warehouses ?? const []),
+            ),
         ],
       ),
-    );
-  }
-}
-
-class _ResultTable extends StatelessWidget {
-  const _ResultTable({required this.result});
-
-  final ReportResult result;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-
-    if (result.rows.isEmpty) {
-      // EmptyStateView is itself a ListView (built for a full-page Expanded
-      // slot) — nesting one inside this screen's own outer ListView leaves
-      // it with unbounded height, so a plain inline message goes here
-      // instead.
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-        child: Column(
-          children: [
-            Icon(Icons.table_chart_outlined,
-                size: 48, color: theme.colorScheme.onSurfaceVariant),
-            const SizedBox(height: AppSpacing.md),
-            Text(l10n.reportEmpty,
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-          ],
-        ),
-      );
-    }
-
-    final columns = result.rows.first.keys.toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(l10n.reportRowCount(result.rows.length), style: theme.textTheme.bodySmall),
-        const SizedBox(height: AppSpacing.sm),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columns: [for (final c in columns) DataColumn(label: Text(c))],
-            rows: [
-              for (final row in result.rows)
-                DataRow(cells: [
-                  for (final c in columns) DataCell(Text('${row[c] ?? ''}')),
-                ]),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

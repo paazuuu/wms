@@ -31,6 +31,7 @@ dependencies:
   # Value equality
   equatable: ^2.0.5
   printing: ^5.15.0
+  pdf: ^3.11.0
   # Zip for reading and writing .xlsx sheets (master import, 0138)
   archive: ^4.0.9
   xml: ^7.0.0
@@ -53,6 +54,10 @@ flutter:
   # that design (lib/core/theme/theme_fonts.dart).
   assets:
     - assets/fonts/themes/
+    # IPAGothic, unmodified (IPA Font License v1.0, see
+    # assets/fonts/pdf/IPA_Font_License_Agreement_v1.0.txt): the Japanese
+    # in report PDFs. Fetched only when a PDF is made.
+    - assets/fonts/pdf/
 
   # Bundled offline-first fonts: Figtree for UI/labels (Astryx Neutral),
   # Fira Code (monospace) for codes/barcodes/quantities.

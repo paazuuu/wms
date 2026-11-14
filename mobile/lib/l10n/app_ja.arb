@@ -15081,5 +15081,105 @@
   "groupAdministration": "管理",
   "groupAdminOnly": "システム管理者のみ",
   "groupAdminOnlyHint": "このカテゴリーはシステム管理者だけに表示され、使えます",
-  "mvAdminOnly": "システム管理者のみ（変更できません）"
+  "mvAdminOnly": "システム管理者のみ（変更できません）",
+  "reportMonth": "月",
+  "reportMonthAny": "月を指定しない（日付で選ぶ）",
+  "reportColumnFilter": "列で絞り込む",
+  "reportFilterAll": "すべて選ぶ",
+  "reportFilterNone": "すべて外す",
+  "reportFilterSearch": "値を検索",
+  "reportFilterApply": "絞り込む",
+  "reportFilterReset": "絞り込みを解除",
+  "reportFiltered": "{shown} / {all} 件（列で絞り込み中）",
+  "@reportFiltered": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "all": {
+        "type": "int"
+      }
+    }
+  },
+  "reportExcel": "Excelでダウンロード",
+  "reportPdf": "PDFでダウンロード",
+  "reportPdfMaking": "PDFを作っています…",
+  "reportFileSaved": "{name} を保存しました",
+  "@reportFileSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDocTitle": "{source}レポート",
+  "@reportDocTitle": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCondPeriod": "期間: {from} 〜 {to}",
+  "@reportCondPeriod": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCondItem": "{label}: {value}",
+  "@reportCondItem": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCondColumn": "絞り込み（{column}）: {values}",
+  "@reportCondColumn": {
+    "placeholders": {
+      "column": {
+        "type": "String"
+      },
+      "values": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPreviewHint": "A4縦で表示しています。ダウンロードするPDFも同じ形です。",
+  "reportPageOf": "{page} / {pages}",
+  "@reportPageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "pages": {
+        "type": "int"
+      }
+    }
+  },
+  "reportTotal": "合計",
+  "reportMadeAt": "作成 {when}",
+  "@reportMadeAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCount": "{count}件",
+  "@reportCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
