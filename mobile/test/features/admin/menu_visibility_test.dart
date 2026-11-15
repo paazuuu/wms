@@ -63,7 +63,7 @@ void main() {
     final system = groups['management']!;
     expect(system.adminOnly, isTrue);
     expect(groups['administration']!.adminOnly, isFalse);
-    expect(groups['administration']!.entries.map((e) => e.id), ['company_profile', 'partners', 'locations', 'reports']);
+    expect(groups['administration']!.entries.map((e) => e.id), ['company_profile', 'partners', 'locations', 'reports', 'work_log']);
     final systemIds = system.entries.map((e) => e.id).toSet();
     expect(systemIds, containsAll(['audit_log', 'user_management', 'requirements', 'system_reset']));
     expect(systemIds, isNot(contains('reports')));

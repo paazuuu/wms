@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import '../../../core/export/save_bytes.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/report_export.dart';
-import '../domain/report.dart';
 import '../domain/report_table.dart';
 
 /// Where a report file is saved (overridden in tests).
@@ -18,17 +18,74 @@ final reportFileSaverProvider =
 /// The Japanese for the PDF (overridden in tests).
 final reportPdfFontProvider = Provider<Future<Uint8List> Function()>((_) => loadReportPdfFont);
 
-/// Rows on one A4 page of the preview.
+/// Rows on one A4 page of the preview when every row is one line.
 const reportRowsPerPage = 30;
+
+/// The preview's text size for a table of [columns] columns.
+double reportFontSize(int columns) => columns <= 6 ? 12.0 : (columns <= 10 ? 11.0 : 9.5);
+
+/// How many lines [text] takes in a column [flex] of [flexSum] wide on the
+/// 698px page, at [size]: wide (CJK) characters count whole, others half.
+int reportLines(String text, double flex, double flexSum, double size, {int max = 6}) {
+  final width = 698 * flex / flexSum - 10;
+  var units = 0.0, lines = 1;
+  for (final r in text.runes) {
+    if (r == 10) {
+      lines++;
+      units = 0;
+      continue;
+    }
+    units += r < 0x2E80 ? 0.55 : 1.0;
+    if (units * size > width) {
+      lines++;
+      units = r < 0x2E80 ? 0.55 : 1.0;
+    }
+  }
+  return lines.clamp(1, max);
+}
+
+/// Each row's height on the page: one line, or more for a long memo.
+double reportRowHeight(ReportTable t, List<String> row) {
+  final size = reportFontSize(t.columns.length);
+  final flexSum = t.columns.fold<double>(0, (a, c) => a + c.flex);
+  var lines = 1;
+  for (final (i, c) in t.columns.indexed) {
+    if (c.wrap) lines = math.max(lines, reportLines(row[i], c.flex, flexSum, size));
+  }
+  return lines == 1 ? 26 : 8 + lines * size * 1.3;
+}
+
+/// The rows split into A4 pages by the height they take: the first page
+/// holds the title and [conditionLines] lines of conditions above them.
+List<List<List<String>>> paginateReport(ReportTable t, {int conditionLines = 0}) {
+  const body = 1123 - 48 - 40 - 26 /* heading row */ - 26 /* total */ - 24 /* footer */;
+  final first = body - (36 + 8 + (conditionLines + 1) * 15 + 14);
+  const later = body - 24;
+  final pages = <List<List<String>>>[];
+  var page = <List<String>>[];
+  var left = first.toDouble();
+  for (final r in t.rows) {
+    final h = reportRowHeight(t, r);
+    if (h > left && page.isNotEmpty) {
+      pages.add(page);
+      page = [];
+      left = later.toDouble();
+    }
+    page.add(r);
+    left -= h;
+  }
+  if (page.isNotEmpty) pages.add(page);
+  return pages;
+}
 
 /// A report's result as it will print: A4 portrait pages with the title and
 /// the conditions on the first, the table with its heading on every page,
 /// and the total at the end — narrowed by any column's values, and saved as
 /// Excel or PDF just as it is shown.
 class ReportView extends ConsumerStatefulWidget {
-  const ReportView({super.key, required this.result, required this.title, required this.conditions});
+  const ReportView({super.key, required this.table, required this.title, required this.conditions});
 
-  final ReportResult result;
+  final ReportTable table;
   final String title;
   final List<String> conditions;
 
@@ -37,7 +94,7 @@ class ReportView extends ConsumerStatefulWidget {
 }
 
 class _ReportViewState extends ConsumerState<ReportView> {
-  late final ReportTable _all = reportTable(widget.result);
+  ReportTable get _all => widget.table;
 
   /// Column index → the values kept.
   final Map<int, Set<String>> _filters = {};
@@ -132,8 +189,8 @@ class _ReportViewState extends ConsumerState<ReportView> {
     }
 
     final shown = _shown;
-    final pages = shown.pages(reportRowsPerPage);
     final doc = _doc(l10n);
+    final pages = paginateReport(shown, conditionLines: doc.conditions.length);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       // The count, and the downloads.
       Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.sm, crossAxisAlignment: WrapCrossAlignment.center, children: [
@@ -225,7 +282,7 @@ class _A4Page extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = doc.table;
     final cols = t.columns;
-    final size = cols.length <= 6 ? 12.0 : (cols.length <= 9 ? 11.0 : 9.5);
+    final size = reportFontSize(cols.length);
     TextStyle style({bool bold = false, Color color = _ink, double? s}) => TextStyle(
         fontSize: s ?? size, color: color, fontWeight: bold ? FontWeight.w700 : FontWeight.w400, height: 1.25);
     Widget cell(String text, ReportColumn c, {bool bold = false}) => Expanded(
@@ -233,14 +290,15 @@ class _A4Page extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: Text(text,
-                maxLines: 1,
+                maxLines: c.wrap ? 6 : 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: c.numeric ? TextAlign.right : TextAlign.left,
                 style: style(bold: bold)),
           ),
         );
     Widget row(List<String?> cells, {Color? fill, bool bold = false}) => Container(
-          height: 26,
+          height: reportRowHeight(t, [for (final c in cells) c ?? '']),
+          alignment: Alignment.centerLeft,
           decoration: BoxDecoration(color: fill, border: const Border(bottom: BorderSide(color: _line, width: 0.8))),
           child: Row(children: [for (final (i, c) in cols.indexed) cell(cells[i] ?? '', c, bold: bold)]),
         );

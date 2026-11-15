@@ -33,6 +33,7 @@ import '../../product/presentation/unlinked_jan_screen.dart';
 import '../../putaway/presentation/putaway_queue_screen.dart';
 import '../../warehouse_context/presentation/location_tree_screen.dart';
 import '../../reports/presentation/report_builder_screen.dart';
+import '../../reports/presentation/work_log_screen.dart';
 import '../../sales/presentation/sales_order_list_screen.dart';
 import '../../supply_chain/presentation/sc_bottleneck_screen.dart';
 import '../../supply_chain/presentation/sc_cost_structure_screen.dart';
@@ -583,6 +584,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _reports,
             requiredAnyOf: ['report.view', 'report.manage'],
           ),
+          // 作業実績 (0215): a month's receipts, shipments and memos with
+          // what was written on each, as A4 Excel and PDF.
+          FeatureEntry(
+            id: 'work_log',
+            icon: Icons.assignment_outlined,
+            status: FeatureStatus.ready,
+            builder: _workLog,
+            requiredAnyOf: ['report.view', 'report.manage', 'inventory.view', 'product.view', 'ship.complete'],
+          ),
         ],
       ),
       // システム管理: the system administrator's only (FeatureGroup.adminOnly).
@@ -810,6 +820,7 @@ Widget _partners(BuildContext _) => const TradingPartnerListScreen();
 
 /// Top-level (const-referenceable) builder for the Report Builder feature.
 Widget _reports(BuildContext _) => const ReportBuilderScreen();
+Widget _workLog(BuildContext _) => const WorkLogScreen();
 Widget _notationTraining(BuildContext _) => const NotationTrainingScreen();
 
 /// Top-level (const-referenceable) builder for the Put-away feature.

@@ -17026,4 +17026,123 @@ class AppLocalizationsZh extends AppLocalizations {
   String reportCount(int count) {
     return '$count条';
   }
+
+  @override
+  String get featWorkLog => '作业实绩';
+
+  @override
+  String get featWorkLogDesc => '按月汇总入库・出库・备忘，以A4格式导出Excel・PDF';
+
+  @override
+  String wlDocTitle(String month) {
+    return '作业实绩 $month';
+  }
+
+  @override
+  String get wlKinds => '类别';
+
+  @override
+  String get wlKindReceipt => '入库';
+
+  @override
+  String get wlKindUnplanned => '计划外入库';
+
+  @override
+  String get wlKindOutbound => '出库';
+
+  @override
+  String get wlKindProxy => '库存外出货';
+
+  @override
+  String get wlKindMemo => '备忘・指示';
+
+  @override
+  String get wlAmounts => '包含金额';
+
+  @override
+  String get wlAmountsHint => '对外提供的记录和备忘录建议不包含金额（金额可在会计画面查看）';
+
+  @override
+  String wlSummary(int r, int o, int p, int m) {
+    return '入库 $r件・出库 $o件・库存外出货 $p件・备忘 $m件';
+  }
+
+  @override
+  String get wlColDay => '日期';
+
+  @override
+  String get wlColKind => '类别';
+
+  @override
+  String get wlColWarehouse => '仓库';
+
+  @override
+  String get wlColPartner => '往来方（供应商・出货地）';
+
+  @override
+  String get wlColFile => '文件';
+
+  @override
+  String get wlColLines => '行数';
+
+  @override
+  String get wlColQty => '数量';
+
+  @override
+  String get wlColStatus => '状态';
+
+  @override
+  String get wlColBy => '负责人';
+
+  @override
+  String get wlColNote => '备忘・指示';
+
+  @override
+  String get wlColAmount => '金额';
+
+  @override
+  String get wlStAwaiting => '待验货';
+
+  @override
+  String get wlStDone => '已入库';
+
+  @override
+  String get wlStPlanned => '计划出库';
+
+  @override
+  String get wlStShipped => '已出库';
+
+  @override
+  String get wlStRecorded => '已出货（记录）';
+
+  @override
+  String wlCartons(int n) {
+    return '$n箱';
+  }
+
+  @override
+  String wlFee(String v) {
+    return '手续费 $v';
+  }
+
+  @override
+  String wlFreight(String v) {
+    return '运费 $v';
+  }
+
+  @override
+  String wlDocDay(String d) {
+    return '单据日期 $d';
+  }
+
+  @override
+  String get wlEmpty => '本月没有作业记录';
+
+  @override
+  String get wlNoKinds => '请至少选择一个类别';
+
+  @override
+  String wkShort(int n) {
+    return '缺 $n';
+  }
 }

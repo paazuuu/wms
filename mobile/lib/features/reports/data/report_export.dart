@@ -87,7 +87,7 @@ Future<Uint8List> buildReportPdf(ReportDoc d, Uint8List fontBytes, {bool compres
   const head = PdfColor.fromInt(0xFFEEF1F4);
   const stripe = PdfColor.fromInt(0xFFF8F9FA);
   // Narrow tables read larger; wide ones shrink to fit the portrait page.
-  final size = t.columns.length <= 6 ? 8.5 : (t.columns.length <= 9 ? 7.5 : 6.5);
+  final size = t.columns.length <= 6 ? 8.5 : (t.columns.length <= 10 ? 7.5 : 6.5);
   final doc = pw.Document(
       title: d.title, compress: compress, theme: pw.ThemeData.withFont(base: font, bold: font));
   doc.addPage(pw.MultiPage(

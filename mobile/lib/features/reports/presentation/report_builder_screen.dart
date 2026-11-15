@@ -10,6 +10,7 @@ import '../../warehouse_context/presentation/warehouse_overview_screen.dart' sho
 import '../application/report_providers.dart';
 import '../domain/report.dart';
 import '../../warehouse_context/domain/warehouse.dart' show Warehouse;
+import '../domain/report_table.dart';
 import 'report_view.dart';
 
 /// Custom/saved report builder (spec §46 checklist item 10, 0037) — pick a
@@ -386,7 +387,7 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
           if (_result != null)
             ReportView(
               key: ValueKey(_result),
-              result: _result!,
+              table: reportTable(_result!),
               title: l10n.reportDocTitle(_sourceLabel(l10n, _result!.source)),
               conditions: _conditions(l10n, warehouseAsync.valueOrNull?.warehouses ?? const []),
             ),

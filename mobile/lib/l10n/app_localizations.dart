@@ -30085,6 +30085,216 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{count}件'**
   String reportCount(int count);
+
+  /// No description provided for @featWorkLog.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業実績'**
+  String get featWorkLog;
+
+  /// No description provided for @featWorkLogDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷・出庫・メモを月ごとにまとめ、A4のExcel・PDFで出す'**
+  String get featWorkLogDesc;
+
+  /// No description provided for @wlDocTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'作業実績 {month}'**
+  String wlDocTitle(String month);
+
+  /// No description provided for @wlKinds.
+  ///
+  /// In ja, this message translates to:
+  /// **'区分'**
+  String get wlKinds;
+
+  /// No description provided for @wlKindReceipt.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷'**
+  String get wlKindReceipt;
+
+  /// No description provided for @wlKindUnplanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷'**
+  String get wlKindUnplanned;
+
+  /// No description provided for @wlKindOutbound.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫'**
+  String get wlKindOutbound;
+
+  /// No description provided for @wlKindProxy.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫外出荷'**
+  String get wlKindProxy;
+
+  /// No description provided for @wlKindMemo.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ・指示'**
+  String get wlKindMemo;
+
+  /// No description provided for @wlAmounts.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額も載せる'**
+  String get wlAmounts;
+
+  /// No description provided for @wlAmountsHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'社外に渡す記録や覚書には、金額を載せないことをおすすめします（金額は会計の画面で確認できます）'**
+  String get wlAmountsHint;
+
+  /// No description provided for @wlSummary.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷 {r}件・出庫 {o}件・在庫外出荷 {p}件・メモ {m}件'**
+  String wlSummary(int r, int o, int p, int m);
+
+  /// No description provided for @wlColDay.
+  ///
+  /// In ja, this message translates to:
+  /// **'日付'**
+  String get wlColDay;
+
+  /// No description provided for @wlColKind.
+  ///
+  /// In ja, this message translates to:
+  /// **'区分'**
+  String get wlColKind;
+
+  /// No description provided for @wlColWarehouse.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫'**
+  String get wlColWarehouse;
+
+  /// No description provided for @wlColPartner.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先（仕入先・出荷先）'**
+  String get wlColPartner;
+
+  /// No description provided for @wlColFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル'**
+  String get wlColFile;
+
+  /// No description provided for @wlColLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'行数'**
+  String get wlColLines;
+
+  /// No description provided for @wlColQty.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量'**
+  String get wlColQty;
+
+  /// No description provided for @wlColStatus.
+  ///
+  /// In ja, this message translates to:
+  /// **'状態'**
+  String get wlColStatus;
+
+  /// No description provided for @wlColBy.
+  ///
+  /// In ja, this message translates to:
+  /// **'担当'**
+  String get wlColBy;
+
+  /// No description provided for @wlColNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ・指示'**
+  String get wlColNote;
+
+  /// No description provided for @wlColAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額'**
+  String get wlColAmount;
+
+  /// No description provided for @wlStAwaiting.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品待ち'**
+  String get wlStAwaiting;
+
+  /// No description provided for @wlStDone.
+  ///
+  /// In ja, this message translates to:
+  /// **'入庫済み'**
+  String get wlStDone;
+
+  /// No description provided for @wlStPlanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫予定'**
+  String get wlStPlanned;
+
+  /// No description provided for @wlStShipped.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫済み'**
+  String get wlStShipped;
+
+  /// No description provided for @wlStRecorded.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷済み（記録）'**
+  String get wlStRecorded;
+
+  /// No description provided for @wlCartons.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}箱'**
+  String wlCartons(int n);
+
+  /// No description provided for @wlFee.
+  ///
+  /// In ja, this message translates to:
+  /// **'手数料 {v}'**
+  String wlFee(String v);
+
+  /// No description provided for @wlFreight.
+  ///
+  /// In ja, this message translates to:
+  /// **'輸送費 {v}'**
+  String wlFreight(String v);
+
+  /// No description provided for @wlDocDay.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類日付 {d}'**
+  String wlDocDay(String d);
+
+  /// No description provided for @wlEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'この月の作業記録はありません'**
+  String get wlEmpty;
+
+  /// No description provided for @wlNoKinds.
+  ///
+  /// In ja, this message translates to:
+  /// **'区分を1つ以上選んでください'**
+  String get wlNoKinds;
+
+  /// No description provided for @wkShort.
+  ///
+  /// In ja, this message translates to:
+  /// **'不足 {n}'**
+  String wkShort(int n);
 }
 
 class _AppLocalizationsDelegate

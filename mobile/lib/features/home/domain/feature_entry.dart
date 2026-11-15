@@ -192,6 +192,8 @@ class FeatureEntry {
         return l10n.featWorkOrders;
       case 'reports':
         return l10n.featReports;
+      case 'work_log':
+        return l10n.featWorkLog;
       case 'notation_training':
         return l10n.featNotationTraining;
       case 'sc_dashboard':
@@ -338,6 +340,8 @@ class FeatureEntry {
         return l10n.featWorkOrdersDesc;
       case 'reports':
         return l10n.featReportsDesc;
+      case 'work_log':
+        return l10n.featWorkLogDesc;
       case 'notation_training':
         return l10n.featNotationTrainingDesc;
       case 'sc_dashboard':

@@ -17148,4 +17148,123 @@ class AppLocalizationsJa extends AppLocalizations {
   String reportCount(int count) {
     return '$count件';
   }
+
+  @override
+  String get featWorkLog => '作業実績';
+
+  @override
+  String get featWorkLogDesc => '入荷・出庫・メモを月ごとにまとめ、A4のExcel・PDFで出す';
+
+  @override
+  String wlDocTitle(String month) {
+    return '作業実績 $month';
+  }
+
+  @override
+  String get wlKinds => '区分';
+
+  @override
+  String get wlKindReceipt => '入荷';
+
+  @override
+  String get wlKindUnplanned => '予定外の入荷';
+
+  @override
+  String get wlKindOutbound => '出庫';
+
+  @override
+  String get wlKindProxy => '在庫外出荷';
+
+  @override
+  String get wlKindMemo => 'メモ・指示';
+
+  @override
+  String get wlAmounts => '金額も載せる';
+
+  @override
+  String get wlAmountsHint => '社外に渡す記録や覚書には、金額を載せないことをおすすめします（金額は会計の画面で確認できます）';
+
+  @override
+  String wlSummary(int r, int o, int p, int m) {
+    return '入荷 $r件・出庫 $o件・在庫外出荷 $p件・メモ $m件';
+  }
+
+  @override
+  String get wlColDay => '日付';
+
+  @override
+  String get wlColKind => '区分';
+
+  @override
+  String get wlColWarehouse => '倉庫';
+
+  @override
+  String get wlColPartner => '取引先（仕入先・出荷先）';
+
+  @override
+  String get wlColFile => 'ファイル';
+
+  @override
+  String get wlColLines => '行数';
+
+  @override
+  String get wlColQty => '数量';
+
+  @override
+  String get wlColStatus => '状態';
+
+  @override
+  String get wlColBy => '担当';
+
+  @override
+  String get wlColNote => 'メモ・指示';
+
+  @override
+  String get wlColAmount => '金額';
+
+  @override
+  String get wlStAwaiting => '検品待ち';
+
+  @override
+  String get wlStDone => '入庫済み';
+
+  @override
+  String get wlStPlanned => '出庫予定';
+
+  @override
+  String get wlStShipped => '出庫済み';
+
+  @override
+  String get wlStRecorded => '出荷済み（記録）';
+
+  @override
+  String wlCartons(int n) {
+    return '$n箱';
+  }
+
+  @override
+  String wlFee(String v) {
+    return '手数料 $v';
+  }
+
+  @override
+  String wlFreight(String v) {
+    return '輸送費 $v';
+  }
+
+  @override
+  String wlDocDay(String d) {
+    return '書類日付 $d';
+  }
+
+  @override
+  String get wlEmpty => 'この月の作業記録はありません';
+
+  @override
+  String get wlNoKinds => '区分を1つ以上選んでください';
+
+  @override
+  String wkShort(int n) {
+    return '不足 $n';
+  }
 }

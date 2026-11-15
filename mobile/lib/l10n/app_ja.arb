@@ -15181,5 +15181,98 @@
         "type": "int"
       }
     }
+  },
+  "featWorkLog": "作業実績",
+  "featWorkLogDesc": "入荷・出庫・メモを月ごとにまとめ、A4のExcel・PDFで出す",
+  "wlDocTitle": "作業実績 {month}",
+  "@wlDocTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "wlKinds": "区分",
+  "wlKindReceipt": "入荷",
+  "wlKindUnplanned": "予定外の入荷",
+  "wlKindOutbound": "出庫",
+  "wlKindProxy": "在庫外出荷",
+  "wlKindMemo": "メモ・指示",
+  "wlAmounts": "金額も載せる",
+  "wlAmountsHint": "社外に渡す記録や覚書には、金額を載せないことをおすすめします（金額は会計の画面で確認できます）",
+  "wlSummary": "入荷 {r}件・出庫 {o}件・在庫外出荷 {p}件・メモ {m}件",
+  "@wlSummary": {
+    "placeholders": {
+      "r": {
+        "type": "int"
+      },
+      "o": {
+        "type": "int"
+      },
+      "p": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "wlColDay": "日付",
+  "wlColKind": "区分",
+  "wlColWarehouse": "倉庫",
+  "wlColPartner": "取引先（仕入先・出荷先）",
+  "wlColFile": "ファイル",
+  "wlColLines": "行数",
+  "wlColQty": "数量",
+  "wlColStatus": "状態",
+  "wlColBy": "担当",
+  "wlColNote": "メモ・指示",
+  "wlColAmount": "金額",
+  "wlStAwaiting": "検品待ち",
+  "wlStDone": "入庫済み",
+  "wlStPlanned": "出庫予定",
+  "wlStShipped": "出庫済み",
+  "wlStRecorded": "出荷済み（記録）",
+  "wlCartons": "{n}箱",
+  "@wlCartons": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wlFee": "手数料 {v}",
+  "@wlFee": {
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  },
+  "wlFreight": "輸送費 {v}",
+  "@wlFreight": {
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  },
+  "wlDocDay": "書類日付 {d}",
+  "@wlDocDay": {
+    "placeholders": {
+      "d": {
+        "type": "String"
+      }
+    }
+  },
+  "wlEmpty": "この月の作業記録はありません",
+  "wlNoKinds": "区分を1つ以上選んでください",
+  "wkShort": "不足 {n}",
+  "@wkShort": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

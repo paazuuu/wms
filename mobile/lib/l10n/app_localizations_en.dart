@@ -17492,4 +17492,125 @@ class AppLocalizationsEn extends AppLocalizations {
   String reportCount(int count) {
     return '$count rows';
   }
+
+  @override
+  String get featWorkLog => 'Work log';
+
+  @override
+  String get featWorkLogDesc =>
+      'Each month’s receipts, shipments and memos, as A4 Excel and PDF';
+
+  @override
+  String wlDocTitle(String month) {
+    return 'Work log $month';
+  }
+
+  @override
+  String get wlKinds => 'Kinds';
+
+  @override
+  String get wlKindReceipt => 'Receipt';
+
+  @override
+  String get wlKindUnplanned => 'Unplanned receipt';
+
+  @override
+  String get wlKindOutbound => 'Shipment';
+
+  @override
+  String get wlKindProxy => 'Shipped by others';
+
+  @override
+  String get wlKindMemo => 'Memo / instruction';
+
+  @override
+  String get wlAmounts => 'Include amounts';
+
+  @override
+  String get wlAmountsHint =>
+      'For records and memoranda given outside the company, leaving amounts out is recommended (they are in the accounting screens)';
+
+  @override
+  String wlSummary(int r, int o, int p, int m) {
+    return 'Receipts $r, shipments $o, shipped by others $p, memos $m';
+  }
+
+  @override
+  String get wlColDay => 'Date';
+
+  @override
+  String get wlColKind => 'Kind';
+
+  @override
+  String get wlColWarehouse => 'Warehouse';
+
+  @override
+  String get wlColPartner => 'Partner (supplier / ship-to)';
+
+  @override
+  String get wlColFile => 'File';
+
+  @override
+  String get wlColLines => 'Lines';
+
+  @override
+  String get wlColQty => 'Qty';
+
+  @override
+  String get wlColStatus => 'Status';
+
+  @override
+  String get wlColBy => 'By';
+
+  @override
+  String get wlColNote => 'Memo / instructions';
+
+  @override
+  String get wlColAmount => 'Amount';
+
+  @override
+  String get wlStAwaiting => 'Awaiting inspection';
+
+  @override
+  String get wlStDone => 'In stock';
+
+  @override
+  String get wlStPlanned => 'Planned';
+
+  @override
+  String get wlStShipped => 'Shipped';
+
+  @override
+  String get wlStRecorded => 'Shipped (recorded)';
+
+  @override
+  String wlCartons(int n) {
+    return '$n cartons';
+  }
+
+  @override
+  String wlFee(String v) {
+    return 'fee $v';
+  }
+
+  @override
+  String wlFreight(String v) {
+    return 'freight $v';
+  }
+
+  @override
+  String wlDocDay(String d) {
+    return 'document dated $d';
+  }
+
+  @override
+  String get wlEmpty => 'No work recorded this month';
+
+  @override
+  String get wlNoKinds => 'Pick at least one kind';
+
+  @override
+  String wkShort(int n) {
+    return 'short $n';
+  }
 }

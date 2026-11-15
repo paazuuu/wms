@@ -5,7 +5,10 @@ import 'report.dart';
 /// One column of a report as people read it: the key the server sends,
 /// its heading, and whether it holds numbers (right-aligned, summed).
 class ReportColumn {
-  const ReportColumn(this.key, this.label, {this.numeric = false, this.summed = false, this.flex = 1});
+  const ReportColumn(this.key, this.label, {this.numeric = false, this.summed = false, this.flex = 1, this.wrap = false});
+
+  /// Long text (a memo) shown in full over several lines, not cut short.
+  final bool wrap;
 
   final String key;
   final String label;
