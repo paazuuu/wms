@@ -30451,6 +30451,78 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'データ・倉庫・期間・絞り込みの組み合わせに名前を付けて残します。次からは一覧から選ぶだけで、その時点の最新のデータで作り直せます。ファイルのダウンロードと違い、中身ではなく条件を保存します'**
   String get reportSaveHint;
+
+  /// No description provided for @umTierPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'区分'**
+  String get umTierPick;
+
+  /// No description provided for @umTierHelpAdmin.
+  ///
+  /// In ja, this message translates to:
+  /// **'ADMIN（システム管理者）：すべての機能と、ユーザー・設定の管理'**
+  String get umTierHelpAdmin;
+
+  /// No description provided for @umTierHelpManager.
+  ///
+  /// In ja, this message translates to:
+  /// **'管理者（倉庫責任者）：入出荷・在庫・商品・取引先・レポート'**
+  String get umTierHelpManager;
+
+  /// No description provided for @umTierHelpUser.
+  ///
+  /// In ja, this message translates to:
+  /// **'通常（現場スタッフ）：入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整'**
+  String get umTierHelpUser;
+
+  /// No description provided for @umTierConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'区分を変えますか？'**
+  String get umTierConfirm;
+
+  /// No description provided for @umTierConfirmBody.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} さんを「{from}」から「{to}」にします。見えるメニューと使える機能が変わります。'**
+  String umTierConfirmBody(String name, String from, String to);
+
+  /// No description provided for @umTierChange.
+  ///
+  /// In ja, this message translates to:
+  /// **'変更する'**
+  String get umTierChange;
+
+  /// No description provided for @umTierChanged.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} さんの区分を「{to}」にしました'**
+  String umTierChanged(String name, String to);
+
+  /// No description provided for @umTierSelf.
+  ///
+  /// In ja, this message translates to:
+  /// **'ご自身の区分は変えられません（システム管理者がいなくならないように）'**
+  String get umTierSelf;
+
+  /// No description provided for @umErrSelfAdmin.
+  ///
+  /// In ja, this message translates to:
+  /// **'ご自身のシステム管理者の権限は外せません'**
+  String get umErrSelfAdmin;
+
+  /// No description provided for @umErrLastAdmin.
+  ///
+  /// In ja, this message translates to:
+  /// **'システム管理者が1人もいなくなるため、外せません'**
+  String get umErrLastAdmin;
+
+  /// No description provided for @umTierNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'未設定'**
+  String get umTierNone;
 }
 
 class _AppLocalizationsDelegate

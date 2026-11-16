@@ -76,7 +76,7 @@ void main() {
       ])),
       userProvisioningRepositoryProvider.overrideWithValue(p),
     ]);
-    expect(find.text('区分: ADMIN'), findsOneWidget);
+    expect(find.text('ADMIN'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('um-add')));
     await tester.pumpAndSettle();
@@ -114,7 +114,7 @@ void main() {
       ])),
       userProvisioningRepositoryProvider.overrideWithValue(p),
     ]);
-    expect(find.text('区分: 通常'), findsOneWidget);
+    expect(find.text('通常'), findsOneWidget);
 
     // Typed: too short is refused; the text is shown as typed.
     await tester.tap(find.byKey(const ValueKey('um-reset-u9')));

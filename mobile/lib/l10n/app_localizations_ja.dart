@@ -17353,4 +17353,44 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get reportSaveHint =>
       'データ・倉庫・期間・絞り込みの組み合わせに名前を付けて残します。次からは一覧から選ぶだけで、その時点の最新のデータで作り直せます。ファイルのダウンロードと違い、中身ではなく条件を保存します';
+
+  @override
+  String get umTierPick => '区分';
+
+  @override
+  String get umTierHelpAdmin => 'ADMIN（システム管理者）：すべての機能と、ユーザー・設定の管理';
+
+  @override
+  String get umTierHelpManager => '管理者（倉庫責任者）：入出荷・在庫・商品・取引先・レポート';
+
+  @override
+  String get umTierHelpUser => '通常（現場スタッフ）：入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整';
+
+  @override
+  String get umTierConfirm => '区分を変えますか？';
+
+  @override
+  String umTierConfirmBody(String name, String from, String to) {
+    return '$name さんを「$from」から「$to」にします。見えるメニューと使える機能が変わります。';
+  }
+
+  @override
+  String get umTierChange => '変更する';
+
+  @override
+  String umTierChanged(String name, String to) {
+    return '$name さんの区分を「$to」にしました';
+  }
+
+  @override
+  String get umTierSelf => 'ご自身の区分は変えられません（システム管理者がいなくならないように）';
+
+  @override
+  String get umErrSelfAdmin => 'ご自身のシステム管理者の権限は外せません';
+
+  @override
+  String get umErrLastAdmin => 'システム管理者が1人もいなくなるため、外せません';
+
+  @override
+  String get umTierNone => '未設定';
 }

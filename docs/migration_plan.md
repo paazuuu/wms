@@ -9621,6 +9621,30 @@ two stages. Where: 商品 → ファイルから商品・在庫登録 (also 商�
 - `pg_net` 拡張が public スキーマに入っている。
 - `normalize_barcode` の search_path が固定されていない。
 
+## 0217: ユーザーは「区分」で切り替える、役割を外すときの安全策、normalize_barcode
+
+**ユーザー管理**
+- 区分は3つで、それぞれ役割1つに対応する。ユーザー追加（0194）と同じ対応。
+  - 通常 ＝ floor_staff（現場スタッフ）
+  - 管理者 ＝ warehouse_manager（倉庫責任者）
+  - ADMIN ＝ system_admin（システム管理者）
+- 画面では、役割のチップ（×で外せた）と「ロールを追加」をやめ、区分を選ぶメニューにした。
+  - 選ぶと、変更前と変更後を示して確認を出す。キャンセルすれば何も変わらない。
+  - 各区分でできることを、メニューの横に表示する。
+  - 自分の区分は変えられない（鍵のアイコンで表示）。
+- `set_user_tier(user, tier)`：ユーザーの役割を、その区分の役割1つにそろえる。
+  - システム管理者だけが実行できる。
+  - 先に新しい役割を付けてから、ほかの役割を外す。役割が1つもない瞬間を作らないため。
+  - 監査ログ `user.tier_set` に、変更前の役割も残す。
+- `revoke_user_role` に安全策を2つ足した。
+  - 自分のシステム管理者を外せない（`user_role_self_admin`）。
+  - 最後のシステム管理者を外せない（`user_role_last_admin`）。
+- 役割の一覧（Receiving・Picker など13種）はDBにそのまま残す。今使っているのは上の3つだけ。
+
+**normalize_barcode**
+- `search_path` を固定した。DBの標準の機能だけを使う関数なので、動きは変わらない。
+- `pg_net` は public のまま。移すには入れ直しが必要で、定期処理が止まるため。
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).

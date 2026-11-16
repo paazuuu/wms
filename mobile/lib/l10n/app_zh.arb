@@ -5417,5 +5417,17 @@
   "reportSourceHelpAuditLog": "谁・何时・做了什么的操作记录",
   "reportSourceHelpProducts": "期间内登记的商品列表（JAN・商品名・类别・状态）",
   "reportSourcesNone": "请至少选择一种数据",
-  "reportSaveHint": "为数据・仓库・期间・筛选的组合命名并保存。下次只需从列表中选择，即可按当时最新数据重新生成。与下载文件不同，保存的是条件而不是内容"
+  "reportSaveHint": "为数据・仓库・期间・筛选的组合命名并保存。下次只需从列表中选择，即可按当时最新数据重新生成。与下载文件不同，保存的是条件而不是内容",
+  "umTierPick": "类别",
+  "umTierHelpAdmin": "ADMIN（系统管理员）：全部功能及用户・设置的管理",
+  "umTierHelpManager": "管理者（仓库负责人）：出入货・库存・商品・往来方・报表",
+  "umTierHelpUser": "普通（现场员工）：入库・验货・上架・拣货・包装・出货・库存调整",
+  "umTierConfirm": "要更改类别吗？",
+  "umTierConfirmBody": "将 {name} 从「{from}」改为「{to}」。可见的菜单和可用的功能会改变。",
+  "umTierChange": "更改",
+  "umTierChanged": "已将 {name} 的类别改为「{to}」",
+  "umTierSelf": "不能更改自己的类别（以免系统没有管理员）",
+  "umErrSelfAdmin": "不能撤销自己的系统管理员权限",
+  "umErrLastAdmin": "这样会没有系统管理员，无法撤销",
+  "umTierNone": "未设置"
 }

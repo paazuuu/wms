@@ -19,6 +19,9 @@ abstract class AdminRepository {
 
   Future<ApiResult<bool>> revokeRole(String userId, String roleCode);
 
+  /// The user's 区分 (0217): their roles become the tier's one role.
+  Future<ApiResult<bool>> setTier(String userId, String tier);
+
   Future<ApiResult<bool>> assignWarehouse(String userId, int warehouseId);
 
   Future<ApiResult<bool>> revokeWarehouse(String userId, int warehouseId);
@@ -76,6 +79,16 @@ class AdminRepositoryImpl implements AdminRepository {
         'p_user_id': userId,
         'p_role_code': roleCode,
       });
+      return ApiSuccess(response.data == true);
+    } on DioException catch (e) {
+      return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<bool>> setTier(String userId, String tier) async {
+    try {
+      final response = await _dio.post('/rpc/set_user_tier', data: {'p_user_id': userId, 'p_tier': tier});
       return ApiSuccess(response.data == true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);

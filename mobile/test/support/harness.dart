@@ -1872,6 +1872,31 @@ class FakeAdminRepository implements AdminRepository {
     return const ApiSuccess(true);
   }
 
+  /// (user id, tier) for each 区分 set (0217).
+  final List<(String, String)> tiers = [];
+
+  @override
+  Future<ApiResult<bool>> setTier(String userId, String tier) async {
+    tiers.add((userId, tier));
+    const roleOf = {'admin': 'system_admin', 'manager': 'warehouse_manager', 'user': 'floor_staff'};
+    _users = [
+      for (final u in _users)
+        if (u.id == userId)
+          AppUserSummary(
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            status: u.status,
+            createdAt: u.createdAt,
+            roles: [UserRoleTag(code: roleOf[tier]!, name: roleOf[tier]!)],
+            warehouseIds: u.warehouseIds,
+          )
+        else
+          u,
+    ];
+    return const ApiSuccess(true);
+  }
+
   @override
   Future<ApiResult<bool>> revokeRole(String userId, String roleCode) async {
     _users = [

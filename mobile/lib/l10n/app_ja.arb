@@ -15307,5 +15307,40 @@
   "reportSourceHelpAuditLog": "誰が・いつ・何をしたかの操作の記録",
   "reportSourceHelpProducts": "期間内に登録された商品の一覧（JAN・商品名・カテゴリ・状態）",
   "reportSourcesNone": "データを1つ以上選んでください",
-  "reportSaveHint": "データ・倉庫・期間・絞り込みの組み合わせに名前を付けて残します。次からは一覧から選ぶだけで、その時点の最新のデータで作り直せます。ファイルのダウンロードと違い、中身ではなく条件を保存します"
+  "reportSaveHint": "データ・倉庫・期間・絞り込みの組み合わせに名前を付けて残します。次からは一覧から選ぶだけで、その時点の最新のデータで作り直せます。ファイルのダウンロードと違い、中身ではなく条件を保存します",
+  "umTierPick": "区分",
+  "umTierHelpAdmin": "ADMIN（システム管理者）：すべての機能と、ユーザー・設定の管理",
+  "umTierHelpManager": "管理者（倉庫責任者）：入出荷・在庫・商品・取引先・レポート",
+  "umTierHelpUser": "通常（現場スタッフ）：入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整",
+  "umTierConfirm": "区分を変えますか？",
+  "umTierConfirmBody": "{name} さんを「{from}」から「{to}」にします。見えるメニューと使える機能が変わります。",
+  "@umTierConfirmBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "umTierChange": "変更する",
+  "umTierChanged": "{name} さんの区分を「{to}」にしました",
+  "@umTierChanged": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "umTierSelf": "ご自身の区分は変えられません（システム管理者がいなくならないように）",
+  "umErrSelfAdmin": "ご自身のシステム管理者の権限は外せません",
+  "umErrLastAdmin": "システム管理者が1人もいなくなるため、外せません",
+  "umTierNone": "未設定"
 }

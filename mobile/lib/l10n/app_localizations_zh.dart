@@ -17228,4 +17228,44 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get reportSaveHint =>
       '为数据・仓库・期间・筛选的组合命名并保存。下次只需从列表中选择，即可按当时最新数据重新生成。与下载文件不同，保存的是条件而不是内容';
+
+  @override
+  String get umTierPick => '类别';
+
+  @override
+  String get umTierHelpAdmin => 'ADMIN（系统管理员）：全部功能及用户・设置的管理';
+
+  @override
+  String get umTierHelpManager => '管理者（仓库负责人）：出入货・库存・商品・往来方・报表';
+
+  @override
+  String get umTierHelpUser => '普通（现场员工）：入库・验货・上架・拣货・包装・出货・库存调整';
+
+  @override
+  String get umTierConfirm => '要更改类别吗？';
+
+  @override
+  String umTierConfirmBody(String name, String from, String to) {
+    return '将 $name 从「$from」改为「$to」。可见的菜单和可用的功能会改变。';
+  }
+
+  @override
+  String get umTierChange => '更改';
+
+  @override
+  String umTierChanged(String name, String to) {
+    return '已将 $name 的类别改为「$to」';
+  }
+
+  @override
+  String get umTierSelf => '不能更改自己的类别（以免系统没有管理员）';
+
+  @override
+  String get umErrSelfAdmin => '不能撤销自己的系统管理员权限';
+
+  @override
+  String get umErrLastAdmin => '这样会没有系统管理员，无法撤销';
+
+  @override
+  String get umTierNone => '未设置';
 }

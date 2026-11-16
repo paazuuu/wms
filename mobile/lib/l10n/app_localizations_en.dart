@@ -17705,4 +17705,49 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reportSaveHint =>
       'Keeps this choice of data, warehouse, period and filters under a name, to run again with one click on the latest data. Unlike a download, it keeps the conditions, not the contents';
+
+  @override
+  String get umTierPick => 'Tier';
+
+  @override
+  String get umTierHelpAdmin =>
+      'ADMIN (system administrator): everything, users and settings included';
+
+  @override
+  String get umTierHelpManager =>
+      'Manager (warehouse lead): receipts, shipments, stock, products, partners, reports';
+
+  @override
+  String get umTierHelpUser =>
+      'Standard (floor staff): receiving, inspection, put-away, picking, packing, shipping, adjustments';
+
+  @override
+  String get umTierConfirm => 'Change the tier?';
+
+  @override
+  String umTierConfirmBody(String name, String from, String to) {
+    return '$name goes from $from to $to; the menus and what they may do change.';
+  }
+
+  @override
+  String get umTierChange => 'Change';
+
+  @override
+  String umTierChanged(String name, String to) {
+    return '$name is now $to';
+  }
+
+  @override
+  String get umTierSelf =>
+      'You cannot change your own tier (so the system always has an administrator)';
+
+  @override
+  String get umErrSelfAdmin =>
+      'You cannot take away your own system administrator rights';
+
+  @override
+  String get umErrLastAdmin => 'This would leave no system administrator';
+
+  @override
+  String get umTierNone => 'Not set';
 }

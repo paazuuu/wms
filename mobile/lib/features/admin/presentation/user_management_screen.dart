@@ -13,6 +13,7 @@ import 'add_users_dialog.dart';
 import 'menu_visibility_screen.dart' show userTierLabel;
 import '../domain/app_user_summary.dart';
 import '../../../core/ui/popconfirm.dart';
+import '../../auth/application/auth_controller.dart';
 
 /// Assigning roles to teammates (spec §21/§22) — the UI half of 0024/0025's
 /// admin RPCs. Anyone can open this screen; the server is the real gate
@@ -30,49 +31,28 @@ class UserManagementScreen extends ConsumerWidget {
       ));
   }
 
-  Future<void> _addRole(
-      BuildContext context, WidgetRef ref, AppUserSummary user) async {
+  /// 区分 (0217): 通常 ⇄ 管理者 (and ADMIN), after a confirm; the roles follow.
+  Future<void> _setTier(BuildContext context, WidgetRef ref, AppUserSummary user, UserTier? from, UserTier to) async {
     final l10n = AppLocalizations.of(context);
-    final List<RoleOption> catalog;
-    try {
-      catalog = await ref.read(adminRoleCatalogProvider.future);
-    } catch (e) {
-      if (context.mounted) _snackError(context, '$e');
-      return;
-    }
-    if (!context.mounted) return;
-
-    final held = user.roles.map((r) => r.code).toSet();
-    final options = catalog.where((r) => !held.contains(r.code)).toList();
-    if (options.isEmpty) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(l10n.userMgmtAllRolesHeld)));
-      return;
-    }
-
-    final picked = await showModalBottomSheet<RoleOption>(
-      context: context,
-      builder: (sheetContext) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            for (final role in options)
-              ListTile(
-                title: Text(role.name),
-                onTap: () => Navigator.of(sheetContext).pop(role),
-              ),
-          ],
-        ),
-      ),
+    final name = user.name.isEmpty ? user.email : user.name;
+    final confirmed = await showPopconfirm(
+      context,
+      title: l10n.umTierConfirm,
+      message: l10n.umTierConfirmBody(name, from == null ? l10n.umTierNone : userTierLabel(l10n, from), userTierLabel(l10n, to)),
+      okLabel: l10n.umTierChange,
+      okKey: ValueKey('um-tier-ok-${user.id}'),
+      danger: to == UserTier.admin || from == UserTier.admin,
     );
-    if (picked == null || !context.mounted) return;
-
-    final result =
-        await ref.read(adminRepositoryProvider).assignRole(user.id, picked.code);
+    if (confirmed != true || !context.mounted) return;
+    final result = await ref.read(adminRepositoryProvider).setTier(user.id, to.wire);
     if (!context.mounted) return;
     result.when(
-      success: (_) => ref.invalidate(adminUsersProvider),
+      success: (_) {
+        ref.invalidate(adminUsersProvider);
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(l10n.umTierChanged(name, userTierLabel(l10n, to)))));
+      },
       failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
     );
   }
@@ -149,33 +129,13 @@ class UserManagementScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _removeRole(BuildContext context, WidgetRef ref,
-      AppUserSummary user, UserRoleTag role) async {
-    final l10n = AppLocalizations.of(context);
-    final confirmed = await showPopconfirm(
-      context,
-      title: l10n.userMgmtRemoveRoleTitle,
-      message: l10n.userMgmtRemoveRoleBody(role.name, user.name),
-      okLabel: l10n.userMgmtRemoveRoleAction,
-      danger: true,
-    );
-    if (confirmed != true || !context.mounted) return;
-
-    final result =
-        await ref.read(adminRepositoryProvider).revokeRole(user.id, role.code);
-    if (!context.mounted) return;
-    result.when(
-      success: (_) => ref.invalidate(adminUsersProvider),
-      failure: (f) => _snackError(context, humanizeApiErrorMessage(l10n, f.message)),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final async = ref.watch(adminUsersProvider);
     final warehouses =
         ref.watch(warehouseOverviewProvider).valueOrNull?.warehouses ?? const [];
+    final meId = ref.exists(authControllerProvider) ? ref.watch(authControllerProvider).user?.id : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -215,8 +175,8 @@ class UserManagementScreen extends ConsumerWidget {
               itemBuilder: (context, i) => _UserCard(
                 user: users[i],
                 warehouses: warehouses,
-                onAddRole: () => _addRole(context, ref, users[i]),
-                onRemoveRole: (role) => _removeRole(context, ref, users[i], role),
+                isMe: users[i].id == meId,
+                onTier: (from, to) => _setTier(context, ref, users[i], from, to),
                 onAddWarehouse: () => _addWarehouse(context, ref, users[i]),
                 onRemoveWarehouse: (w) => _removeWarehouse(context, ref, users[i], w),
                 onResetPassword: () => resetUserPassword(context, ref, userId: users[i].id, email: users[i].email),
@@ -233,8 +193,8 @@ class _UserCard extends StatelessWidget {
   const _UserCard({
     required this.user,
     required this.warehouses,
-    required this.onAddRole,
-    required this.onRemoveRole,
+    required this.onTier,
+    this.isMe = false,
     required this.onAddWarehouse,
     required this.onRemoveWarehouse,
     this.onResetPassword,
@@ -242,8 +202,11 @@ class _UserCard extends StatelessWidget {
 
   final AppUserSummary user;
   final List<Warehouse> warehouses;
-  final VoidCallback onAddRole;
-  final ValueChanged<UserRoleTag> onRemoveRole;
+  /// The 区分 picked: (what it was, what it becomes).
+  final void Function(UserTier? from, UserTier to) onTier;
+
+  /// The signed-in user: their own 区分 is not changed here.
+  final bool isMe;
   final VoidCallback onAddWarehouse;
   final ValueChanged<Warehouse> onRemoveWarehouse;
   final VoidCallback? onResetPassword;
@@ -291,11 +254,6 @@ class _UserCard extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  tooltip: l10n.userMgmtAddRole,
-                  icon: const Icon(Icons.add_moderator_outlined),
-                  onPressed: onAddRole,
-                ),
-                IconButton(
                   tooltip: l10n.userMgmtAddWarehouse,
                   icon: const Icon(Icons.add_business_outlined),
                   onPressed: onAddWarehouse,
@@ -310,33 +268,53 @@ class _UserCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
-            if (UserTier.of(user.roles.map((r) => r.code)) case final tier?)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                child: Text(
-                  l10n.userMgmtTier(userTierLabel(l10n, tier)),
-                  key: ValueKey('um-tier-${user.id}'),
-                  style: theme.textTheme.labelMedium?.copyWith(color: scheme.primary, fontWeight: FontWeight.w700),
-                ),
-              ),
-            if (user.roles.isEmpty)
-              Text(
-                l10n.userMgmtNoRoles,
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: scheme.onSurfaceVariant),
-              )
-            else
-              Wrap(
-                spacing: AppSpacing.xs,
-                runSpacing: AppSpacing.xs,
-                children: [
-                  for (final role in user.roles)
-                    InputChip(
-                      label: Text(role.name),
-                      onDeleted: () => onRemoveRole(role),
+            // 区分: one of three, each one role — changed here, not by roles.
+            Builder(builder: (context) {
+              final tier = UserTier.of(user.roles.map((r) => r.code));
+              final help = switch (tier) {
+                UserTier.admin => l10n.umTierHelpAdmin,
+                UserTier.manager => l10n.umTierHelpManager,
+                UserTier.user => l10n.umTierHelpUser,
+                null => l10n.userMgmtNoRoles,
+              };
+              return Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                Tooltip(
+                  message: isMe ? l10n.umTierSelf : '',
+                  child: PopupMenuButton<UserTier>(
+                    key: ValueKey('um-tier-${user.id}'),
+                    enabled: !isMe,
+                    tooltip: '',
+                    onSelected: (t) {
+                      if (t != tier) onTier(tier, t);
+                    },
+                    itemBuilder: (_) => [
+                      for (final t in UserTier.values)
+                        CheckedPopupMenuItem(
+                          key: ValueKey('um-tier-${user.id}-${t.wire}'),
+                          value: t,
+                          checked: t == tier,
+                          child: Text(userTierLabel(l10n, t)),
+                        ),
+                    ],
+                    // Always what is saved: a cancelled change leaves it as it was.
+                    child: SizedBox(
+                      width: 200,
+                      child: InputDecorator(
+                        decoration: InputDecoration(labelText: l10n.umTierPick, isDense: true, enabled: !isMe),
+                        child: Row(children: [
+                          Expanded(
+                            child: Text(tier == null ? l10n.umTierNone : userTierLabel(l10n, tier),
+                                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+                          ),
+                          Icon(isMe ? Icons.lock_outline : Icons.arrow_drop_down, size: 20),
+                        ]),
+                      ),
                     ),
-                ],
-              ),
+                  ),
+                ),
+                Text(help, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+              ]);
+            }),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.userMgmtWarehousesLabel,

@@ -82,6 +82,8 @@ String humanizeApiErrorMessage(AppLocalizations l10n, String rawMessage) {
   if (rawMessage.contains('outbound_ship_day_future')) return l10n.ofErrShipDayFuture;
   if (rawMessage.contains('outbound_card_required')) return l10n.ofErrCardRequired;
   if (rawMessage.contains('outbound_costs_locked')) return l10n.ocLocked;
+  if (rawMessage.contains('user_role_self_admin')) return l10n.umErrSelfAdmin;
+  if (rawMessage.contains('user_role_last_admin')) return l10n.umErrLastAdmin;
   if (rawMessage.contains('outbound_fee_negative')) return l10n.ocErrNegative;
   // 必須項目 (0212): which rows lack what, by their row numbers.
   final req = RegExp(r'requirement_missing:([\w.]+)(?::([\d,?]+))?').firstMatch(rawMessage);

@@ -5417,5 +5417,17 @@
   "reportSourceHelpAuditLog": "Who did what, and when",
   "reportSourceHelpProducts": "Products registered in the period (JAN, name, category, status)",
   "reportSourcesNone": "Pick at least one kind of data",
-  "reportSaveHint": "Keeps this choice of data, warehouse, period and filters under a name, to run again with one click on the latest data. Unlike a download, it keeps the conditions, not the contents"
+  "reportSaveHint": "Keeps this choice of data, warehouse, period and filters under a name, to run again with one click on the latest data. Unlike a download, it keeps the conditions, not the contents",
+  "umTierPick": "Tier",
+  "umTierHelpAdmin": "ADMIN (system administrator): everything, users and settings included",
+  "umTierHelpManager": "Manager (warehouse lead): receipts, shipments, stock, products, partners, reports",
+  "umTierHelpUser": "Standard (floor staff): receiving, inspection, put-away, picking, packing, shipping, adjustments",
+  "umTierConfirm": "Change the tier?",
+  "umTierConfirmBody": "{name} goes from {from} to {to}; the menus and what they may do change.",
+  "umTierChange": "Change",
+  "umTierChanged": "{name} is now {to}",
+  "umTierSelf": "You cannot change your own tier (so the system always has an administrator)",
+  "umErrSelfAdmin": "You cannot take away your own system administrator rights",
+  "umErrLastAdmin": "This would leave no system administrator",
+  "umTierNone": "Not set"
 }

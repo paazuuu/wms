@@ -14,7 +14,7 @@ void main() {
     RoleOption(code: 'picker', name: 'Picker'),
   ];
 
-  testWidgets('lists users with their current roles', (tester) async {
+  testWidgets('lists users with their 区分 and what it allows', (tester) async {
     final repo = FakeAdminRepository(
       [
         AppUserSummary(
@@ -23,7 +23,7 @@ void main() {
           email: 'yamada@example.com',
           status: 'active',
           createdAt: DateTime(2026, 1, 1),
-          roles: const [UserRoleTag(code: 'picker', name: 'Picker')],
+          roles: const [UserRoleTag(code: 'floor_staff', name: 'Floor Staff')],
         ),
       ],
       roles: roleCatalog,
@@ -37,7 +37,10 @@ void main() {
 
     expect(find.text('Yamada'), findsOneWidget);
     expect(find.text('yamada@example.com'), findsOneWidget);
-    expect(find.text('Picker'), findsOneWidget);
+    expect(find.text('通常'), findsOneWidget);
+    expect(find.textContaining('現場スタッフ'), findsOneWidget);
+    // No role is taken off by a cross any more.
+    expect(find.byIcon(Icons.add_moderator_outlined), findsNothing);
   });
 
   testWidgets('a user with no roles says so rather than showing nothing',
@@ -93,8 +96,9 @@ void main() {
     expect(find.textContaining('user.manage'), findsNothing);
   });
 
-  testWidgets('adding a role from the picker attaches it to the user',
-      (tester) async {
+  testWidgets('区分: 通常 to 管理者 after a confirm; cancelled, nothing changes', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     final repo = FakeAdminRepository(
       [
         AppUserSummary(
@@ -103,57 +107,33 @@ void main() {
           email: 'yamada@example.com',
           status: 'active',
           createdAt: DateTime(2026, 1, 1),
+          roles: const [UserRoleTag(code: 'floor_staff', name: 'Floor Staff')],
         ),
       ],
       roles: roleCatalog,
     );
+    await pumpApp(tester, const UserManagementScreen(), overrides: [adminRepositoryProvider.overrideWithValue(repo)]);
 
-    await pumpApp(
-      tester,
-      const UserManagementScreen(),
-      overrides: [adminRepositoryProvider.overrideWithValue(repo)],
-    );
-
-    await tester.tap(find.byIcon(Icons.add_moderator_outlined));
+    // Cancelled: still 通常.
+    await tester.tap(find.byKey(const ValueKey('um-tier-u1')));
     await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Picker'));
+    await tester.tap(find.byKey(const ValueKey('um-tier-u1-manager')));
     await tester.pumpAndSettle();
-
-    expect(find.text('Picker'), findsOneWidget);
-  });
-
-  testWidgets('removing a role detaches it after confirming', (tester) async {
-    final repo = FakeAdminRepository(
-      [
-        AppUserSummary(
-          id: 'u1',
-          name: 'Yamada',
-          email: 'yamada@example.com',
-          status: 'active',
-          createdAt: DateTime(2026, 1, 1),
-          roles: const [UserRoleTag(code: 'picker', name: 'Picker')],
-        ),
-      ],
-      roles: roleCatalog,
-    );
-
-    await pumpApp(
-      tester,
-      const UserManagementScreen(),
-      overrides: [adminRepositoryProvider.overrideWithValue(repo)],
-    );
-
-    expect(find.text('Picker'), findsOneWidget);
-
-    // Material 3's default chip delete affordance is Icons.clear, not the
-    // Icons.cancel used pre-M3 — confirmed by dumping the rendered icons.
-    await tester.tap(find.byIcon(Icons.clear));
+    expect(find.textContaining('「通常」から「管理者」'), findsOneWidget);
+    await tester.tap(find.text('キャンセル'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('削除'));
-    await tester.pumpAndSettle();
+    expect(repo.tiers, isEmpty);
+    expect(find.text('通常'), findsOneWidget);
 
-    expect(find.text('ロール未割り当て'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('um-tier-u1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('um-tier-u1-manager')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('um-tier-ok-u1')));
+    await tester.pumpAndSettle();
+    expect(repo.tiers, [('u1', 'manager')]);
+    expect(find.text('管理者'), findsOneWidget);
+    expect(find.textContaining('倉庫責任者'), findsOneWidget);
   });
 
   const warehouseCatalog = [
