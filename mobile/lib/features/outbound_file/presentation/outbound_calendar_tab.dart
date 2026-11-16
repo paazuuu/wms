@@ -378,6 +378,7 @@ class OutboundUndecidedCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final narrow = MediaQuery.sizeOf(context).width < 600;
     return Padding(
       key: ValueKey('of-undecided-${f.id}'),
       padding: const EdgeInsets.symmetric(vertical: 3),
@@ -427,16 +428,25 @@ class OutboundUndecidedCard extends ConsumerWidget {
                 ]),
               ),
               const SizedBox(width: AppSpacing.sm),
-              if (!compact)
+              if (!compact && !narrow)
                 Text(l10n.ofUdOpen, style: theme.textTheme.labelLarge?.copyWith(color: scheme.primary)),
               Icon(Icons.chevron_right, color: scheme.primary),
               const SizedBox(width: AppSpacing.sm),
-              OutlinedButton.icon(
-                key: ValueKey('of-undecided-set-${f.id}'),
-                onPressed: () => _setDay(context, ref, f, warehouseId),
-                icon: const Icon(Icons.edit_calendar_outlined, size: 18),
-                label: Text(l10n.ofSetDay),
-              ),
+              // A phone: the button as its icon, so the name keeps its room.
+              if (narrow)
+                IconButton.outlined(
+                  key: ValueKey('of-undecided-set-${f.id}'),
+                  tooltip: l10n.ofSetDay,
+                  onPressed: () => _setDay(context, ref, f, warehouseId),
+                  icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+                )
+              else
+                OutlinedButton.icon(
+                  key: ValueKey('of-undecided-set-${f.id}'),
+                  onPressed: () => _setDay(context, ref, f, warehouseId),
+                  icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+                  label: Text(l10n.ofSetDay),
+                ),
             ]),
           ),
         ),

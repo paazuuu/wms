@@ -254,7 +254,7 @@ class _PurchaseRequestsScreenState extends ConsumerState<PurchaseRequestsScreen>
                       const SizedBox(width: AppSpacing.md),
                       SizedBox(width: 72, child: Text('× ${w.quantity}', textAlign: TextAlign.end, style: theme.textTheme.titleSmall)),
                       const SizedBox(width: AppSpacing.sm),
-                      Text(w.number ?? '', style: muted),
+                      Flexible(child: Text(w.number ?? '', style: muted, maxLines: 1, overflow: TextOverflow.ellipsis)),
                       Icon(Icons.chevron_right, size: 18, color: scheme.primary),
                     ]),
                   ),

@@ -794,8 +794,10 @@ class _CartonCard extends StatelessWidget {
                 Text(l10n.cartonMustReopenToEdit,
                     style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
               ],
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              // The actions in a line, carried onto a second one on a phone.
+              Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   if (onEditMeasurements != null)
                     IconButton(

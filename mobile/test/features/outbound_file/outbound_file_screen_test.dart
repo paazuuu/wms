@@ -812,6 +812,31 @@ void main() {
     expect(find.byKey(const ValueKey('of-undecided-7')), findsNothing);
   });
 
+  testWidgets('出庫日 未定 on a phone: the set-day button is its icon, the row does not overflow', (tester) async {
+    tester.view
+      ..devicePixelRatio = 1.0
+      ..physicalSize = const Size(390, 844);
+    addTearDown(tester.view.reset);
+    final repo = FakeOutboundFileRepository()
+      ..undecidedFiles = [
+        OutboundFileSummary(
+            id: 7, warehouseId: 1, shippedOn: DateTime(2026, 11, 5), fileName: 'とても長い名前の出荷明細ファイル_2026年11月分.xlsx',
+            status: 'planned', dateUndecided: true, lineCount: 3, quantityTotal: 30),
+      ];
+    await pumpApp(tester, const OutboundFileScreen(), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(repo),
+      activeWarehouseIdProvider.overrideWith((ref) => null),
+    ]);
+    expect(tester.takeException(), isNull);
+    final set = find.byKey(const ValueKey('of-undecided-set-7'));
+    expect(tester.widget(set), isA<IconButton>());
+    await tester.tap(set);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(repo.rescheduled.single.$1, 7);
+  });
+
   testWidgets('出庫日 未定: said first in the detail, and when it is confirmed', (tester) async {
     final plan = OutboundFileSummary(
         id: 9, warehouseId: 1, shippedOn: DateTime(2026, 11, 6), fileName: '未定の明細.xlsx', status: 'planned',

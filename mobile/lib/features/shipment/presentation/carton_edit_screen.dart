@@ -235,16 +235,16 @@ class _PackableLineCard extends StatelessWidget {
                   Text(line.productName.isEmpty ? line.janCode : line.productName,
                       style: theme.textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 2),
-                  Row(
+                  // One line when it fits, two on a phone.
+                  Wrap(
+                    spacing: AppSpacing.sm,
                     children: [
                       Text(l10n.packProgress(line.packed, line.packable),
                           style: theme.textTheme.bodySmall
                               ?.copyWith(fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant)),
-                      if (!done) ...[
-                        const SizedBox(width: AppSpacing.sm),
+                      if (!done)
                         Text(l10n.cartonUnpackedCount(line.unpacked),
                             style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
-                      ],
                     ],
                   ),
                 ],
