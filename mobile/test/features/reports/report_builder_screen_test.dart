@@ -61,21 +61,21 @@ void main() {
     });
     await _pump(tester, repo);
 
-    expect(find.text('保存済みのレポートはまだありません'), findsOneWidget);
+    expect(find.textContaining('保存した条件はまだありません'), findsOneWidget);
 
     await tester.tap(find.text('実行'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(OutlinedButton, '保存'));
+    await tester.tap(find.byKey(const ValueKey('report-save')));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.widgetWithText(TextField, 'レポート名'), 'マイレポート');
+    await tester.enterText(find.widgetWithText(TextField, '名前'), 'マイレポート');
     await tester.tap(find.descendant(
-        of: find.byType(AlertDialog), matching: find.widgetWithText(FilledButton, '保存')));
+        of: find.byType(AlertDialog), matching: find.widgetWithText(FilledButton, '条件を保存')));
     await tester.pumpAndSettle();
 
     expect(find.text('マイレポート'), findsOneWidget);
-    expect(find.text('保存済みのレポートはまだありません'), findsNothing);
+    expect(find.textContaining('保存した条件はまだありません'), findsNothing);
 
     await tester.binding.setSurfaceSize(null);
   });
@@ -90,15 +90,12 @@ void main() {
     });
     await _pump(tester, repo);
 
-    // The three operational areas that had no reporting before are now
-    // pickable, and running one renders its own columns.
-    await tester.tap(find.byType(DropdownButtonFormField<ReportSource>));
-    await tester.pumpAndSettle();
-    expect(find.text('検品').last, findsOneWidget);
-    expect(find.text('倉庫間移動'), findsWidgets);
-    expect(find.text('出庫'), findsWidgets);
-
-    await tester.tap(find.text('検品').last);
+    // Picked side by side; 入出庫履歴 is on at first and taken off here.
+    expect(find.byKey(const ValueKey('report-source-inspections')), findsOneWidget);
+    expect(find.byKey(const ValueKey('report-source-transfers')), findsOneWidget);
+    expect(find.byKey(const ValueKey('report-source-shipments')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('report-source-stock_movements')));
+    await tester.tap(find.byKey(const ValueKey('report-source-inspections')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('実行'));
     await tester.pumpAndSettle();
@@ -197,5 +194,38 @@ void main() {
     await tester.tap(find.descendant(of: find.byKey(const ValueKey('report-cond-JANコード（任意）')), matching: find.byType(Icon)).last);
     await tester.pumpAndSettle();
     expect(find.text('JANコード: 4909999000014'), findsNothing);
+  });
+
+  testWidgets('several kinds of data at once, one after another; what each is on hover', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeReportRepository(rowsBySource: {
+      ReportSource.stockMovements: [
+        {'id': 1, 'jan_code': '4909999000014', 'quantity': 7},
+      ],
+      ReportSource.auditLog: [
+        {'id': 2, 'event_type': 'outbound.fee_set', 'entity_type': 'outbound_file'},
+      ],
+    });
+    await _pump(tester, repo);
+    final tip = tester.widget<Tooltip>(
+        find.ancestor(of: find.byKey(const ValueKey('report-source-stock_movements')), matching: find.byType(Tooltip)).first);
+    expect(tip.message, contains('在庫の数が変わったすべての記録'));
+
+    await tester.tap(find.byKey(const ValueKey('report-source-audit_log')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('実行'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('report-section-stock_movements')), findsOneWidget);
+    expect(find.byKey(const ValueKey('report-section-audit_log')), findsOneWidget);
+    expect(find.text('outbound.fee_set'), findsOneWidget);
+
+    // Kept as conditions, with both kinds.
+    await tester.tap(find.byKey(const ValueKey('report-save')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, '名前'), '月次の確認');
+    await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.byType(FilledButton)));
+    await tester.pumpAndSettle();
+    expect(find.text('入出庫履歴・監査ログ'), findsOneWidget);
   });
 }

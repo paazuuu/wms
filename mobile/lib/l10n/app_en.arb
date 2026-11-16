@@ -797,10 +797,10 @@
   "reportDateFrom": "From",
   "reportDateTo": "To",
   "reportRun": "Run",
-  "reportSave": "Save",
-  "reportSaveTitle": "Save report",
-  "reportName": "Report name",
-  "reportSaved": "Report saved",
+  "reportSave": "Save conditions",
+  "reportSaveTitle": "Save these conditions",
+  "reportName": "Name",
+  "reportSaved": "Conditions saved",
   "reportEmpty": "No matching data",
   "reportRowCount": "{count} rows",
   "@reportRowCount": {
@@ -810,8 +810,8 @@
       }
     }
   },
-  "reportSavedTitle": "Saved reports",
-  "reportSavedEmpty": "No saved reports yet",
+  "reportSavedTitle": "Saved conditions",
+  "reportSavedEmpty": "No saved conditions yet. Save a combination you use often to run it again from this list",
   "woTitle": "Kitting (set assembly)",
   "woNew": "New kitting job",
   "woEmpty": "No kitting jobs yet",
@@ -5406,5 +5406,16 @@
   "rhTabHistory": "Stock movements",
   "rhTabActivity": "Receipts & shipments",
   "rhHelpHistory": "Each product’s movements: when, where and how many. The audit log and the product list can be chosen too",
-  "rhHelpActivity": "Receipts by supplier, shipments by destination and the warehouse memos, month by month — for monthly reports and memoranda"
+  "rhHelpActivity": "Receipts by supplier, shipments by destination and the warehouse memos, month by month — for monthly reports and memoranda",
+  "reportSourceHelpStockMovements": "Every change in stock (in, out, adjustment, transfer, count): per product, when, where, before and after. The history used most",
+  "reportSourceHelpInspections": "Inspection records (delivered, passed and failed quantities)",
+  "reportSourceHelpTransfers": "Transfers from one warehouse to another, and where each stands",
+  "reportSourceHelpShipments": "Shipment orders (the earlier way). Lists shipped from a shipping file are in 入出庫履歴 and 入出荷実績",
+  "reportSourceHelpPurchaseOrders": "Purchase orders. Receipts read from a supplier’s file are in 入出荷実績",
+  "reportSourceHelpSalesOrders": "Sales orders received, and where each stands",
+  "reportSourceHelpWorkOrders": "Work orders (kitting and the like), and where each stands",
+  "reportSourceHelpAuditLog": "Who did what, and when",
+  "reportSourceHelpProducts": "Products registered in the period (JAN, name, category, status)",
+  "reportSourcesNone": "Pick at least one kind of data",
+  "reportSaveHint": "Keeps this choice of data, warehouse, period and filters under a name, to run again with one click on the latest data. Unlike a download, it keeps the conditions, not the contents"
 }

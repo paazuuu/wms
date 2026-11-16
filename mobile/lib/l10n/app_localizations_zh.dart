@@ -1703,16 +1703,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportRun => '运行';
 
   @override
-  String get reportSave => '保存';
+  String get reportSave => '保存条件';
 
   @override
-  String get reportSaveTitle => '保存报表';
+  String get reportSaveTitle => '为条件命名并保存';
 
   @override
-  String get reportName => '报表名称';
+  String get reportName => '名称';
 
   @override
-  String get reportSaved => '报表已保存';
+  String get reportSaved => '已保存条件';
 
   @override
   String get reportEmpty => '没有匹配的数据';
@@ -1723,10 +1723,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get reportSavedTitle => '已保存的报表';
+  String get reportSavedTitle => '已保存的条件';
 
   @override
-  String get reportSavedEmpty => '暂无已保存的报表';
+  String get reportSavedEmpty => '还没有保存的条件。保存常用的组合后，下次从列表中选择即可生成';
 
   @override
   String get woTitle => '流通加工（组套）';
@@ -17192,4 +17192,40 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rhHelpActivity => '按月汇总供应商的入库、出货地的出库及仓库备忘・指示。可用于月报和备忘录';
+
+  @override
+  String get reportSourceHelpStockMovements =>
+      '库存数量变动的全部记录（入库・出库・调整・仓库间移动・盘点）。按商品查看何时・哪个仓库・变更前→变更后。最常用的履历';
+
+  @override
+  String get reportSourceHelpInspections => '验货记录（交货数量、合格・不合格数量等）';
+
+  @override
+  String get reportSourceHelpTransfers => '仓库间移动的指示及其状态';
+
+  @override
+  String get reportSourceHelpShipments =>
+      '出货指示记录（以前的方式）。通过导入出货明细出库的记录在「出入库履历」和「出入货实绩」中';
+
+  @override
+  String get reportSourceHelpPurchaseOrders => '采购单记录。从进货文件导入的入库在「出入货实绩」中';
+
+  @override
+  String get reportSourceHelpSalesOrders => '订单记录（接单内容及状态）';
+
+  @override
+  String get reportSourceHelpWorkOrders => '流通加工（组套等）的作业指示及其状态';
+
+  @override
+  String get reportSourceHelpAuditLog => '谁・何时・做了什么的操作记录';
+
+  @override
+  String get reportSourceHelpProducts => '期间内登记的商品列表（JAN・商品名・类别・状态）';
+
+  @override
+  String get reportSourcesNone => '请至少选择一种数据';
+
+  @override
+  String get reportSaveHint =>
+      '为数据・仓库・期间・筛选的组合命名并保存。下次只需从列表中选择，即可按当时最新数据重新生成。与下载文件不同，保存的是条件而不是内容';
 }

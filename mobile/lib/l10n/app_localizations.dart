@@ -3325,25 +3325,25 @@ abstract class AppLocalizations {
   /// No description provided for @reportSave.
   ///
   /// In ja, this message translates to:
-  /// **'保存'**
+  /// **'条件を保存'**
   String get reportSave;
 
   /// No description provided for @reportSaveTitle.
   ///
   /// In ja, this message translates to:
-  /// **'レポートを保存'**
+  /// **'条件に名前を付けて保存'**
   String get reportSaveTitle;
 
   /// No description provided for @reportName.
   ///
   /// In ja, this message translates to:
-  /// **'レポート名'**
+  /// **'名前'**
   String get reportName;
 
   /// No description provided for @reportSaved.
   ///
   /// In ja, this message translates to:
-  /// **'レポートを保存しました'**
+  /// **'条件を保存しました'**
   String get reportSaved;
 
   /// No description provided for @reportEmpty.
@@ -3361,13 +3361,13 @@ abstract class AppLocalizations {
   /// No description provided for @reportSavedTitle.
   ///
   /// In ja, this message translates to:
-  /// **'保存済みレポート'**
+  /// **'保存した条件'**
   String get reportSavedTitle;
 
   /// No description provided for @reportSavedEmpty.
   ///
   /// In ja, this message translates to:
-  /// **'保存済みのレポートはまだありません'**
+  /// **'保存した条件はまだありません。よく使う組み合わせを保存すると、次から一覧で選ぶだけで作れます'**
   String get reportSavedEmpty;
 
   /// No description provided for @woTitle.
@@ -30385,6 +30385,72 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'仕入先・出荷先ごとの入荷と出庫、倉庫のメモ・指示を月ごとにまとめた記録。月報や覚書に'**
   String get rhHelpActivity;
+
+  /// No description provided for @reportSourceHelpStockMovements.
+  ///
+  /// In ja, this message translates to:
+  /// **'在庫の数が変わったすべての記録（入庫・出庫・在庫調整・倉庫間移動・棚卸）。商品ごとに、いつ・どの倉庫で・変更前→変更後が分かります。いちばんよく使う履歴です'**
+  String get reportSourceHelpStockMovements;
+
+  /// No description provided for @reportSourceHelpInspections.
+  ///
+  /// In ja, this message translates to:
+  /// **'検品の記録（納品の数と、合格・不合格の数など）'**
+  String get reportSourceHelpInspections;
+
+  /// No description provided for @reportSourceHelpTransfers.
+  ///
+  /// In ja, this message translates to:
+  /// **'倉庫から倉庫への移動の指示と、その状態'**
+  String get reportSourceHelpTransfers;
+
+  /// No description provided for @reportSourceHelpShipments.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷指示の記録（以前のしくみ）。出荷明細を取り込んで出庫したものは「入出庫履歴」と「入出荷実績」に出ます'**
+  String get reportSourceHelpShipments;
+
+  /// No description provided for @reportSourceHelpPurchaseOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注書の記録。仕入ファイルから取り込んだ入荷は「入出荷実績」に出ます'**
+  String get reportSourceHelpPurchaseOrders;
+
+  /// No description provided for @reportSourceHelpSalesOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注の記録（注文を受けた内容と状態）'**
+  String get reportSourceHelpSalesOrders;
+
+  /// No description provided for @reportSourceHelpWorkOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'流通加工（セット組みなど）の作業指示と、その状態'**
+  String get reportSourceHelpWorkOrders;
+
+  /// No description provided for @reportSourceHelpAuditLog.
+  ///
+  /// In ja, this message translates to:
+  /// **'誰が・いつ・何をしたかの操作の記録'**
+  String get reportSourceHelpAuditLog;
+
+  /// No description provided for @reportSourceHelpProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'期間内に登録された商品の一覧（JAN・商品名・カテゴリ・状態）'**
+  String get reportSourceHelpProducts;
+
+  /// No description provided for @reportSourcesNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'データを1つ以上選んでください'**
+  String get reportSourcesNone;
+
+  /// No description provided for @reportSaveHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'データ・倉庫・期間・絞り込みの組み合わせに名前を付けて残します。次からは一覧から選ぶだけで、その時点の最新のデータで作り直せます。ファイルのダウンロードと違い、中身ではなく条件を保存します'**
+  String get reportSaveHint;
 }
 
 class _AppLocalizationsDelegate

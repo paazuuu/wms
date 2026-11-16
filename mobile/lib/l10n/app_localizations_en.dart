@@ -1762,16 +1762,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportRun => 'Run';
 
   @override
-  String get reportSave => 'Save';
+  String get reportSave => 'Save conditions';
 
   @override
-  String get reportSaveTitle => 'Save report';
+  String get reportSaveTitle => 'Save these conditions';
 
   @override
-  String get reportName => 'Report name';
+  String get reportName => 'Name';
 
   @override
-  String get reportSaved => 'Report saved';
+  String get reportSaved => 'Conditions saved';
 
   @override
   String get reportEmpty => 'No matching data';
@@ -1782,10 +1782,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get reportSavedTitle => 'Saved reports';
+  String get reportSavedTitle => 'Saved conditions';
 
   @override
-  String get reportSavedEmpty => 'No saved reports yet';
+  String get reportSavedEmpty =>
+      'No saved conditions yet. Save a combination you use often to run it again from this list';
 
   @override
   String get woTitle => 'Kitting (set assembly)';
@@ -17662,4 +17663,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get rhHelpActivity =>
       'Receipts by supplier, shipments by destination and the warehouse memos, month by month — for monthly reports and memoranda';
+
+  @override
+  String get reportSourceHelpStockMovements =>
+      'Every change in stock (in, out, adjustment, transfer, count): per product, when, where, before and after. The history used most';
+
+  @override
+  String get reportSourceHelpInspections =>
+      'Inspection records (delivered, passed and failed quantities)';
+
+  @override
+  String get reportSourceHelpTransfers =>
+      'Transfers from one warehouse to another, and where each stands';
+
+  @override
+  String get reportSourceHelpShipments =>
+      'Shipment orders (the earlier way). Lists shipped from a shipping file are in 入出庫履歴 and 入出荷実績';
+
+  @override
+  String get reportSourceHelpPurchaseOrders =>
+      'Purchase orders. Receipts read from a supplier’s file are in 入出荷実績';
+
+  @override
+  String get reportSourceHelpSalesOrders =>
+      'Sales orders received, and where each stands';
+
+  @override
+  String get reportSourceHelpWorkOrders =>
+      'Work orders (kitting and the like), and where each stands';
+
+  @override
+  String get reportSourceHelpAuditLog => 'Who did what, and when';
+
+  @override
+  String get reportSourceHelpProducts =>
+      'Products registered in the period (JAN, name, category, status)';
+
+  @override
+  String get reportSourcesNone => 'Pick at least one kind of data';
+
+  @override
+  String get reportSaveHint =>
+      'Keeps this choice of data, warehouse, period and filters under a name, to run again with one click on the latest data. Unlike a download, it keeps the conditions, not the contents';
 }

@@ -33,7 +33,8 @@ class ReportBuilderScreen extends ConsumerStatefulWidget {
 }
 
 class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
-  ReportSource _source = ReportSource.stockMovements;
+  /// The data picked, any number at once; run each, shown one after another.
+  final Set<ReportSource> _sources = {ReportSource.stockMovements};
   int? _warehouseId;
   String? _countryCode;
   final _status = TextEditingController();
@@ -46,7 +47,10 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
   DateTime? get _dateTo => _period?.to;
 
   bool _running = false;
-  ReportResult? _result;
+  List<ReportResult> _results = const [];
+
+  /// The picked data in the order they are offered.
+  List<ReportSource> get _picked => [for (final s in ReportSource.values) if (_sources.contains(s)) s];
 
   @override
   void dispose() {
@@ -119,16 +123,24 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
 
   Future<void> _run() async {
     final l10n = AppLocalizations.of(context);
+    if (_sources.isEmpty) {
+      _snack(l10n.reportSourcesNone);
+      return;
+    }
     setState(() => _running = true);
-    final result = await ref
-        .read(reportRepositoryProvider)
-        .run(_source, filters: _filters());
-    if (!mounted) return;
-    setState(() => _running = false);
-    result.when(
-      success: (r) => setState(() => _result = r),
-      failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
-    );
+    final out = <ReportResult>[];
+    for (final s in _picked) {
+      final result = await ref.read(reportRepositoryProvider).run(s, filters: _filters());
+      if (!mounted) return;
+      result.when(
+        success: out.add,
+        failure: (f) => _snack(humanizeApiErrorMessage(l10n, f.message), danger: true),
+      );
+    }
+    setState(() {
+      _running = false;
+      _results = out;
+    });
   }
 
   Future<void> _saveCurrent() async {
@@ -141,8 +153,8 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
 
     final result = await ref.read(reportRepositoryProvider).save(
           name: name.trim(),
-          source: _source,
-          filters: _filters(),
+          source: _picked.first,
+          filters: {..._filters(), 'sources': [for (final s in _picked) s.wire]},
         );
     if (!mounted) return;
     result.when(
@@ -156,7 +168,10 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
 
   Future<void> _loadSaved(ReportDefinition def) async {
     setState(() {
-      _source = def.source;
+      final wires = def.filters['sources'];
+      _sources
+        ..clear()
+        ..addAll(wires is List && wires.isNotEmpty ? [for (final w in wires) ReportSource.parse('$w')] : [def.source]);
       _warehouseId = def.filters['warehouse_id'] == null
           ? null
           : int.tryParse('${def.filters['warehouse_id']}');
@@ -196,6 +211,18 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
         ReportSource.products => l10n.reportSourceProducts,
       };
 
+  String _sourceHelp(AppLocalizations l10n, ReportSource source) => switch (source) {
+        ReportSource.stockMovements => l10n.reportSourceHelpStockMovements,
+        ReportSource.inspections => l10n.reportSourceHelpInspections,
+        ReportSource.transfers => l10n.reportSourceHelpTransfers,
+        ReportSource.shipments => l10n.reportSourceHelpShipments,
+        ReportSource.purchaseOrders => l10n.reportSourceHelpPurchaseOrders,
+        ReportSource.salesOrders => l10n.reportSourceHelpSalesOrders,
+        ReportSource.workOrders => l10n.reportSourceHelpWorkOrders,
+        ReportSource.auditLog => l10n.reportSourceHelpAuditLog,
+        ReportSource.products => l10n.reportSourceHelpProducts,
+      };
+
   String _fmtDate(DateTime? d) =>
       d == null ? '—' : '${d.year}/${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')}';
 
@@ -219,21 +246,25 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
+          // The data, side by side, any number at once; what each is on hover.
+          Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            Text(l10n.reportSource, style: theme.textTheme.labelLarge),
+            for (final s in ReportSource.values)
+              Tooltip(
+                message: _sourceHelp(l10n, s),
+                waitDuration: const Duration(milliseconds: 300),
+                child: FilterChip(
+                  key: ValueKey('report-source-${s.wire}'),
+                  visualDensity: VisualDensity.compact,
+                  label: Text(_sourceLabel(l10n, s)),
+                  selected: _sources.contains(s),
+                  onSelected: (v) => setState(() => v ? _sources.add(s) : _sources.remove(s)),
+                ),
+              ),
+          ]),
+          const SizedBox(height: AppSpacing.md),
           // The conditions in one row; the rarer ones behind ⋮.
           Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.md, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            SizedBox(
-              width: 220,
-              child: DropdownButtonFormField<ReportSource>(
-                key: const ValueKey('report-source'),
-                initialValue: _source,
-                isExpanded: true,
-                decoration: InputDecoration(labelText: l10n.reportSource, isDense: true),
-                items: [
-                  for (final s in ReportSource.values) DropdownMenuItem(value: s, child: Text(_sourceLabel(l10n, s))),
-                ],
-                onChanged: (v) => setState(() => _source = v ?? _source),
-              ),
-            ),
             ...warehouseAsync.when(
               loading: () => const <Widget>[],
               error: (_, __) => const <Widget>[],
@@ -304,10 +335,15 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
                   : const Icon(Icons.play_arrow_outlined),
               label: Text(l10n.reportRun),
             ),
-            OutlinedButton.icon(
-              onPressed: _result == null ? null : _saveCurrent,
-              icon: const Icon(Icons.save_outlined),
-              label: Text(l10n.reportSave),
+            // The conditions kept by name — not the contents (that is the download).
+            Tooltip(
+              message: l10n.reportSaveHint,
+              child: OutlinedButton.icon(
+                key: const ValueKey('report-save'),
+                onPressed: _sources.isEmpty ? null : _saveCurrent,
+                icon: const Icon(Icons.bookmark_add_outlined),
+                label: Text(l10n.reportSave),
+              ),
             ),
           ]),
           if (hidden.isNotEmpty)
@@ -350,7 +386,13 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
                         Card(
                           child: ListTile(
                             title: Text(def.name),
-                            subtitle: Text(_sourceLabel(l10n, def.source)),
+                            subtitle: Text(() {
+                              final wires = def.filters['sources'];
+                              final list = wires is List && wires.isNotEmpty
+                                  ? [for (final w in wires) ReportSource.parse('$w')]
+                                  : [def.source];
+                              return list.map((s) => _sourceLabel(l10n, s)).join('・');
+                            }()),
                             onTap: () => _loadSaved(def),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline),
@@ -362,13 +404,22 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
                   ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          if (_result != null)
+          // Each kind of data picked, one after another.
+          for (final r in _results) ...[
+            if (_results.length > 1)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: Text(l10n.reportDocTitle(_sourceLabel(l10n, r.source)),
+                    key: ValueKey('report-section-${r.source.wire}'), style: theme.textTheme.titleMedium),
+              ),
             ReportView(
-              key: ValueKey(_result),
-              table: reportTable(_result!),
-              title: l10n.reportDocTitle(_sourceLabel(l10n, _result!.source)),
+              key: ValueKey(r),
+              table: reportTable(r),
+              title: l10n.reportDocTitle(_sourceLabel(l10n, r.source)),
               conditions: _conditions(l10n, warehouseAsync.valueOrNull?.warehouses ?? const []),
             ),
+            const SizedBox(height: AppSpacing.xl),
+          ],
         ],
       ),
     );

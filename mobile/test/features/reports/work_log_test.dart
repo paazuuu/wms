@@ -171,18 +171,20 @@ void main() {
     expect(find.byKey(const ValueKey('rp-span')), findsNothing);
   });
 
-  testWidgets('レポート: 入出庫履歴 and 入出荷実績 as tabs', (tester) async {
+  testWidgets('レポート: 入出荷実績 and 入出庫履歴 as tabs', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1100, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpApp(tester, const ReportsHubScreen(), overrides: [
       workLogRepositoryProvider.overrideWithValue(FakeWorkLogRepository(_entries)),
     ]);
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('rh-history')), findsOneWidget);
-    expect(find.byKey(const ValueKey('report-source')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('rh-activity')));
-    await tester.pumpAndSettle();
+    // 入出荷実績 first, and open at first.
+    expect(tester.getTopLeft(find.byKey(const ValueKey('rh-activity'))).dx,
+        lessThan(tester.getTopLeft(find.byKey(const ValueKey('rh-history'))).dx));
     expect(find.byKey(const ValueKey('wl-more')), findsOneWidget);
     expect(find.textContaining('入出荷実績'), findsWidgets);
+    await tester.tap(find.byKey(const ValueKey('rh-history')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('report-source-stock_movements')), findsOneWidget);
   });
 }

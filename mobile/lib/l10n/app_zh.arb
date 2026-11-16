@@ -797,10 +797,10 @@
   "reportDateFrom": "起始日期",
   "reportDateTo": "结束日期",
   "reportRun": "运行",
-  "reportSave": "保存",
-  "reportSaveTitle": "保存报表",
-  "reportName": "报表名称",
-  "reportSaved": "报表已保存",
+  "reportSave": "保存条件",
+  "reportSaveTitle": "为条件命名并保存",
+  "reportName": "名称",
+  "reportSaved": "已保存条件",
   "reportEmpty": "没有匹配的数据",
   "reportRowCount": "{count} 行",
   "@reportRowCount": {
@@ -810,8 +810,8 @@
       }
     }
   },
-  "reportSavedTitle": "已保存的报表",
-  "reportSavedEmpty": "暂无已保存的报表",
+  "reportSavedTitle": "已保存的条件",
+  "reportSavedEmpty": "还没有保存的条件。保存常用的组合后，下次从列表中选择即可生成",
   "woTitle": "流通加工（组套）",
   "woNew": "登记组套",
   "woEmpty": "还没有流通加工作业",
@@ -5406,5 +5406,16 @@
   "rhTabHistory": "出入库履历",
   "rhTabActivity": "出入货实绩",
   "rhHelpHistory": "按商品的入库・出库・调整履历（何时・哪个仓库・动了多少）。也可选择审计日志和商品列表",
-  "rhHelpActivity": "按月汇总供应商的入库、出货地的出库及仓库备忘・指示。可用于月报和备忘录"
+  "rhHelpActivity": "按月汇总供应商的入库、出货地的出库及仓库备忘・指示。可用于月报和备忘录",
+  "reportSourceHelpStockMovements": "库存数量变动的全部记录（入库・出库・调整・仓库间移动・盘点）。按商品查看何时・哪个仓库・变更前→变更后。最常用的履历",
+  "reportSourceHelpInspections": "验货记录（交货数量、合格・不合格数量等）",
+  "reportSourceHelpTransfers": "仓库间移动的指示及其状态",
+  "reportSourceHelpShipments": "出货指示记录（以前的方式）。通过导入出货明细出库的记录在「出入库履历」和「出入货实绩」中",
+  "reportSourceHelpPurchaseOrders": "采购单记录。从进货文件导入的入库在「出入货实绩」中",
+  "reportSourceHelpSalesOrders": "订单记录（接单内容及状态）",
+  "reportSourceHelpWorkOrders": "流通加工（组套等）的作业指示及其状态",
+  "reportSourceHelpAuditLog": "谁・何时・做了什么的操作记录",
+  "reportSourceHelpProducts": "期间内登记的商品列表（JAN・商品名・类别・状态）",
+  "reportSourcesNone": "请至少选择一种数据",
+  "reportSaveHint": "为数据・仓库・期间・筛选的组合命名并保存。下次只需从列表中选择，即可按当时最新数据重新生成。与下载文件不同，保存的是条件而不是内容"
 }

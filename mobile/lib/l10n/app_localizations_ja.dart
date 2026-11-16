@@ -1709,16 +1709,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reportRun => '実行';
 
   @override
-  String get reportSave => '保存';
+  String get reportSave => '条件を保存';
 
   @override
-  String get reportSaveTitle => 'レポートを保存';
+  String get reportSaveTitle => '条件に名前を付けて保存';
 
   @override
-  String get reportName => 'レポート名';
+  String get reportName => '名前';
 
   @override
-  String get reportSaved => 'レポートを保存しました';
+  String get reportSaved => '条件を保存しました';
 
   @override
   String get reportEmpty => '該当するデータがありません';
@@ -1729,10 +1729,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get reportSavedTitle => '保存済みレポート';
+  String get reportSavedTitle => '保存した条件';
 
   @override
-  String get reportSavedEmpty => '保存済みのレポートはまだありません';
+  String get reportSavedEmpty =>
+      '保存した条件はまだありません。よく使う組み合わせを保存すると、次から一覧で選ぶだけで作れます';
 
   @override
   String get woTitle => '流通加工（セット組み）';
@@ -17315,4 +17316,41 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get rhHelpActivity => '仕入先・出荷先ごとの入荷と出庫、倉庫のメモ・指示を月ごとにまとめた記録。月報や覚書に';
+
+  @override
+  String get reportSourceHelpStockMovements =>
+      '在庫の数が変わったすべての記録（入庫・出庫・在庫調整・倉庫間移動・棚卸）。商品ごとに、いつ・どの倉庫で・変更前→変更後が分かります。いちばんよく使う履歴です';
+
+  @override
+  String get reportSourceHelpInspections => '検品の記録（納品の数と、合格・不合格の数など）';
+
+  @override
+  String get reportSourceHelpTransfers => '倉庫から倉庫への移動の指示と、その状態';
+
+  @override
+  String get reportSourceHelpShipments =>
+      '出荷指示の記録（以前のしくみ）。出荷明細を取り込んで出庫したものは「入出庫履歴」と「入出荷実績」に出ます';
+
+  @override
+  String get reportSourceHelpPurchaseOrders =>
+      '発注書の記録。仕入ファイルから取り込んだ入荷は「入出荷実績」に出ます';
+
+  @override
+  String get reportSourceHelpSalesOrders => '受注の記録（注文を受けた内容と状態）';
+
+  @override
+  String get reportSourceHelpWorkOrders => '流通加工（セット組みなど）の作業指示と、その状態';
+
+  @override
+  String get reportSourceHelpAuditLog => '誰が・いつ・何をしたかの操作の記録';
+
+  @override
+  String get reportSourceHelpProducts => '期間内に登録された商品の一覧（JAN・商品名・カテゴリ・状態）';
+
+  @override
+  String get reportSourcesNone => 'データを1つ以上選んでください';
+
+  @override
+  String get reportSaveHint =>
+      'データ・倉庫・期間・絞り込みの組み合わせに名前を付けて残します。次からは一覧から選ぶだけで、その時点の最新のデータで作り直せます。ファイルのダウンロードと違い、中身ではなく条件を保存します';
 }
