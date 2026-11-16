@@ -3187,13 +3187,13 @@ abstract class AppLocalizations {
   /// No description provided for @featReports.
   ///
   /// In ja, this message translates to:
-  /// **'レポート作成'**
+  /// **'レポート'**
   String get featReports;
 
   /// No description provided for @featReportsDesc.
   ///
   /// In ja, this message translates to:
-  /// **'データを選んで絞り込み、レポートとして保存'**
+  /// **'入出庫履歴と入出荷実績を、A4のExcel・PDFで出す'**
   String get featReportsDesc;
 
   /// No description provided for @reportTitle.
@@ -3211,7 +3211,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportSourceStockMovements.
   ///
   /// In ja, this message translates to:
-  /// **'在庫履歴'**
+  /// **'入出庫履歴'**
   String get reportSourceStockMovements;
 
   /// No description provided for @reportSourceInspections.
@@ -30089,7 +30089,7 @@ abstract class AppLocalizations {
   /// No description provided for @featWorkLog.
   ///
   /// In ja, this message translates to:
-  /// **'作業実績'**
+  /// **'入出荷実績'**
   String get featWorkLog;
 
   /// No description provided for @featWorkLogDesc.
@@ -30101,7 +30101,7 @@ abstract class AppLocalizations {
   /// No description provided for @wlDocTitle.
   ///
   /// In ja, this message translates to:
-  /// **'作業実績 {month}'**
+  /// **'入出荷実績 {month}'**
   String wlDocTitle(String month);
 
   /// No description provided for @wlKinds.
@@ -30179,7 +30179,7 @@ abstract class AppLocalizations {
   /// No description provided for @wlColPartner.
   ///
   /// In ja, this message translates to:
-  /// **'取引先（仕入先・出荷先）'**
+  /// **'仕入先・出荷先'**
   String get wlColPartner;
 
   /// No description provided for @wlColFile.
@@ -30295,6 +30295,96 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'不足 {n}'**
   String wkShort(int n);
+
+  /// No description provided for @rpLast.
+  ///
+  /// In ja, this message translates to:
+  /// **'直近{n}か月'**
+  String rpLast(int n);
+
+  /// No description provided for @rpMonths.
+  ///
+  /// In ja, this message translates to:
+  /// **'期間を指定（○月〜○月）…'**
+  String get rpMonths;
+
+  /// No description provided for @rpDays.
+  ///
+  /// In ja, this message translates to:
+  /// **'日付で指定…'**
+  String get rpDays;
+
+  /// No description provided for @rpPeriod.
+  ///
+  /// In ja, this message translates to:
+  /// **'期間'**
+  String get rpPeriod;
+
+  /// No description provided for @rpAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての期間'**
+  String get rpAll;
+
+  /// No description provided for @rpClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'期間を戻す'**
+  String get rpClear;
+
+  /// No description provided for @rpFromMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'開始月'**
+  String get rpFromMonth;
+
+  /// No description provided for @rpToMonth.
+  ///
+  /// In ja, this message translates to:
+  /// **'終了月'**
+  String get rpToMonth;
+
+  /// No description provided for @rpApply.
+  ///
+  /// In ja, this message translates to:
+  /// **'決定'**
+  String get rpApply;
+
+  /// No description provided for @rpMore.
+  ///
+  /// In ja, this message translates to:
+  /// **'その他の条件'**
+  String get rpMore;
+
+  /// No description provided for @rpConditions.
+  ///
+  /// In ja, this message translates to:
+  /// **'絞り込み条件（状態・JAN・カテゴリ）…'**
+  String get rpConditions;
+
+  /// No description provided for @rhTabHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'入出庫履歴'**
+  String get rhTabHistory;
+
+  /// No description provided for @rhTabActivity.
+  ///
+  /// In ja, this message translates to:
+  /// **'入出荷実績'**
+  String get rhTabActivity;
+
+  /// No description provided for @rhHelpHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ごとの入荷・出庫・調整の履歴（いつ・どの倉庫で・何個動いたか）。監査ログや商品の一覧も選べます'**
+  String get rhHelpHistory;
+
+  /// No description provided for @rhHelpActivity.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先・出荷先ごとの入荷と出庫、倉庫のメモ・指示を月ごとにまとめた記録。月報や覚書に'**
+  String get rhHelpActivity;
 }
 
 class _AppLocalizationsDelegate

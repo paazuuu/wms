@@ -11,6 +11,7 @@ import '../../admin/data/menu_visibility_repository.dart' show showPricesProvide
 import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/work_log_repository.dart';
 import '../domain/report_table.dart';
+import 'report_period.dart';
 import 'report_view.dart';
 
 /// The kinds of work, in the order they are offered.
@@ -47,7 +48,7 @@ String _money(double v, String? currency) =>
 /// [amounts].
 ReportTable workLogTable(AppLocalizations l10n, List<WorkLogEntry> entries, {bool amounts = false}) {
   final cols = [
-    ReportColumn('day', l10n.wlColDay, flex: 1.05),
+    ReportColumn('day', l10n.wlColDay, flex: 1.25),
     ReportColumn('kind', l10n.wlColKind, flex: 1.2),
     ReportColumn('warehouse', l10n.wlColWarehouse, flex: 0.85),
     ReportColumn('partner', l10n.wlColPartner, flex: 1.8),
@@ -57,7 +58,7 @@ ReportTable workLogTable(AppLocalizations l10n, List<WorkLogEntry> entries, {boo
     ReportColumn('status', l10n.wlColStatus, flex: 0.95),
     ReportColumn('by', l10n.wlColBy, flex: 1.0),
     if (amounts) ReportColumn('amount', l10n.wlColAmount, flex: 1.2, wrap: true),
-    ReportColumn('note', l10n.wlColNote, flex: 2.4, wrap: true),
+    ReportColumn('note', l10n.wlColNote, flex: 2.25, wrap: true),
   ];
   return ReportTable(columns: cols, rows: [
     for (final e in entries)
@@ -92,14 +93,17 @@ ReportTable workLogTable(AppLocalizations l10n, List<WorkLogEntry> entries, {boo
 /// warehouse, ship-to …), saved as Excel or PDF. Amounts are left out unless
 /// asked for: a record like this is often handed on.
 class WorkLogScreen extends ConsumerStatefulWidget {
-  const WorkLogScreen({super.key});
+  const WorkLogScreen({super.key, this.embedded = false});
+
+  /// Inside the レポート tabs: no bar of its own.
+  final bool embedded;
 
   @override
   ConsumerState<WorkLogScreen> createState() => _WorkLogScreenState();
 }
 
 class _WorkLogScreenState extends ConsumerState<WorkLogScreen> {
-  late String _month = _ym(DateTime.now());
+  ReportPeriod _period = ReportPeriod.month(DateTime.now());
   int? _warehouseId;
   final Set<String> _kinds = {...workLogKinds};
   bool _amounts = false;
@@ -108,10 +112,18 @@ class _WorkLogScreenState extends ConsumerState<WorkLogScreen> {
   String? _error;
   int _run = 0;
 
-  static String _ym(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}';
+  DateTime get _from => _period.from;
+  DateTime get _to => _period.to;
 
-  DateTime get _from => DateTime(int.parse(_month.substring(0, 4)), int.parse(_month.substring(5)));
-  DateTime get _to => DateTime(_from.year, _from.month + 1, 0);
+  /// The ⋮ menu: other periods, and the amounts.
+  Future<void> _more(Object v) async {
+    if (v is PeriodChoice) {
+      final p = await choosePeriod(context, v, _period);
+      if (p != null && mounted) _change(() => _period = p);
+    } else if (v == 'amounts') {
+      _change(() => _amounts = !_amounts);
+    }
+  }
 
   @override
   void initState() {
@@ -156,33 +168,17 @@ class _WorkLogScreenState extends ConsumerState<WorkLogScreen> {
     final scheme = theme.colorScheme;
     final warehouses = ref.watch(warehouseOverviewProvider).valueOrNull?.warehouses ?? const [];
     final prices = ref.watch(showPricesProvider);
-    final now = DateTime.now();
     final shown = [for (final e in _entries ?? const <WorkLogEntry>[]) if (_kinds.contains(e.kind)) e];
     int count(String k) => shown.where((e) => e.kind == k).length;
-    final monthLabel = _month.replaceFirst('-', '/');
+    final monthLabel = _period.label;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.featWorkLog)),
+      appBar: widget.embedded ? null : AppBar(title: Text(l10n.featWorkLog)),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.md, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            SizedBox(
-              width: 180,
-              child: DropdownButtonFormField<String>(
-                key: const ValueKey('wl-month'),
-                initialValue: _month,
-                decoration: InputDecoration(labelText: l10n.reportMonth, isDense: true),
-                items: [
-                  for (var i = 0; i < 24; i++)
-                    () {
-                      final d = DateTime(now.year, now.month - i);
-                      return DropdownMenuItem(value: _ym(d), child: Text(_ym(d).replaceFirst('-', '/')));
-                    }(),
-                ],
-                onChanged: (v) => v == null ? null : _change(() => _month = v),
-              ),
-            ),
+            ReportPeriodField(period: _period, onChanged: (p) => _change(() => _period = p ?? _period)),
             SizedBox(
               width: 220,
               child: DropdownButtonFormField<int?>(
@@ -197,24 +193,38 @@ class _WorkLogScreenState extends ConsumerState<WorkLogScreen> {
                 onChanged: (v) => _change(() => _warehouseId = v),
               ),
             ),
-            if (prices)
-              Tooltip(
-                message: l10n.wlAmountsHint,
-                child: FilterChip(
-                  key: const ValueKey('wl-amounts'),
-                  avatar: const Icon(Icons.currency_yen, size: 16),
-                  label: Text(l10n.wlAmounts),
-                  selected: _amounts,
-                  onSelected: (v) => _change(() => _amounts = v),
-                ),
+            // Used now and then: kept behind ⋮ — 3/6/12 months, a span, the amounts.
+            PopupMenuButton<Object>(
+              key: const ValueKey('wl-more'),
+              tooltip: l10n.rpMore,
+              icon: const Icon(Icons.more_vert),
+              onSelected: _more,
+              itemBuilder: (_) => [
+                ...periodMenuItems(l10n),
+                if (prices) ...[
+                  const PopupMenuDivider(),
+                  CheckedPopupMenuItem(
+                    key: const ValueKey('wl-amounts'),
+                    value: 'amounts',
+                    checked: _amounts,
+                    child: Text(l10n.wlAmounts),
+                  ),
+                ],
+              ],
+            ),
+            // What is on but out of sight, shown so it is not forgotten.
+            if (prices && _amounts)
+              InputChip(
+                key: const ValueKey('wl-amounts-on'),
+                avatar: const Icon(Icons.currency_yen, size: 16),
+                label: Text(l10n.wlAmounts),
+                onDeleted: () => _change(() => _amounts = false),
               ),
-          ]),
-          const SizedBox(height: AppSpacing.md),
-          // Which kinds of work are in it.
-          Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+            // Which kinds of work are in it.
             for (final k in workLogKinds)
               FilterChip(
                 key: ValueKey('wl-kind-$k'),
+                visualDensity: VisualDensity.compact,
                 label: Text(workLogKindLabel(l10n, k)),
                 selected: _kinds.contains(k),
                 onSelected: (v) => setState(() => v ? _kinds.add(k) : _kinds.remove(k)),

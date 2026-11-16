@@ -1640,10 +1640,10 @@ class AppLocalizationsJa extends AppLocalizations {
       'バラの商品（部材）を使ってセット品・詰め合わせを作る作業。部材の在庫が減り、セット品の在庫が増える';
 
   @override
-  String get featReports => 'レポート作成';
+  String get featReports => 'レポート';
 
   @override
-  String get featReportsDesc => 'データを選んで絞り込み、レポートとして保存';
+  String get featReportsDesc => '入出庫履歴と入出荷実績を、A4のExcel・PDFで出す';
 
   @override
   String get reportTitle => 'レポート作成';
@@ -1652,7 +1652,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reportSource => 'データソース';
 
   @override
-  String get reportSourceStockMovements => '在庫履歴';
+  String get reportSourceStockMovements => '入出庫履歴';
 
   @override
   String get reportSourceInspections => '検品';
@@ -17150,14 +17150,14 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get featWorkLog => '作業実績';
+  String get featWorkLog => '入出荷実績';
 
   @override
   String get featWorkLogDesc => '入荷・出庫・メモを月ごとにまとめ、A4のExcel・PDFで出す';
 
   @override
   String wlDocTitle(String month) {
-    return '作業実績 $month';
+    return '入出荷実績 $month';
   }
 
   @override
@@ -17199,7 +17199,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wlColWarehouse => '倉庫';
 
   @override
-  String get wlColPartner => '取引先（仕入先・出荷先）';
+  String get wlColPartner => '仕入先・出荷先';
 
   @override
   String get wlColFile => 'ファイル';
@@ -17267,4 +17267,52 @@ class AppLocalizationsJa extends AppLocalizations {
   String wkShort(int n) {
     return '不足 $n';
   }
+
+  @override
+  String rpLast(int n) {
+    return '直近$nか月';
+  }
+
+  @override
+  String get rpMonths => '期間を指定（○月〜○月）…';
+
+  @override
+  String get rpDays => '日付で指定…';
+
+  @override
+  String get rpPeriod => '期間';
+
+  @override
+  String get rpAll => 'すべての期間';
+
+  @override
+  String get rpClear => '期間を戻す';
+
+  @override
+  String get rpFromMonth => '開始月';
+
+  @override
+  String get rpToMonth => '終了月';
+
+  @override
+  String get rpApply => '決定';
+
+  @override
+  String get rpMore => 'その他の条件';
+
+  @override
+  String get rpConditions => '絞り込み条件（状態・JAN・カテゴリ）…';
+
+  @override
+  String get rhTabHistory => '入出庫履歴';
+
+  @override
+  String get rhTabActivity => '入出荷実績';
+
+  @override
+  String get rhHelpHistory =>
+      '商品ごとの入荷・出庫・調整の履歴（いつ・どの倉庫で・何個動いたか）。監査ログや商品の一覧も選べます';
+
+  @override
+  String get rhHelpActivity => '仕入先・出荷先ごとの入荷と出庫、倉庫のメモ・指示を月ごとにまとめた記録。月報や覚書に';
 }

@@ -2,12 +2,14 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
 import 'package:wms_mobile/features/admin/data/menu_visibility_repository.dart' show showPricesProvider;
 import 'package:wms_mobile/l10n/app_localizations.dart';
 import 'package:wms_mobile/features/reports/data/work_log_repository.dart';
 import 'package:wms_mobile/features/reports/domain/report_table.dart';
 import 'package:wms_mobile/features/reports/presentation/report_view.dart';
+import 'package:wms_mobile/features/reports/presentation/reports_hub_screen.dart';
 import 'package:wms_mobile/features/reports/presentation/work_log_screen.dart';
 
 import '../../support/fake_work_log_repository.dart';
@@ -34,7 +36,7 @@ void main() {
     final l10n = lookupAppLocalizations(const Locale('ja'));
     final t = workLogTable(l10n, _entries);
     expect(t.columns.map((c) => c.label),
-        ['日付', '区分', '倉庫', '取引先（仕入先・出荷先）', 'ファイル', '行数', '数量', '状態', '担当', 'メモ・指示']);
+        ['日付', '区分', '倉庫', '仕入先・出荷先', 'ファイル', '行数', '数量', '状態', '担当', 'メモ・指示']);
     expect(t.columns.last.wrap, isTrue);
     expect(t.rows[0].sublist(0, 2), ['2026/11/02', '入荷']);
     expect(t.rows[0][7], '検品待ち');
@@ -61,7 +63,7 @@ void main() {
     expect(pages.expand((p) => p).length, 40);
   });
 
-  testWidgets('作業実績: this month by default, a kind left out, a supplier picked, saved as Excel', (tester) async {
+  testWidgets('入出荷実績: this month by default, a kind left out, a supplier picked, saved as Excel', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1100, 2600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final repo = FakeWorkLogRepository(_entries);
@@ -76,7 +78,7 @@ void main() {
     expect(repo.asked.single.to, DateTime(now.year, now.month + 1, 0));
     expect(repo.asked.single.amounts, isFalse);
     final month = '${now.year}/${now.month.toString().padLeft(2, '0')}';
-    expect(find.text('作業実績 $month'), findsOneWidget);
+    expect(find.text('入出荷実績 $month'), findsOneWidget);
     expect(find.text('入荷 2件・出庫 1件・在庫外出荷 1件・メモ 1件'), findsOneWidget);
     expect(find.textContaining('12/1から入荷の受付は午前のみ'), findsOneWidget);
 
@@ -99,15 +101,18 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('report-excel')));
     await tester.pumpAndSettle();
     final rows = readXlsx(saved.single.$2);
-    expect(saved.single.$1, startsWith('作業実績_'));
-    expect(rows.first.first, '作業実績 $month');
+    expect(saved.single.$1, startsWith('入出荷実績_'));
+    expect(rows.first.first, '入出荷実績 $month');
     expect(rows.any((r) => r.contains('テスト商事')), isTrue);
     expect(rows.any((r) => r.contains('テスト貿易')), isFalse);
     expect(rows.any((r) => r.any((c) => c.contains('箱潰れ2箱あり'))), isTrue);
 
-    // Amounts, asked for.
+    // Amounts, asked for from ⋮, and shown as on.
+    await tester.tap(find.byKey(const ValueKey('wl-more')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('wl-amounts')));
     await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('wl-amounts-on')), findsOneWidget);
     expect(repo.asked.last.amounts, isTrue);
     expect(find.text('金額'), findsWidgets);
   });
@@ -119,7 +124,65 @@ void main() {
       showPricesProvider.overrideWithValue(false),
     ]);
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('wl-more')));
+    await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('wl-amounts')), findsNothing);
+    expect(find.byKey(const ValueKey('rp-last3')), findsOneWidget);
     expect(repo.asked.single.amounts, isFalse);
+  });
+
+  testWidgets('the period from ⋮: the last 3 months, then a month to a month, cleared back to this month', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1100, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeWorkLogRepository(_entries);
+    await pumpApp(tester, const WorkLogScreen(), overrides: [workLogRepositoryProvider.overrideWithValue(repo)]);
+    await tester.pumpAndSettle();
+    final now = DateTime.now();
+
+    await tester.tap(find.byKey(const ValueKey('wl-more')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('rp-last3')));
+    await tester.pumpAndSettle();
+    expect(repo.asked.last.from, DateTime(now.year, now.month - 2));
+    expect(repo.asked.last.to, DateTime(now.year, now.month + 1, 0));
+    final m = DateFormat('y/MM');
+    final span = '${m.format(DateTime(now.year, now.month - 2))}〜${m.format(now)}';
+    expect(find.text(span), findsOneWidget);
+    expect(find.text('入出荷実績 $span'), findsOneWidget);
+
+    // A month to a month.
+    await tester.tap(find.byKey(const ValueKey('wl-more')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('rp-months')));
+    await tester.pumpAndSettle();
+    final from = DateTime(now.year, now.month - 5);
+    await tester.tap(find.byKey(const ValueKey('rp-from')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(m.format(from)).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('rp-months-ok')));
+    await tester.pumpAndSettle();
+    expect(repo.asked.last.from, from);
+
+    // Back to one field: this month.
+    await tester.tap(find.byKey(const ValueKey('rp-span-clear')));
+    await tester.pumpAndSettle();
+    expect(repo.asked.last.from, DateTime(now.year, now.month));
+    expect(find.byKey(const ValueKey('rp-span')), findsNothing);
+  });
+
+  testWidgets('レポート: 入出庫履歴 and 入出荷実績 as tabs', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1100, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const ReportsHubScreen(), overrides: [
+      workLogRepositoryProvider.overrideWithValue(FakeWorkLogRepository(_entries)),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('rh-history')), findsOneWidget);
+    expect(find.byKey(const ValueKey('report-source')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('rh-activity')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('wl-more')), findsOneWidget);
+    expect(find.textContaining('入出荷実績'), findsWidgets);
   });
 }

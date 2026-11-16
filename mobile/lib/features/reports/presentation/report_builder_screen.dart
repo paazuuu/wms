@@ -11,6 +11,7 @@ import '../application/report_providers.dart';
 import '../domain/report.dart';
 import '../../warehouse_context/domain/warehouse.dart' show Warehouse;
 import '../domain/report_table.dart';
+import 'report_period.dart';
 import 'report_view.dart';
 
 /// Custom/saved report builder (spec §46 checklist item 10, 0037) — pick a
@@ -22,7 +23,10 @@ import 'report_view.dart';
 /// (0093): the warehouse list narrows to it and every row names its country,
 /// so a column summed afterwards is never a cross-border total by accident.
 class ReportBuilderScreen extends ConsumerStatefulWidget {
-  const ReportBuilderScreen({super.key});
+  const ReportBuilderScreen({super.key, this.embedded = false});
+
+  /// Inside the レポート tabs: no bar of its own.
+  final bool embedded;
 
   @override
   ConsumerState<ReportBuilderScreen> createState() => _ReportBuilderScreenState();
@@ -35,12 +39,11 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
   final _status = TextEditingController();
   final _janCode = TextEditingController();
   final _category = TextEditingController();
-  DateTime? _dateFrom;
-  DateTime? _dateTo;
+  /// Null: every date.
+  ReportPeriod? _period;
 
-  /// The month picked ('YYYY-MM'), which sets both dates; null when the
-  /// dates were picked by hand.
-  String? _month;
+  DateTime? get _dateFrom => _period?.from;
+  DateTime? get _dateTo => _period?.to;
 
   bool _running = false;
   ReportResult? _result;
@@ -77,13 +80,28 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
           'date_to': DateTime(_dateTo!.year, _dateTo!.month, _dateTo!.day, 23, 59, 59, 999).toUtc().toIso8601String(),
       };
 
-  void _pickMonth(String? m) => setState(() {
-        _month = m;
-        if (m == null) return;
-        final y = int.parse(m.substring(0, 4)), mo = int.parse(m.substring(5));
-        _dateFrom = DateTime(y, mo);
-        _dateTo = DateTime(y, mo + 1, 0);
-      });
+  /// 状態・JAN・カテゴリ, typed in a dialog from the ⋮ menu.
+  Future<void> _editConditions() async {
+    final r = await showDialog<List<String>>(
+      context: context,
+      builder: (_) => _ConditionsDialog(values: [_status.text, _janCode.text, _category.text]),
+    );
+    if (r == null || !mounted) return;
+    setState(() {
+      _status.text = r[0];
+      _janCode.text = r[1];
+      _category.text = r[2];
+    });
+  }
+
+  Future<void> _more(Object v) async {
+    if (v is PeriodChoice) {
+      final p = await choosePeriod(context, v, _period);
+      if (p != null && mounted) setState(() => _period = p);
+    } else if (v == 'conditions') {
+      await _editConditions();
+    }
+  }
 
   /// The conditions as lines for the page, the Excel and the PDF.
   List<String> _conditions(AppLocalizations l10n, List<Warehouse> warehouses) => [
@@ -147,9 +165,11 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
       _status.text = (def.filters['status'] ?? '').toString();
       _janCode.text = (def.filters['jan_code'] ?? '').toString();
       _category.text = (def.filters['category'] ?? '').toString();
-      _dateFrom = DateTime.tryParse('${def.filters['date_from']}')?.toLocal();
-      _dateTo = DateTime.tryParse('${def.filters['date_to']}')?.toLocal();
-      _month = null;
+      final from = DateTime.tryParse('${def.filters['date_from']}')?.toLocal();
+      final to = DateTime.tryParse('${def.filters['date_to']}')?.toLocal();
+      _period = from == null || to == null
+          ? null
+          : ReportPeriod(DateTime(from.year, from.month, from.day), DateTime(to.year, to.month, to.day));
     });
     await _run();
   }
@@ -176,25 +196,6 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
         ReportSource.products => l10n.reportSourceProducts,
       };
 
-  Future<void> _pickDate({required bool isFrom}) async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: (isFrom ? _dateFrom : _dateTo) ?? now,
-      firstDate: DateTime(now.year - 5),
-      lastDate: now,
-    );
-    if (picked == null) return;
-    setState(() {
-      _month = null;
-      if (isFrom) {
-        _dateFrom = picked;
-      } else {
-        _dateTo = picked;
-      }
-    });
-  }
-
   String _fmtDate(DateTime? d) =>
       d == null ? '—' : '${d.year}/${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')}';
 
@@ -205,147 +206,124 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
     final warehouseAsync = ref.watch(warehouseOverviewProvider);
     final savedAsync = ref.watch(savedReportListProvider);
 
+    final scheme = theme.colorScheme;
+    // Conditions set behind ⋮, shown so they are not forgotten.
+    final hidden = [
+      (l10n.reportFilterStatus, _status),
+      (l10n.reportFilterJan, _janCode),
+      (l10n.reportFilterCategory, _category),
+    ].where((e) => e.$2.text.trim().isNotEmpty).toList();
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.reportTitle)),
+      appBar: widget.embedded ? null : AppBar(title: Text(l10n.reportTitle)),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
-          DropdownButtonFormField<ReportSource>(
-            initialValue: _source,
-            decoration: InputDecoration(labelText: l10n.reportSource),
-            items: [
-              for (final s in ReportSource.values)
-                DropdownMenuItem(value: s, child: Text(_sourceLabel(l10n, s))),
-            ],
-            onChanged: (v) => setState(() => _source = v ?? _source),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          warehouseAsync.when(
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-            data: (overview) {
-              final countries = {for (final w in overview.warehouses) w.countryCode}.toList();
-              final warehouses = [
-                for (final w in overview.warehouses)
-                  if (_countryCode == null || w.countryCode == _countryCode) w,
-              ];
-              return Column(
-                children: [
-                  if (countries.length > 1) ...[
-                    DropdownButtonFormField<String?>(
-                      key: const ValueKey('report-country'),
-                      initialValue: _countryCode,
-                      decoration: InputDecoration(labelText: l10n.reportCountry),
-                      items: [
-                        DropdownMenuItem(value: null, child: Text(l10n.reportAllCountries)),
-                        for (final c in countries)
-                          DropdownMenuItem(value: c, child: Text(countryLabel(l10n, c))),
-                      ],
-                      onChanged: (v) => setState(() {
-                        _countryCode = v;
-                        // A warehouse from another country would match nothing.
-                        final keep = overview.warehouses
-                            .any((w) => w.id == _warehouseId && (v == null || w.countryCode == v));
-                        if (!keep) _warehouseId = null;
-                      }),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
-                  DropdownButtonFormField<int?>(
-                    // Rebuilt when the country changes so a cleared choice shows.
-                    key: ValueKey('report-warehouse-${_countryCode ?? ''}'),
-                    initialValue: _warehouseId,
-                    decoration: InputDecoration(labelText: l10n.reportWarehouse),
-                    items: [
-                      DropdownMenuItem(value: null, child: Text(l10n.reportAllWarehouses)),
-                      for (final w in warehouses)
-                        DropdownMenuItem(value: w.id, child: Text(w.name)),
-                    ],
-                    onChanged: (v) => setState(() => _warehouseId = v),
-                  ),
+          // The conditions in one row; the rarer ones behind ⋮.
+          Wrap(spacing: AppSpacing.md, runSpacing: AppSpacing.md, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            SizedBox(
+              width: 220,
+              child: DropdownButtonFormField<ReportSource>(
+                key: const ValueKey('report-source'),
+                initialValue: _source,
+                isExpanded: true,
+                decoration: InputDecoration(labelText: l10n.reportSource, isDense: true),
+                items: [
+                  for (final s in ReportSource.values) DropdownMenuItem(value: s, child: Text(_sourceLabel(l10n, s))),
                 ],
-              );
-            },
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          TextField(
-            controller: _status,
-            decoration: InputDecoration(labelText: l10n.reportFilterStatus),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          TextField(
-            controller: _janCode,
-            decoration: InputDecoration(labelText: l10n.reportFilterJan),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          TextField(
-            controller: _category,
-            decoration: InputDecoration(labelText: l10n.reportFilterCategory),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          // A month at once: the 1st to its last day.
-          DropdownButtonFormField<String?>(
-            key: ValueKey('report-month-$_month'),
-            initialValue: _month,
-            decoration: InputDecoration(labelText: l10n.reportMonth, prefixIcon: const Icon(Icons.calendar_month_outlined)),
-            items: [
-              DropdownMenuItem(value: null, child: Text(l10n.reportMonthAny)),
-              for (var i = 0; i < 24; i++)
-                () {
-                  final d = DateTime(DateTime.now().year, DateTime.now().month - i);
-                  final v = '${d.year}-${d.month.toString().padLeft(2, '0')}';
-                  return DropdownMenuItem(value: v, child: Text('${d.year}/${d.month.toString().padLeft(2, '0')}'));
-                }(),
-            ],
-            onChanged: _pickMonth,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () => _pickDate(isFrom: true),
-                  child: InputDecorator(
-                    decoration: InputDecoration(labelText: l10n.reportDateFrom),
-                    child: Text(_fmtDate(_dateFrom)),
+                onChanged: (v) => setState(() => _source = v ?? _source),
+              ),
+            ),
+            ...warehouseAsync.when(
+              loading: () => const <Widget>[],
+              error: (_, __) => const <Widget>[],
+              data: (overview) {
+                final countries = {for (final w in overview.warehouses) w.countryCode}.toList();
+                final warehouses = [
+                  for (final w in overview.warehouses)
+                    if (_countryCode == null || w.countryCode == _countryCode) w,
+                ];
+                return [
+                  if (countries.length > 1)
+                    SizedBox(
+                      width: 180,
+                      child: DropdownButtonFormField<String?>(
+                        key: const ValueKey('report-country'),
+                        initialValue: _countryCode,
+                        isExpanded: true,
+                        decoration: InputDecoration(labelText: l10n.reportCountry, isDense: true),
+                        items: [
+                          DropdownMenuItem(value: null, child: Text(l10n.reportAllCountries)),
+                          for (final c in countries) DropdownMenuItem(value: c, child: Text(countryLabel(l10n, c))),
+                        ],
+                        onChanged: (v) => setState(() {
+                          _countryCode = v;
+                          // A warehouse from another country would match nothing.
+                          final keep = overview.warehouses
+                              .any((w) => w.id == _warehouseId && (v == null || w.countryCode == v));
+                          if (!keep) _warehouseId = null;
+                        }),
+                      ),
+                    ),
+                  SizedBox(
+                    width: 200,
+                    child: DropdownButtonFormField<int?>(
+                      // Rebuilt when the country changes so a cleared choice shows.
+                      key: ValueKey('report-warehouse-${_countryCode ?? ''}'),
+                      initialValue: _warehouseId,
+                      isExpanded: true,
+                      decoration: InputDecoration(labelText: l10n.reportWarehouse, isDense: true),
+                      items: [
+                        DropdownMenuItem(value: null, child: Text(l10n.reportAllWarehouses)),
+                        for (final w in warehouses) DropdownMenuItem(value: w.id, child: Text(w.name)),
+                      ],
+                      onChanged: (v) => setState(() => _warehouseId = v),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: InkWell(
-                  onTap: () => _pickDate(isFrom: false),
-                  child: InputDecorator(
-                    decoration: InputDecoration(labelText: l10n.reportDateTo),
-                    child: Text(_fmtDate(_dateTo)),
+                ];
+              },
+            ),
+            ReportPeriodField(period: _period, allowNone: true, onChanged: (p) => setState(() => _period = p)),
+            PopupMenuButton<Object>(
+              key: const ValueKey('report-more'),
+              tooltip: l10n.rpMore,
+              icon: const Icon(Icons.more_vert),
+              onSelected: _more,
+              itemBuilder: (_) => [
+                ...periodMenuItems(l10n, days: true),
+                const PopupMenuDivider(),
+                PopupMenuItem(
+                    value: 'conditions', key: const ValueKey('report-conditions'), child: Text(l10n.rpConditions)),
+              ],
+            ),
+            FilledButton.icon(
+              key: const ValueKey('report-run'),
+              onPressed: _running ? null : _run,
+              icon: _running
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.play_arrow_outlined),
+              label: Text(l10n.reportRun),
+            ),
+            OutlinedButton.icon(
+              onPressed: _result == null ? null : _saveCurrent,
+              icon: const Icon(Icons.save_outlined),
+              label: Text(l10n.reportSave),
+            ),
+          ]),
+          if (hidden.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.xs, children: [
+                for (final (label, c) in hidden)
+                  InputChip(
+                    key: ValueKey('report-cond-$label'),
+                    label: Text(l10n.reportCondItem(label.replaceAll(RegExp(r'（.*?）'), ''), c.text.trim())),
+                    onPressed: _editConditions,
+                    onDeleted: () => setState(c.clear),
+                    deleteIconColor: scheme.onSurfaceVariant,
                   ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: _running ? null : _run,
-                  icon: _running
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.play_arrow_outlined),
-                  label: Text(l10n.reportRun),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              OutlinedButton.icon(
-                onPressed: _result == null ? null : _saveCurrent,
-                icon: const Icon(Icons.save_outlined),
-                label: Text(l10n.reportSave),
-              ),
-            ],
-          ),
+              ]),
+            ),
           const SizedBox(height: AppSpacing.xl),
           Text(l10n.reportSavedTitle, style: theme.textTheme.titleMedium),
           const SizedBox(height: AppSpacing.sm),
@@ -434,6 +412,56 @@ class _NameDialogState extends State<_NameDialog> {
         FilledButton(
           onPressed: () => Navigator.pop(context, _name.text),
           child: Text(l10n.reportSave),
+        ),
+      ],
+    );
+  }
+}
+
+/// 状態・JAN・カテゴリ: the conditions used now and then.
+class _ConditionsDialog extends StatefulWidget {
+  const _ConditionsDialog({required this.values});
+
+  final List<String> values;
+
+  @override
+  State<_ConditionsDialog> createState() => _ConditionsDialogState();
+}
+
+class _ConditionsDialogState extends State<_ConditionsDialog> {
+  late final _c = [for (final v in widget.values) TextEditingController(text: v)];
+
+  @override
+  void dispose() {
+    for (final c in _c) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    Widget field(String key, int i, String label) => Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          child: TextField(key: ValueKey(key), controller: _c[i], decoration: InputDecoration(labelText: label)),
+        );
+    return AlertDialog(
+      title: Text(l10n.rpMore),
+      content: SizedBox(
+        width: 360,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          field('report-status', 0, l10n.reportFilterStatus),
+          field('report-jan', 1, l10n.reportFilterJan),
+          field('report-category', 2, l10n.reportFilterCategory),
+        ]),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        FilledButton(
+          key: const ValueKey('report-conditions-ok'),
+          onPressed: () => Navigator.pop(context, [for (final c in _c) c.text.trim()]),
+          child: Text(l10n.rpApply),
         ),
       ],
     );

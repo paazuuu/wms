@@ -1692,11 +1692,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Make sets or assortments from single items: the parts\' stock goes down, the set\'s goes up';
 
   @override
-  String get featReports => 'Report builder';
+  String get featReports => 'Reports';
 
   @override
   String get featReportsDesc =>
-      'Pick a data source, filter it, save it for reuse';
+      'Stock movements and receipts & shipments, as A4 Excel and PDF';
 
   @override
   String get reportTitle => 'Report builder';
@@ -1705,7 +1705,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportSource => 'Data source';
 
   @override
-  String get reportSourceStockMovements => 'Stock ledger';
+  String get reportSourceStockMovements => 'Stock movements';
 
   @override
   String get reportSourceInspections => 'Inspections';
@@ -17494,7 +17494,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get featWorkLog => 'Work log';
+  String get featWorkLog => 'Receipts & shipments';
 
   @override
   String get featWorkLogDesc =>
@@ -17502,7 +17502,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String wlDocTitle(String month) {
-    return 'Work log $month';
+    return 'Receipts & shipments $month';
   }
 
   @override
@@ -17545,7 +17545,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wlColWarehouse => 'Warehouse';
 
   @override
-  String get wlColPartner => 'Partner (supplier / ship-to)';
+  String get wlColPartner => 'Supplier / ship-to';
 
   @override
   String get wlColFile => 'File';
@@ -17613,4 +17613,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String wkShort(int n) {
     return 'short $n';
   }
+
+  @override
+  String rpLast(int n) {
+    return 'Last $n months';
+  }
+
+  @override
+  String get rpMonths => 'Choose months (from – to)…';
+
+  @override
+  String get rpDays => 'Choose days…';
+
+  @override
+  String get rpPeriod => 'Period';
+
+  @override
+  String get rpAll => 'All time';
+
+  @override
+  String get rpClear => 'Reset the period';
+
+  @override
+  String get rpFromMonth => 'From';
+
+  @override
+  String get rpToMonth => 'To';
+
+  @override
+  String get rpApply => 'Apply';
+
+  @override
+  String get rpMore => 'More conditions';
+
+  @override
+  String get rpConditions => 'Filters (status, JAN, category)…';
+
+  @override
+  String get rhTabHistory => 'Stock movements';
+
+  @override
+  String get rhTabActivity => 'Receipts & shipments';
+
+  @override
+  String get rhHelpHistory =>
+      'Each product’s movements: when, where and how many. The audit log and the product list can be chosen too';
+
+  @override
+  String get rhHelpActivity =>
+      'Receipts by supplier, shipments by destination and the warehouse memos, month by month — for monthly reports and memoranda';
 }

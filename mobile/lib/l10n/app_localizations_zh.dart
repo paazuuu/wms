@@ -1634,10 +1634,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featWorkOrdersDesc => '用散件（部件）组合成套装・礼盒的作业。部件库存减少，套装库存增加';
 
   @override
-  String get featReports => '报表生成器';
+  String get featReports => '报表';
 
   @override
-  String get featReportsDesc => '选择数据源、筛选并保存以便复用';
+  String get featReportsDesc => '以A4格式导出出入库履历和出入货实绩的Excel・PDF';
 
   @override
   String get reportTitle => '报表生成器';
@@ -1646,7 +1646,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportSource => '数据源';
 
   @override
-  String get reportSourceStockMovements => '库存流水';
+  String get reportSourceStockMovements => '出入库履历';
 
   @override
   String get reportSourceInspections => '验货';
@@ -17028,14 +17028,14 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get featWorkLog => '作业实绩';
+  String get featWorkLog => '出入货实绩';
 
   @override
   String get featWorkLogDesc => '按月汇总入库・出库・备忘，以A4格式导出Excel・PDF';
 
   @override
   String wlDocTitle(String month) {
-    return '作业实绩 $month';
+    return '出入货实绩 $month';
   }
 
   @override
@@ -17077,7 +17077,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wlColWarehouse => '仓库';
 
   @override
-  String get wlColPartner => '往来方（供应商・出货地）';
+  String get wlColPartner => '供应商・出货地';
 
   @override
   String get wlColFile => '文件';
@@ -17145,4 +17145,51 @@ class AppLocalizationsZh extends AppLocalizations {
   String wkShort(int n) {
     return '缺 $n';
   }
+
+  @override
+  String rpLast(int n) {
+    return '最近$n个月';
+  }
+
+  @override
+  String get rpMonths => '指定期间（○月〜○月）…';
+
+  @override
+  String get rpDays => '按日期指定…';
+
+  @override
+  String get rpPeriod => '期间';
+
+  @override
+  String get rpAll => '全部期间';
+
+  @override
+  String get rpClear => '重置期间';
+
+  @override
+  String get rpFromMonth => '开始月';
+
+  @override
+  String get rpToMonth => '结束月';
+
+  @override
+  String get rpApply => '确定';
+
+  @override
+  String get rpMore => '其他条件';
+
+  @override
+  String get rpConditions => '筛选条件（状态・JAN・类别）…';
+
+  @override
+  String get rhTabHistory => '出入库履历';
+
+  @override
+  String get rhTabActivity => '出入货实绩';
+
+  @override
+  String get rhHelpHistory => '按商品的入库・出库・调整履历（何时・哪个仓库・动了多少）。也可选择审计日志和商品列表';
+
+  @override
+  String get rhHelpActivity => '按月汇总供应商的入库、出货地的出库及仓库备忘・指示。可用于月报和备忘录';
 }

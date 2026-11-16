@@ -98,7 +98,7 @@ void main() {
     final now = DateTime.now();
     final m = DateTime(now.year, now.month - 1);
     final label = '${m.year}/${m.month.toString().padLeft(2, '0')}';
-    await tester.tap(find.byKey(const ValueKey('report-month-null')));
+    await tester.tap(find.byKey(const ValueKey('rp-month-null')));
     await tester.pumpAndSettle();
     await tester.tap(find.text(label).last);
     await tester.pumpAndSettle();
@@ -112,7 +112,7 @@ void main() {
 
     // The page: title, conditions, headings, rows.
     expect(find.byKey(const ValueKey('report-page-1')), findsOneWidget);
-    expect(find.text('在庫履歴レポート'), findsOneWidget);
+    expect(find.text('入出庫履歴レポート'), findsOneWidget);
     expect(find.textContaining('期間: $label/01'), findsOneWidget);
     expect(find.text('商品名'), findsWidgets);
     expect(find.text('第二倉庫'), findsOneWidget);
@@ -136,7 +136,7 @@ void main() {
     expect(saved, hasLength(2));
     expect(saved.first, endsWith('.xlsx'));
     expect(saved.last, endsWith('.pdf'));
-    expect(saved.first, startsWith('在庫履歴レポート_'));
+    expect(saved.first, startsWith('入出庫履歴レポート_'));
 
     await tester.tap(find.byKey(const ValueKey('report-filter-reset')));
     await tester.pumpAndSettle();

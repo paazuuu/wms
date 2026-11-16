@@ -428,12 +428,15 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(inSidebar('Picking'), findsOneWidget);
-      // Report builder's description opens "Pick a data source...", so it
-      // survives a filter for 'pick'. Documented rather than tuned away: the
-      // same rule is what makes 'approve' find the order screens, and a
-      // near-miss that stays visible is cheaper for an operator than a
-      // relevant entry that vanishes.
-      expect(inSidebar('Report builder'), findsOneWidget);
+
+      // Reports' description says "… as A4 Excel and PDF", so it survives a
+      // filter for 'excel' though its label does not say so. Documented
+      // rather than tuned away: the same rule is what makes 'approve' find
+      // the order screens, and a near-miss that stays visible is cheaper
+      // for an operator than a relevant entry that vanishes.
+      await tester.enterText(find.byKey(menuFilterKey), 'excel');
+      await tester.pumpAndSettle();
+      expect(inSidebar('Reports'), findsOneWidget);
     });
 
     testWidgets('the filter matches descriptions, not just labels',

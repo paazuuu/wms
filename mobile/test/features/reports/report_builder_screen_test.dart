@@ -165,4 +165,37 @@ void main() {
     expect(find.byKey(const ValueKey('report-country')), findsNothing);
     await tester.binding.setSurfaceSize(null);
   });
+
+  testWidgets('one row of conditions; 状態・JAN・カテゴリ behind ⋮, shown as chips once set', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeReportRepository();
+    await _pump(tester, repo);
+    expect(find.byKey(const ValueKey('report-jan')), findsNothing, reason: 'not on screen until asked for');
+
+    await tester.tap(find.byKey(const ValueKey('report-more')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('report-conditions')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('report-jan')), '4909999000014');
+    await tester.tap(find.byKey(const ValueKey('report-conditions-ok')));
+    await tester.pumpAndSettle();
+    expect(find.text('JANコード: 4909999000014'), findsOneWidget);
+
+    // The last 6 months from ⋮.
+    await tester.tap(find.byKey(const ValueKey('report-more')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('rp-last6')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('実行'));
+    await tester.pumpAndSettle();
+    expect(repo.lastFilters!['jan_code'], '4909999000014');
+    final now = DateTime.now();
+    expect(DateTime.parse(repo.lastFilters!['date_from'] as String).toLocal(), DateTime(now.year, now.month - 5));
+
+    // The chip's cross takes the JAN off.
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey('report-cond-JANコード（任意）')), matching: find.byType(Icon)).last);
+    await tester.pumpAndSettle();
+    expect(find.text('JANコード: 4909999000014'), findsNothing);
+  });
 }
