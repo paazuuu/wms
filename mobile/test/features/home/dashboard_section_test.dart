@@ -7,6 +7,8 @@ import 'package:wms_mobile/features/warehouse_context/application/warehouse_prov
 import 'package:wms_mobile/features/home/domain/dashboard_metrics.dart';
 import 'package:wms_mobile/features/home/presentation/dashboard_widgets.dart';
 
+import 'package:wms_mobile/core/ui/responsive.dart';
+
 import '../../support/harness.dart';
 
 DashboardMetrics _metrics() => DashboardMetrics(
@@ -93,5 +95,36 @@ void main() {
     expect(find.text('ペン'), findsOneWidget);
 
     await tester.binding.setSurfaceSize(null);
+  });
+  testWidgets('a window the browser reports as nothing (a hidden tab, DevTools over it) is laid out at the smallest size, not at zero', (tester) async {
+    tester.view
+      ..devicePixelRatio = 1.0
+      ..physicalSize = const Size(1200, 900);
+    addTearDown(tester.view.reset);
+    await pumpApp(
+      tester,
+      const MinimumLayoutSize(
+        child: Scaffold(
+          body: SingleChildScrollView(
+            padding: EdgeInsets.all(24),
+            child: DashboardMetricsSection(),
+          ),
+        ),
+      ),
+      overrides: [
+        dashboardRepositoryProvider.overrideWithValue(FakeDashboardRepository(_metrics())),
+      ],
+    );
+    expect(find.text('17,117'), findsOneWidget);
+    for (final s in const [Size(0, 0), Size(0, 900), Size(1200, 0), Size(1, 1)]) {
+      tester.view.physicalSize = s;
+      await tester.pump();
+      expect(tester.takeException(), isNull, reason: '$s');
+    }
+    // Back to a real window: laid out exactly at it.
+    tester.view.physicalSize = const Size(1200, 900);
+    await tester.pump();
+    expect(tester.getSize(find.byType(Scaffold)), const Size(1200, 900));
+    expect(find.text('17,117'), findsOneWidget);
   });
 }

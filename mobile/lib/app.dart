@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/router/app_router.dart';
 import 'core/ui/popconfirm.dart';
+import 'core/ui/responsive.dart';
 import 'core/ui/selectable_app.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/appearance_controller.dart';
@@ -48,7 +49,8 @@ class WmsApp extends ConsumerWidget {
           // and copied, so a JAN or 品番 never has to be typed out again.
           // Scanning is unaffected: the hardware scanner and shortcuts
           // listen on HardwareKeyboard, not on focus.
-          child: SelectableApp(child: child ?? const SizedBox.shrink()),
+          // Never laid out smaller than a small phone: see [MinimumLayoutSize].
+          child: MinimumLayoutSize(child: SelectableApp(child: child ?? const SizedBox.shrink())),
         );
       },
     );
