@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../application/product_providers.dart';
 import '../domain/product.dart';
 import 'product_labels.dart';
+import '../data/product_category_repository.dart';
 
 /// Bottom sheet for creating or editing one product. The JAN code is fixed
 /// once created — `update_product` never touches it — so it's read-only
@@ -208,6 +209,16 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
       result.when(success: (_) {}, failure: (f) => errorMessage = f.message);
     }
 
+    // The category as a place in the tree (0218): "文房具 > ペン" makes or
+    // finds each level, and marks it a person's, so the AI leaves it be.
+    final categoryChanged = (category ?? '') != (widget.product?.category ?? '');
+    if (errorMessage == null && productId != null && categoryChanged) {
+      final result = await ref
+          .read(productCategoryRepositoryProvider)
+          .setCategory(productId, parseCategoryPath(category ?? ''));
+      result.when(success: (_) => ref.invalidate(categoryTreeProvider), failure: (f) => errorMessage = f.message);
+    }
+
     // §16's default draw order — its own call for the same reason identity is:
     // a different decision from the name/price/category `update`/`create` set.
     final pickingRuleChanged =
@@ -396,8 +407,9 @@ class ProductFormSheetState extends ConsumerState<ProductFormSheet> {
             ),
             const SizedBox(height: AppSpacing.lg),
             TextField(
+              key: const ValueKey('product-category'),
               controller: _category,
-              decoration: InputDecoration(labelText: l10n.productCategory),
+              decoration: InputDecoration(labelText: l10n.productCategory, helperText: l10n.pcPathHint),
             ),
             const SizedBox(height: AppSpacing.lg),
             TextField(

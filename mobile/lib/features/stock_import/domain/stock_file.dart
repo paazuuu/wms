@@ -32,10 +32,14 @@ class StockFileLine extends Equatable {
     this.maker,
     this.code,
     this.unitPrice,
+    this.classCode,
   });
 
   final int lineNo;
   final String janCode;
+
+  /// 識別コード (0218): the supplier's code for the group it belongs to.
+  final String? classCode;
   final int quantity;
   final String? name;
 
@@ -65,6 +69,7 @@ class StockFileLine extends Equatable {
         maker: maker,
         code: code,
         unitPrice: unitPrice,
+        classCode: classCode,
       );
 
   /// What a product made from this line is called: the file's name for it,
@@ -86,10 +91,16 @@ class StockFileLine extends Equatable {
       };
 
   Map<String, dynamic> toJson() =>
-      {'line_no': lineNo, 'jan_code': janCode, 'quantity': quantity, if (unitPrice != null) 'unit_price': unitPrice};
+      {
+        'line_no': lineNo,
+        'jan_code': janCode,
+        'quantity': quantity,
+        if (unitPrice != null) 'unit_price': unitPrice,
+        if ((classCode ?? '').isNotEmpty) 'class_code': classCode,
+      };
 
   @override
-  List<Object?> get props => [lineNo, janCode, quantity, name, merged, doubtful, maker, code, unitPrice];
+  List<Object?> get props => [lineNo, janCode, quantity, name, merged, doubtful, maker, code, unitPrice, classCode];
 }
 
 /// A row the file had that cannot be taken: its row number and why.
@@ -237,7 +248,11 @@ class LedgerFields extends Equatable {
     this.amount = '',
     this.taxRate = '',
     this.orderNumber = '',
+    this.classCode = '',
   });
+
+  /// 識別コード (0218): HL, BL … as the supplier prints it.
+  final String classCode;
 
   final String orderDate;
   final String deliveryDate;
@@ -265,11 +280,13 @@ class LedgerFields extends Equatable {
 
   static const _keys = [
     'order_date', 'delivery_date', 'serial', 'supplier', 'unit', 'list_price', 'unit_price', 'unit_price_tax',
-    'amount', 'tax_rate', 'order_number',
+    'amount', 'tax_rate', 'order_number', 'class_code',
   ];
 
-  List<String> get _values =>
-      [orderDate, deliveryDate, serial, supplier, unit, listPrice, unitPrice, unitPriceTax, amount, taxRate, orderNumber];
+  List<String> get _values => [
+        orderDate, deliveryDate, serial, supplier, unit, listPrice, unitPrice, unitPriceTax, amount, taxRate, orderNumber,
+        classCode,
+      ];
 
   bool get isEmpty => _values.every((v) => v.isEmpty);
 
@@ -282,7 +299,7 @@ class LedgerFields extends Equatable {
     v[_keys.indexOf(key)] = value;
     return LedgerFields(
       orderDate: v[0], deliveryDate: v[1], serial: v[2], supplier: v[3], unit: v[4], listPrice: v[5],
-      unitPrice: v[6], unitPriceTax: v[7], amount: v[8], taxRate: v[9], orderNumber: v[10],
+      unitPrice: v[6], unitPriceTax: v[7], amount: v[8], taxRate: v[9], orderNumber: v[10], classCode: v[11],
     );
   }
 
@@ -311,6 +328,7 @@ class LedgerFields extends Equatable {
       amount: s('amount'),
       taxRate: s('tax_rate'),
       orderNumber: s('order_number'),
+      classCode: s('class_code').toUpperCase(),
     );
   }
 
@@ -380,6 +398,7 @@ const _stockFieldOf = <String, String>{
   'amount': 'amount',
   'tax_rate': 'tax_rate',
   'order_number': 'order_number',
+  'class_code': 'class_code',
 };
 
 class StockSheet extends Equatable {
@@ -465,6 +484,7 @@ const _ledgerNames = <String, Set<String>>{
   'amount': {'金額', '合計', '金额', '合计'},
   'tax_rate': {'税率'},
   'order_number': {'注番', '注文番号', '注文no', '発注番号', 'オーダー番号', '订单号'},
+  'class_code': {'識別コード', '識別', '識別記号', '区分コード', '分類コード', '識別番号', '识别码'},
 };
 const _codeNames = {'品番', '型番', '商品コード', 'sku', 'itemcode', 'productcode'};
 const _aiJanNames = {'読み取ったjan', 'aiが読んだjan'};
@@ -528,6 +548,13 @@ StockSheet parseStockRows(List<List<String>> rows, {List<HeadingMeaning> meaning
       if (headings[c].isNotEmpty && !used.contains(c)) c,
   ];
 
+  // 識別コード (0218) with no heading for it: a column nothing else took
+  // whose cells are short codes of two kinds or more.
+  if ((ledgerCols['class_code'] ?? -1) < 0) {
+    final c = classCodeColumn(rows.sublist(head + 1), unplaced);
+    if (c >= 0) ledgerCols['class_code'] = c;
+  }
+
   final byJan = <String, StockFileLine>{};
   final problems = <StockFileProblem>[];
   final read = <ReadRow>[];
@@ -575,6 +602,7 @@ StockSheet parseStockRows(List<List<String>> rows, {List<HeadingMeaning> meaning
       maker: prev?.maker ?? opt(row, makerCol),
       code: prev?.code ?? opt(row, codeCol),
       unitPrice: prev?.unitPrice ?? readRow.ledger.pricePer(q),
+      classCode: prev?.classCode ?? classCodeOf(readRow.ledger.classCode),
     );
   }
   return StockSheet(
@@ -656,6 +684,7 @@ StockSheet stockSheetFromRead(List<ReadRow> rows, {bool byAi = true}) {
       maker: prev?.maker ?? (row.maker.isEmpty ? null : row.maker),
       code: prev?.code ?? (row.code.isEmpty ? null : row.code),
       unitPrice: prev?.unitPrice ?? row.ledger.pricePer(q),
+      classCode: prev?.classCode ?? classCodeOf(row.ledger.classCode),
     );
   }
   return StockSheet(lines: byJan.values.toList(), problems: problems, byAi: byAi, read: rows);
@@ -849,4 +878,50 @@ extension _Let<T> on T {
     XlsxSheet(name: base, headers: pad(rows.first), rows: [for (final r in rows.skip(1)) pad(r)]),
   ]);
   return (name: '${base}_$suffix.xlsx', bytes: markXlsxRows(book, marks, headerRow: head, noteHeading: heading));
+}
+
+/// A 識別コード (0218): a short code of letters, or letters and digits — HL,
+/// BL, BH — upper case; a date or code beside a date ("20261027 HL",
+/// "11月5日 BL") gives the code. Null for anything else.
+String? classCodeOf(String? v) {
+  final t = _halfWidth((v ?? '').trim()).toUpperCase();
+  if (t.isEmpty) return null;
+  if (_codeRe.hasMatch(t)) return t;
+  return codeBesideDate(t)?.code;
+}
+
+final _codeRe = RegExp(r'^(?=[A-Z0-9]*[A-Z])[A-Z0-9]{1,6}$');
+final _dateLike = RegExp(r'^(\d{8}|\d{2,4}[/.\-]\d{1,2}([/.\-]\d{1,2})?|\d{1,2}[/.\-]\d{1,2}|(\d{2,4}年)?\d{1,2}月\d{1,2}日?)$');
+
+String _halfWidth(String s) => String.fromCharCodes(s.runes.map((r) => r >= 0xFF01 && r <= 0xFF5E ? r - 0xFEE0 : (r == 0x3000 ? 0x20 : r)));
+
+/// A code printed beside a date in one cell, either side.
+({String code, String rest})? codeBesideDate(String v) {
+  final s = _halfWidth(v.trim());
+  final a = RegExp(r'^(.+?)\s+([A-Za-z][A-Za-z0-9]{0,5})$').firstMatch(s);
+  if (a != null && _dateLike.hasMatch(a[1]!.replaceAll(RegExp(r'\s'), '')) && _codeRe.hasMatch(a[2]!.toUpperCase())) {
+    return (code: a[2]!.toUpperCase(), rest: a[1]!.trim());
+  }
+  final b = RegExp(r'^([A-Za-z][A-Za-z0-9]{0,5})\s+(.+)$').firstMatch(s);
+  if (b != null && _dateLike.hasMatch(b[2]!.replaceAll(RegExp(r'\s'), '')) && _codeRe.hasMatch(b[1]!.toUpperCase())) {
+    return (code: b[1]!.toUpperCase(), rest: b[2]!.trim());
+  }
+  return null;
+}
+
+/// Of [candidates] (columns of [rows]), the first whose cells are mostly
+/// short letter codes, of two kinds or more; -1 when none.
+int classCodeColumn(List<List<String>> rows, List<int> candidates) {
+  for (final c in candidates) {
+    final values = [for (final r in rows) if (c < r.length && r[c].trim().isNotEmpty) r[c].trim()];
+    if (values.length < 2) continue;
+    final hits = [
+      for (final v in values)
+        if (_codeRe.hasMatch(_halfWidth(v).toUpperCase()) && RegExp(r'[A-Z]{2}').hasMatch(_halfWidth(v).toUpperCase()))
+          _halfWidth(v).toUpperCase(),
+    ];
+    final kinds = hits.toSet().length;
+    if (hits.length >= 2 && hits.length >= values.length * 0.6 && kinds >= 2 && kinds <= 30) return c;
+  }
+  return -1;
 }

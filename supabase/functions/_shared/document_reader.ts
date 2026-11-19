@@ -32,14 +32,16 @@ export type Field =
   | "list_price" | "discount_rate" | "unit" | "supplier_code"
   | "upstream_code" | "customer_code" | "multi"
   // A purchase ledger's (明細) own columns (0150).
-  | "serial" | "supplier" | "unit_price_tax" | "delivery_date" | "order_number";
+  | "serial" | "supplier" | "unit_price_tax" | "delivery_date" | "order_number"
+  // 識別コード (0218): the supplier's short code for a group of goods (HL, BL …).
+  | "class_code";
 
 export const FIELDS: Field[] = [
   "jan", "maker", "product_name", "product_code", "name_code", "quantity",
   "case_quantity", "cases", "unit_price", "amount", "spec", "tax_rate",
   "order_date", "ignore", "attr", "list_price", "discount_rate", "unit", "supplier_code",
   "upstream_code", "customer_code", "multi",
-  "serial", "supplier", "unit_price_tax", "delivery_date", "order_number",
+  "serial", "supplier", "unit_price_tax", "delivery_date", "order_number", "class_code",
 ];
 
 /** What a cell holding several fields (0114, field 'multi') can be split into. */
@@ -122,6 +124,9 @@ export type ReadLine = {
   unit_price_tax?: number | null;
   delivery_date?: string | null;
   order_number?: string | null;
+  /** 識別コード (0218): the supplier's code for the group the goods belong
+   * to (HL, BL, BH …), printed in the same column on every line. */
+  class_code?: string | null;
 };
 
 export type Header = {
@@ -976,6 +981,7 @@ const FIELD_HELP =
   "customer_code=得意先コード/お客様コード(取引先から見た当社のコード), " +
   "serial=番号/序番/No(書類の行の番号), supplier=仕入先/供給元(行ごとに書かれた仕入先名), " +
   "unit_price_tax=単価(税込), delivery_date=入荷日/納品日/着日, order_number=注番/注文番号/発注番号, " +
+  "class_code=識別コード(仕入先が商品のくくりごとに付ける HL・BL のような短い英字の記号。同じ欄に行ごとに繰り返し書かれる), " +
   "multi=メーカー・品名・品番など複数の項目が1つの欄にまとまっている, " +
   "attr=色・サイズ・容量・材質・重量など商品の属性(どの属性かを attribute に), ignore=その他";
 
@@ -1469,6 +1475,10 @@ export async function readRows(
   const cUpstream = colOf("upstream_code"), cCustomer = colOf("customer_code");
   const cSerial = colOf("serial"), cSupplier = colOf("supplier"), cUnitTax = colOf("unit_price_tax");
   const cDelivery = colOf("delivery_date"), cOrderNo = colOf("order_number");
+  // 識別コード (0218): its own column, else one no other field took whose
+  // cells are short codes of two kinds or more.
+  const cClass = colOf("class_code") >= 0 ? colOf("class_code")
+    : classCodeColumn(body, new Set(columns.filter((c) => c.field && c.field !== "ignore").map((c) => c.index)));
   // Every attribute column, however many (色 and サイズ side by side).
   const attrCols = columns.filter((c) => c.field === "attr" && c.attribute);
   // Cells holding several fields, split by their layout (0114).
@@ -1573,6 +1583,7 @@ export async function readRows(
       unit_price_tax: toNum(cell(r, cUnitTax)),
       delivery_date: dateStr(cell(r, cDelivery)),
       order_number: str(cell(r, cOrderNo)),
+      class_code: classCodeOf(cell(r, cClass)),
     });
   });
 
@@ -2359,6 +2370,7 @@ const LINE_PROPS: Record<string, Record<string, unknown>> = {
   order_date: { type: "string" },
   delivery_date: { type: "string" },
   order_number: { type: "string" },
+  class_code: { type: "string" },
   attributes: {
     type: "array",
     items: {
@@ -2376,6 +2388,14 @@ const MAKER_ONLY_RULE =
   "商品名の欄に「メーカー名と品番」しか書かれておらず商品名が無い書類も多い(例: 9A ｺｸﾖ ﾗ-N205B、ﾊﾟｲﾛｯﾄ BIL80EFSULB)。" +
   "その場合はメーカー名を maker に(半角カナは全角カナで)、品番を product_code に入れ、product_name は null にする。" +
   "メーカー名を product_name に入れない。行頭の 9A・8G のような短い分類記号はメーカーでも品番でもないので入れない。";
+
+/** 識別コード (0218): how to tell it from what is printed around it. */
+const CLASS_CODE_RULE =
+  "識別コード: 仕入先が商品のくくりごとに付けている、英字を中心にした短い記号(例: HL・BL・BH。2文字とは限らない)が" +
+  "日付の横・備考欄・伝票区分の欄など、毎行同じ欄に書かれていれば、その記号だけを class_code に入れる。" +
+  "同じ欄に複数の種類(HLとBLなど)が並ぶのが目印。日付・伝票番号・品番・JAN・単位は識別コードではない。" +
+  "「20261027 HL」「11月5日 BL」のように日付と並んでいれば、日付は日付の欄に、記号は class_code に分ける。" +
+  "品名の先頭に付く 9A・11D のような記号は識別コードではない。無ければ null。";
 
 const EXTRACT_PROMPT =
   "この画像/PDFは日本の取引先(商社)の納品書・出荷案内・注文明細です。商社ごとに書式も見出しの言葉" +
@@ -2398,6 +2418,7 @@ const EXTRACT_PROMPT =
   "仕入先コード(取引先の仕入先=メーカー等のコード)の欄があれば upstream_code に。" +
   "行ごとに、番号・序番の欄があれば serial に、仕入先名の欄があれば supplier に、税込単価の欄があれば unit_price_tax に、" +
   "発注日・注文日は order_date に、入荷日・納品日(月日だけの欄も)は delivery_date に書かれたとおり、注番・注文番号は order_number に。" +
+  CLASS_CODE_RULE +
   "色・サイズ・容量・材質・重量など商品の属性が別の欄(または品名の後ろ)に書かれていれば、attributes に " +
   "{name: 見出しの文字どおり(カラー・Size など), value: 書かれた値} で入れる。" +
   "表に縦に結合されたセル(複数の行にまたがるセル)があるときは、その値は結合された範囲の商品のもの。" +
@@ -2515,6 +2536,7 @@ function rawToLine(l: RawLine, row: number, aliases: AliasRow[] = []): ReadLine 
     unit_price_tax: toNum(l.unit_price_tax),
     delivery_date: str(l.delivery_date),
     order_number: str(l.order_number),
+    class_code: classCodeOf(l.class_code),
   };
 }
 
@@ -2828,4 +2850,141 @@ export async function readDocument(
     verified: bLines !== null,
     totals,
   };
+}
+
+/** A 識別コード (0218): a short code of letters, or letters and digits —
+ * HL, BL, BH, A1 — as one, upper case. A date, a number or a word is not one. */
+const CODE_RE = /^(?=[A-Z0-9]*[A-Z])[A-Z0-9]{1,6}$/;
+
+/** [v] as a 識別コード, or null. "20261027 HL" and "11月5日 BL" give the code
+ * beside the date. */
+export function classCodeOf(v: unknown): string | null {
+  const s = String(v ?? "").normalize("NFKC").trim().toUpperCase();
+  if (!s) return null;
+  if (CODE_RE.test(s)) return s;
+  return codeBesideDate(s)?.code ?? null;
+}
+
+/** Looks like a date: 20261027, 2026/10/27, 10/27, 11月5日. */
+const DATE_LIKE = /^(\d{8}|\d{2,4}[\/.\-]\d{1,2}([\/.\-]\d{1,2})?|\d{1,2}[\/.\-]\d{1,2}|(\d{2,4}年)?\d{1,2}月\d{1,2}日?)$/;
+
+/** A code printed beside a date in one cell, either side: the code and
+ * the date without it. */
+export function codeBesideDate(v: unknown): { code: string; rest: string } | null {
+  const s = String(v ?? "").normalize("NFKC").trim();
+  const m = s.match(/^(.+?)\s+([A-Za-z][A-Za-z0-9]{0,5})$/) ?? null;
+  if (m && DATE_LIKE.test(m[1].replace(/\s/g, "")) && CODE_RE.test(m[2].toUpperCase())) {
+    return { code: m[2].toUpperCase(), rest: m[1].trim() };
+  }
+  const n = s.match(/^([A-Za-z][A-Za-z0-9]{0,5})\s+(.+)$/) ?? null;
+  if (n && DATE_LIKE.test(n[2].replace(/\s/g, "")) && CODE_RE.test(n[1].toUpperCase())) {
+    return { code: n[1].toUpperCase(), rest: n[2].trim() };
+  }
+  return null;
+}
+
+/** The column of a sheet holding 識別コード when no heading said so: one
+ * not in [used] whose cells are mostly short codes, of two kinds or more
+ * (a column of one code throughout is more likely a unit or a mark). */
+export function classCodeColumn(body: unknown[][], used: Set<number>): number {
+  const ncol = Math.max(0, ...body.map((r) => r.length));
+  for (let c = 0; c < ncol; c++) {
+    if (used.has(c)) continue;
+    const values = body.map((r) => String(r[c] ?? "").trim()).filter((v) => v !== "");
+    if (values.length < 2) continue;
+    const codes = values.map((v) => {
+      const s = v.normalize("NFKC").toUpperCase();
+      return CODE_RE.test(s) && /[A-Z]{2}/.test(s) ? s : null;
+    });
+    const hits = codes.filter((x): x is string => x !== null);
+    const kinds = new Set(hits).size;
+    if (hits.length >= Math.max(2, values.length * 0.6) && kinds >= 2 && kinds <= 30) return c;
+  }
+  return -1;
+}
+
+/** The fields a code may have been read into beside a date. */
+const CODE_HOSTS: (keyof ReadLine)[] = ["delivery_date", "order_date", "order_number", "serial", "spec"];
+
+/** Lines read with no 識別コード where one field holds a date with a code
+ * beside it on two lines or more ("20261027 HL", "11月5日 BL"): the code is
+ * taken out of that field into class_code, the date left. Nothing changes
+ * when any line already has a code. */
+export function inferClassCodes(lines: ReadLine[]): ReadLine[] {
+  if (lines.some((l) => l.class_code)) return lines;
+  for (const f of CODE_HOSTS) {
+    const found = lines.map((l) => codeBesideDate(l[f]));
+    if (found.filter((x) => x !== null).length < 2) continue;
+    lines.forEach((l, i) => {
+      const hit = found[i];
+      if (!hit) return;
+      l.class_code = hit.code;
+      (l as Record<string, unknown>)[f] = hit.rest;
+    });
+    return lines;
+  }
+  return lines;
+}
+
+/** A product to place in the category tree (0218). */
+export type ClassifyItem = {
+  index: number;
+  jan?: string | null;
+  name?: string | null;
+  maker?: string | null;
+  code?: string | null;
+  spec?: string | null;
+};
+
+const CLASSIFY_PROMPT =
+  "あなたは文房具・事務用品・生活雑貨などを扱う商社の商品マスタ担当です。各商品を、人が商品を探すときに使う分類の階層に入れてください。\n" +
+  "path は大分類から順に細かく。例: [\"文房具\",\"筆記具\",\"ボールペン\",\"油性\"]、[\"文房具\",\"筆記具\",\"シャープペン\"]、" +
+  "[\"文房具\",\"筆記具\",\"替芯\",\"シャープ替芯\"]、[\"文房具\",\"消しゴム\"]。\n" +
+  "段の数は商品に合わせて2〜6段。わかる範囲で細かく(水性・油性・ゲルなどインクの種類、ノック式・キャップ式など)、確かでない段は付けない。\n" +
+  "known にある分類に合うときは、その名前と並びをそのまま使い、同じ意味の別の言い方を作らない。\n" +
+  "各段は短い日本語の名詞。色・品番・メーカー名・容量・入数は入れない。何の商品か分からなければ path は空。\n";
+
+/** Each item's place in the category tree, broad to narrow, in the words
+ * already in [known] where they fit (0218). Nothing is kept here. */
+export async function classifyProducts(items: ClassifyItem[], known: string[][] = []): Promise<{ index: number; path: string[] }[]> {
+  const asked = items.filter((i) => str(i.name) || str(i.code)).slice(0, 60);
+  if (asked.length === 0) return [];
+  const r = await gemini([{
+    text: CLASSIFY_PROMPT +
+      "known: " + JSON.stringify(known.slice(0, 400).map((p) => p.join(" > "))) + "\n" +
+      "items: " + JSON.stringify(asked.map((i) => ({
+        index: i.index, name: i.name ?? "", maker: i.maker ?? "", code: i.code ?? "", spec: i.spec ?? "",
+      }))),
+  }], {
+    type: "object",
+    properties: {
+      items: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: { index: { type: "integer" }, path: { type: "array", items: { type: "string" } } },
+          required: ["index", "path"],
+        },
+      },
+    },
+    required: ["items"],
+  }, "classify");
+  return cleanCategoryPaths(r.items, asked.map((a) => a.index));
+}
+
+/** What the AI gave, kept to what can be a path: known items, short
+ * trimmed steps, at most 6 deep, no empty steps or repeats. */
+export function cleanCategoryPaths(raw: unknown, indexes: number[]): { index: number; path: string[] }[] {
+  const out: { index: number; path: string[] }[] = [];
+  for (const it of (Array.isArray(raw) ? raw : []) as { index?: unknown; path?: unknown }[]) {
+    const index = Number(it?.index);
+    if (!indexes.includes(index) || out.some((o) => o.index === index)) continue;
+    const path: string[] = [];
+    for (const step of (Array.isArray(it.path) ? it.path : [])) {
+      const t = String(step ?? "").normalize("NFKC").replace(/\s+/g, " ").trim().slice(0, 30);
+      if (t && !path.includes(t)) path.push(t);
+    }
+    if (path.length) out.push({ index, path: path.slice(0, 6) });
+  }
+  return out;
 }

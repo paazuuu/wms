@@ -42,6 +42,8 @@ import 'reading_check_screen.dart';
 import 'stock_import_calendar_screen.dart';
 import 'stock_inspection_screen.dart';
 import '../../requirements/requirements_repository.dart';
+import '../../product/data/product_category_repository.dart';
+import '../../product/domain/product.dart' show Product;
 
 /// A chosen file: its name and bytes, or null when nothing was chosen.
 typedef PickStockFile = Future<({String name, Uint8List bytes})?> Function();
@@ -176,6 +178,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _catalog = const {};
       _names = const {};
       _namesStopped = false;
+      _categories = const {};
+      _catWork = null;
       _error = null;
       _badFile = false;
       _fileName = f.name;
@@ -285,7 +289,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       return;
     }
     await _lookup();
-    unawaited(_lookUpNames());
+    // The categories (0218) once the names are known: a name places a product
+    // far better than its 品番 alone.
+    _catWork = _lookUpNames().then((_) => _classify());
+    unawaited(_catWork);
   }
 
   /// 読み取り結果の確認: every row read, as a table beside the original, to
@@ -315,7 +322,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _checked = false;
     });
     await _lookup();
-    unawaited(_lookUpNames());
+    // The categories (0218) once the names are known: a name places a product
+    // far better than its 品番 alone.
+    _catWork = _lookUpNames().then((_) => _classify());
+    unawaited(_catWork);
   }
 
   /// The chosen warehouse, as the screen shows it.
@@ -432,8 +442,14 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                 NameAsk(jan: l.janCode, maker: l.maker, code: l.code, name: l.name),
           ]),
         ]);
-        _aiWork = work;
-        unawaited(work);
+        // Their categories (0218), once the AI has placed them: taken now that
+        // the products are there.
+        final registered = {for (final l in todo) l.janCode};
+        _aiWork = Future.wait<void>([
+          work,
+          (_catWork ?? Future<void>.value()).catchError((_) {}).then((_) => _saveCategories(registered)),
+        ]);
+        unawaited(_aiWork);
         return true;
       case ApiFailure(:final message):
         setState(() => _error = humanizeApiErrorMessage(l10n, message));
@@ -455,6 +471,56 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   bool _namesStopped = false;
 
   bool get _checkCleared => _sheet != null && (!_sheet!.byAi || _tableChecked);
+
+  /// 商品カテゴリー (0218): each JAN's place in the tree, as the AI gave it
+  /// after the check — saved onto the products there are, and again onto
+  /// the ones registered after.
+  Map<String, List<String>> _categories = const {};
+  Future<void>? _catWork;
+  bool _catBusy = false;
+  int _catDone = 0;
+  int _catTotal = 0;
+
+  Future<void> _classify() async {
+    final sheet = _sheet;
+    if (sheet == null || !_checkCleared || sheet.lines.isEmpty || !ref.read(productLibraryCanManageProvider)) return;
+    // Products the library already has in a category are left as they are.
+    final placed = {
+      for (final p in ref.read(productListProvider).valueOrNull ?? const <Product>[])
+        if ((p.category ?? '').trim().isNotEmpty) p.janCode,
+    };
+    final asks = [
+      for (final l in sheet.lines)
+        if (!_categories.containsKey(l.janCode) && !placed.contains(l.janCode))
+          CategoryAsk(jan: l.janCode, name: _nameFor(l) ?? l.name, maker: l.maker, code: l.code),
+    ];
+    if (asks.isEmpty) return;
+    setState(() {
+      _catBusy = true;
+      _catDone = 0;
+      _catTotal = asks.length;
+    });
+    final out = await classifyAndSave(ref.read(productCategoryRepositoryProvider), asks, onProgress: (d, _) {
+      if (mounted) setState(() => _catDone = d);
+    });
+    if (!mounted) return;
+    setState(() {
+      _catBusy = false;
+      _categories = {..._categories, ...out.byJan};
+    });
+    if (out.applied > 0) ref.invalidate(productListProvider);
+  }
+
+  /// The categories found for [jans], onto their products (just registered).
+  Future<void> _saveCategories(Set<String> jans) async {
+    final found = [
+      for (final e in _categories.entries)
+        if (jans.contains(e.key)) (CategoryAsk(jan: e.key), e.value),
+    ];
+    if (found.isEmpty) return;
+    final r = await ref.read(productCategoryRepositoryProvider).apply(found);
+    if (r case ApiSuccess(:final data) when data > 0 && mounted) ref.invalidate(productListProvider);
+  }
 
   /// The 商品名 a line goes in under, as shops and the maker call it: the
   /// library's (when it is more than the 品番), the one the web gave, else the
@@ -1172,6 +1238,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
               Text(l10n.sfNamesLooking(_namesDone, _namesTotal), key: const ValueKey('sf-names-looking'), style: muted)
             else if (_namesStopped)
               Text(l10n.plFindNamesStopped, key: const ValueKey('sf-names-stopped'), style: muted),
+            if (_catBusy)
+              Text(l10n.pcCategorizing(_catDone, _catTotal), key: const ValueKey('sf-categorizing'), style: muted),
             // On a PC the lines as a table, field by field as in the check;
             // on a phone, as a list.
             LayoutBuilder(builder: (context, c) {

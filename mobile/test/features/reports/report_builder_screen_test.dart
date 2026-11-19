@@ -228,4 +228,39 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('入出庫履歴・監査ログ'), findsOneWidget);
   });
+
+  testWidgets('入出庫履歴 by 識別コード and the upload memo: typed or picked, sent with the JST days', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeReportRepository(codes: ['BL', 'HL'], notes: ['11月便 箱潰れあり', '10月便']);
+    await _pump(tester, repo);
+
+    await tester.tap(find.byKey(const ValueKey('report-more')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('report-conditions')));
+    await tester.pumpAndSettle();
+    // The code picked from those in use; the memo typed in part.
+    await tester.tap(find.byKey(const ValueKey('report-class-code-pick')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('report-class-code-pick-HL')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('report-note')), '11月');
+    await tester.tap(find.byKey(const ValueKey('report-conditions-ok')));
+    await tester.pumpAndSettle();
+    expect(find.text('識別コード: HL'), findsOneWidget);
+    expect(find.text('入荷時メモ: 11月'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('report-more')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('rp-last3')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('実行'));
+    await tester.pumpAndSettle();
+    expect(repo.lastFilters!['class_code'], 'HL');
+    expect(repo.lastFilters!['note'], '11月');
+    final now = DateTime.now();
+    final first = DateTime(now.year, now.month - 2);
+    expect(repo.lastFilters!['day_from'],
+        '${first.year}-${first.month.toString().padLeft(2, '0')}-01');
+  });
 }

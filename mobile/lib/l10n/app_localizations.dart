@@ -30523,6 +30523,294 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'未設定'**
   String get umTierNone;
+
+  /// No description provided for @lgClassCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'識別コード'**
+  String get lgClassCode;
+
+  /// No description provided for @ccBulkTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'識別コードをまとめて入力'**
+  String get ccBulkTitle;
+
+  /// No description provided for @ccBulkIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先が商品のくくりごとに付けている記号（HL・BL など）を、選んだ行にまとめて入れます。空欄のまま適用すると、選んだ行の識別コードを外します。'**
+  String get ccBulkIntro;
+
+  /// No description provided for @ccInvalid.
+  ///
+  /// In ja, this message translates to:
+  /// **'英字（と数字）6文字までで入力してください'**
+  String get ccInvalid;
+
+  /// No description provided for @ccSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'品名・JAN・コードで絞り込み'**
+  String get ccSearch;
+
+  /// No description provided for @ccPickEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'空欄の行だけ'**
+  String get ccPickEmpty;
+
+  /// No description provided for @ccApply.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}行に入れる'**
+  String ccApply(int n);
+
+  /// No description provided for @ccClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}行から外す'**
+  String ccClear(int n);
+
+  /// No description provided for @ccSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'識別コードを{n}行に保存しました'**
+  String ccSaved(int n);
+
+  /// No description provided for @reportFilterNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷時メモ'**
+  String get reportFilterNote;
+
+  /// No description provided for @reportPick.
+  ///
+  /// In ja, this message translates to:
+  /// **'一覧から選ぶ'**
+  String get reportPick;
+
+  /// No description provided for @reportOnlyMovements.
+  ///
+  /// In ja, this message translates to:
+  /// **'入出庫履歴だけに効きます'**
+  String get reportOnlyMovements;
+
+  /// No description provided for @reportNoteHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを取り込んだときに書いたメモの一部で絞り込みます（入出庫履歴だけ）'**
+  String get reportNoteHelp;
+
+  /// No description provided for @pcTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品カテゴリー'**
+  String get pcTitle;
+
+  /// No description provided for @pcIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品を「文房具 > 筆記具 > ボールペン > 油性」のように、大きな分類から細かい分類へ階層で分けます。階層の深さに決まりはありません。ファイルを取り込んで確認が終わると、AIが商品名・重量と一緒にカテゴリーも付けます。人が直したカテゴリーをAIが上書きすることはありません。'**
+  String get pcIntro;
+
+  /// No description provided for @pcClassify.
+  ///
+  /// In ja, this message translates to:
+  /// **'カテゴリーのない商品をAIで分類'**
+  String get pcClassify;
+
+  /// No description provided for @pcClassifying.
+  ///
+  /// In ja, this message translates to:
+  /// **'分類中 {done}/{total}'**
+  String pcClassifying(int done, int total);
+
+  /// No description provided for @pcClassified.
+  ///
+  /// In ja, this message translates to:
+  /// **'{total}件中 {n}件にカテゴリーを付けました'**
+  String pcClassified(int n, int total);
+
+  /// No description provided for @pcNothingToDo.
+  ///
+  /// In ja, this message translates to:
+  /// **'カテゴリーのない商品はありません'**
+  String get pcNothingToDo;
+
+  /// No description provided for @pcRename.
+  ///
+  /// In ja, this message translates to:
+  /// **'名前を変える'**
+  String get pcRename;
+
+  /// No description provided for @pcNodeName.
+  ///
+  /// In ja, this message translates to:
+  /// **'カテゴリー名'**
+  String get pcNodeName;
+
+  /// No description provided for @pcEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだカテゴリーがありません。取込の確認後か、上のボタンでAIが分類します。'**
+  String get pcEmpty;
+
+  /// No description provided for @pcCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{n}件'**
+  String pcCount(int n);
+
+  /// No description provided for @pcPathHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'大分類 > 中分類 > 小分類（> で区切る。何段でも可）'**
+  String get pcPathHint;
+
+  /// No description provided for @pcCategorizing.
+  ///
+  /// In ja, this message translates to:
+  /// **'カテゴリーを分類中 {done}/{total}'**
+  String pcCategorizing(int done, int total);
+
+  /// No description provided for @saTab.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先回答'**
+  String get saTab;
+
+  /// No description provided for @saTabHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先から届いた「供給できるか・数量・納期」の回答書（在庫回答・納期回答）を、ファイルとメモでためておく場所です'**
+  String get saTabHelp;
+
+  /// No description provided for @saIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先から届いた回答書（在庫回答・納期回答・見積など）を、ファイルとメモでためておきます。ファイルはその場で開いて確認でき、あとからダウンロードできます。どの入荷希望リストへの回答かも付けられます。'**
+  String get saIntro;
+
+  /// No description provided for @saAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'回答を追加'**
+  String get saAdd;
+
+  /// No description provided for @saEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'回答を編集'**
+  String get saEdit;
+
+  /// No description provided for @saSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get saSupplier;
+
+  /// No description provided for @saAnsweredOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'回答日'**
+  String get saAnsweredOn;
+
+  /// No description provided for @saAnsweredAt.
+  ///
+  /// In ja, this message translates to:
+  /// **'回答 {day}'**
+  String saAnsweredAt(String day);
+
+  /// No description provided for @saRequest.
+  ///
+  /// In ja, this message translates to:
+  /// **'対象の入荷希望リスト'**
+  String get saRequest;
+
+  /// No description provided for @saNoRequest.
+  ///
+  /// In ja, this message translates to:
+  /// **'指定しない'**
+  String get saNoRequest;
+
+  /// No description provided for @saTitleField.
+  ///
+  /// In ja, this message translates to:
+  /// **'件名'**
+  String get saTitleField;
+
+  /// No description provided for @saNote.
+  ///
+  /// In ja, this message translates to:
+  /// **'メモ（回答の要点・数量・納期など）'**
+  String get saNote;
+
+  /// No description provided for @saPickFiles.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルを選ぶ'**
+  String get saPickFiles;
+
+  /// No description provided for @saNeedSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先を入力してください'**
+  String get saNeedSupplier;
+
+  /// No description provided for @saSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'回答を保存しました'**
+  String get saSaved;
+
+  /// No description provided for @saRemoveQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} の回答を削除しますか？'**
+  String saRemoveQ(String name);
+
+  /// No description provided for @saFileRemoveQ.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を外しますか？'**
+  String saFileRemoveQ(String name);
+
+  /// No description provided for @saSearch.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先・件名・メモ・ファイル名で絞り込み'**
+  String get saSearch;
+
+  /// No description provided for @saEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ回答がありません。「回答を追加」から、仕入先から届いたファイルを入れてください。'**
+  String get saEmpty;
+
+  /// No description provided for @saNoMatch.
+  ///
+  /// In ja, this message translates to:
+  /// **'条件に合う回答はありません'**
+  String get saNoMatch;
+
+  /// No description provided for @saView.
+  ///
+  /// In ja, this message translates to:
+  /// **'開いて見る'**
+  String get saView;
+
+  /// No description provided for @saDownload.
+  ///
+  /// In ja, this message translates to:
+  /// **'ダウンロード'**
+  String get saDownload;
+
+  /// No description provided for @saNoFiles.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイルなし'**
+  String get saNoFiles;
 }
 
 class _AppLocalizationsDelegate

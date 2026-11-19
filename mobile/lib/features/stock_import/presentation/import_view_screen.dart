@@ -30,6 +30,7 @@ import 'reading_check_screen.dart';
 import 'reading_export.dart';
 import 'stock_file_import_screen.dart' show documentDateSourceLabel;
 import 'stock_inspection_screen.dart' show keptUntilText;
+import 'class_code_dialog.dart';
 
 /// One import with its lines, for the viewer.
 final importDetailProvider = FutureProvider.autoDispose.family<MasterImport, int>((ref, id) async {
@@ -80,6 +81,7 @@ String ledgerSummary(AppLocalizations l10n, LedgerFields f) => [
         (l10n.lgUnitPriceTax, f.unitPriceTax),
         (l10n.lgAmount, f.amount),
         (l10n.lgOrderNumber, f.orderNumber),
+        (l10n.lgClassCode, f.classCode),
       ])
         if (v.isNotEmpty) '$label $v',
     ].join(' · ');
@@ -117,13 +119,25 @@ List<ReadOutcome> readOutcomes(MasterImport m) {
     return [
       for (final l in m.lines)
         ReadOutcome(
-          row: ReadRow(lineNo: l.lineNo, jan: l.janCode, name: l.supplierName ?? '', quantity: '${l.quantity}'),
+          row: ReadRow(
+              lineNo: l.lineNo,
+              jan: l.janCode,
+              name: l.supplierName ?? '',
+              quantity: '${l.quantity}',
+              ledger: LedgerFields(classCode: l.classCode ?? '')),
           fate: _waiting(m, l) ? ReadFate.awaiting : ReadFate.inStock,
           line: l,
         ),
     ];
   }
-  final rows = [for (final r in m.readLines) ReadRow.fromJson(r)];
+  // The 識別コード a line has now (0218), set by hand since, over the reading's.
+  ReadRow withCode(ReadRow r) {
+    final line = byJan[normalizeJan(r.jan)];
+    final code = line?.classCode;
+    return code == null || code == r.ledger.classCode ? r : r.copyWith(ledger: r.ledger.withValue('class_code', code));
+  }
+
+  final rows = [for (final r in m.readLines) withCode(ReadRow.fromJson(r))];
   final unknown = m.skippedJans;
   // What the file gave each JAN over all its rows.
   final fileTotals = <String, int>{};
@@ -177,6 +191,32 @@ String readFateText(AppLocalizations l10n, ReadOutcome o) {
     ReadFate.removed => l10n.ivFateRemoved,
     ReadFate.awaiting => l10n.ivFateAwaiting(o.line?.name ?? o.line?.janCode ?? '', n.format(o.line?.quantity ?? 0)),
   };
+}
+
+/// 識別コードをまとめて入力 (0218), on an import already in: the lines chosen
+/// get the code, saved at once.
+Future<void> editClassCodes(BuildContext context, WidgetRef ref, MasterImport m) async {
+  final l10n = AppLocalizations.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  final picked = await showClassCodeBulkDialog(context, [
+    for (final l in m.lines)
+      ClassCodeRow(
+        lineNo: l.lineNo,
+        label: [l.name ?? l.supplierName ?? '', l.janCode].where((v) => v.isNotEmpty).join('  '),
+        code: l.classCode ?? '',
+      ),
+  ]);
+  if (picked == null) return;
+  final r = await ref
+      .read(stockImportRepositoryProvider)
+      .setClassCodes(m.id, {for (final n in picked.lineNos) n: picked.code});
+  switch (r) {
+    case ApiSuccess(:final data):
+      ref.invalidate(importDetailProvider(m.id));
+      messenger.showSnackBar(SnackBar(content: Text(l10n.ccSaved(data))));
+    case ApiFailure(:final message):
+      messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+  }
 }
 
 /// 読み取り結果を見る; the reading as a sheet in a browser tab of its own
@@ -646,6 +686,23 @@ class _ReadPane extends StatelessWidget {
               ),
             ),
           ),
+        // 識別コード (0218): filled in or changed after the file went in.
+        if (m.source == 'stock_file' && m.lines.isNotEmpty)
+          Consumer(builder: (context, ref, _) {
+            final user = ref.watch(authControllerProvider).user;
+            if (!(user?.hasPermission('inventory.adjust') ?? false) && !(user?.hasPermission('product.manage') ?? false)) {
+              return const SizedBox.shrink();
+            }
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: ValueKey('iv-class-code-${m.id}'),
+                onPressed: () => editClassCodes(context, ref, m),
+                icon: const Icon(Icons.label_outline, size: 18),
+                label: Text(l10n.ccBulkTitle),
+              ),
+            );
+          }),
         const SizedBox(height: AppSpacing.sm),
         Text(l10n.ivRead, style: theme.textTheme.titleSmall),
         const SizedBox(height: AppSpacing.xs),

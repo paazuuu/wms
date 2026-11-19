@@ -44,7 +44,7 @@ class MasterLine extends Equatable {
 
   static const ledgerKeys = [
     'order_date', 'delivery_date', 'serial', 'supplier', 'unit', 'list_price', 'unit_price', 'unit_price_tax',
-    'amount', 'tax_rate', 'order_number',
+    'amount', 'tax_rate', 'order_number', 'class_code',
   ];
 
   final int lineNo;
@@ -510,7 +510,13 @@ class MasterImportLine extends Equatable {
     this.coveredByImportId,
     this.invoicedImportId,
     this.notDelivered = false,
+    this.classCode,
+    this.category,
   });
+
+  /// 識別コード (0218) on the line, and its product's category path.
+  final String? classCode;
+  final String? category;
 
   final int lineNo;
   final String janCode;
@@ -571,13 +577,15 @@ class MasterImportLine extends Equatable {
       coveredByImportId: n(j['covered_by_import_id']),
       invoicedImportId: n(j['invoiced_import_id']),
       notDelivered: j['not_delivered'] == true,
+      classCode: (j['class_code'] as String?)?.trim().isEmpty ?? true ? null : (j['class_code'] as String).trim(),
+      category: j['category']?.toString(),
     );
   }
 
   @override
   List<Object?> get props =>
       [lineNo, janCode, productId, name, nameEn, quantity, masterStatus, onHandBefore, onHandSet, added, onHandAfter, onHandNow,
-       inspectedAt, inspectedQuantity, coveredByImportId, invoicedImportId, notDelivered];
+       inspectedAt, inspectedQuantity, coveredByImportId, invoicedImportId, notDelivered, classCode, category];
 }
 
 /// An import: its files, where it got to, and its lines when asked for.

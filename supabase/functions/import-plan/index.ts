@@ -67,6 +67,8 @@ import {
   companiesInFileName,
   companyKey,
   CODE_MATCHES,
+  classifyProducts,
+  inferClassCodes,
   normalizeJan,
   normalizeText,
   aiPing,
@@ -749,6 +751,31 @@ Deno.serve(async (req) => {
         if (items.length === 0) return json({ message: "items are required" }, 400);
         return json({ data: await lookupMarketNames(items) });
       }
+      // 商品カテゴリー (0218): each product's place in the category tree,
+      // in the words the tree already has. Nothing kept here; the app saves
+      // it with product_categories_apply.
+      if (str(b.mode) === "classify") {
+        if (!(await clientPermitted(supabase, "product.manage"))) {
+          return json({ message: notPermittedMessage("product.manage") }, 403);
+        }
+        const items = (Array.isArray(b.items) ? b.items : [])
+          .filter((i: unknown): i is Record<string, unknown> => !!i && typeof i === "object")
+          .map((i: Record<string, unknown>, n: number) => ({
+            index: Number.isFinite(Number(i.index)) ? Number(i.index) : n,
+            jan: str(i.jan), name: str(i.name), maker: str(i.maker), code: str(i.code), spec: str(i.spec),
+          }));
+        if (items.length === 0) return json({ message: "items are required" }, 400);
+        const { data: tree } = await supabase.rpc("product_category_tree");
+        const known = ((tree ?? []) as { path?: unknown; total?: number }[])
+          .filter((t) => Array.isArray(t.path) && (t.total ?? 0) > 0)
+          .map((t) => (t.path as unknown[]).map((x) => String(x)));
+        resetAiFailures();
+        try {
+          return json({ data: { results: await classifyProducts(items, known), ai_failure: aiFailure() } });
+        } catch (e) {
+          return json({ message: String((e as Error)?.message ?? e), ai_failure: aiFailure() }, 502);
+        }
+      }
       if (str(b.mode) === "suggest_names") {
         // §43: English standard names for products we do not have yet,
         // proposed for a person to accept or change.
@@ -981,6 +1008,8 @@ Deno.serve(async (req) => {
     // The 振込先 and 登録番号 printed beside the table are not goods: out of
     // the lines, and the 振込先 kept with the document (0171).
     header.payee = settlePayee(header.payee, dropNonItemLines(lines));
+    // 識別コード (0218) printed beside a date ("20261027 HL") taken out of it.
+    inferClassCodes(lines);
     // A company chosen on the form, or found earlier, under the name we keep.
     if (partnerId && !header.supplier_name && !supplier) header.supplier_name = await partnerName(partnerId);
     const merged = keepRows ? lines : aggregate(lines);

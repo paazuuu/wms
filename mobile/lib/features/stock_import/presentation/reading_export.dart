@@ -35,12 +35,12 @@ class ReadingTable {
 /// became of each row.
 const _headers = [
   '行', '発注日', '入荷日', '番号', '仕入先', 'メーカー', '品番', 'JANコード', '商品名', '数量', '単位',
-  '定価（税抜）', '単価（税抜）', '単価（税込）', '金額', '注番',
+  '定価（税抜）', '単価（税抜）', '単価（税込）', '金額', '注番', '識別コード',
   'AIの迷い', '確認用Excelで直した', '結果', '商品', '反映前', '増減', '反映後', '検品',
 ];
 
 /// Where the JAN, the quantity and the result are among [_headers].
-const _janCol = 7, _qtyCol = 9, _resultCol = 18;
+const _janCol = 7, _qtyCol = 9, _resultCol = 19;
 
 /// [m]'s reading as rows (0146 kept it; 0148 adds the inspection). The
 /// file's own JAN and quantity stay as text, as they were written.
@@ -72,6 +72,7 @@ ReadingTable readingTable(AppLocalizations l10n, MasterImport m) {
       g.unitPriceWithTax,
       g.amount,
       g.orderNumber,
+      g.classCode,
       doubts,
       o.row.corrected ? '${o.row.aiJan ?? ''} / ${o.row.aiQuantity ?? ''} → ${o.row.jan} / ${o.row.quantity}' : '',
       readFateText(l10n, o),

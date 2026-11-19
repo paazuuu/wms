@@ -66,6 +66,7 @@ Uint8List buildReportXlsx(ReportDoc d) {
           ]
         : const [],
     widths: [for (final c in t.columns) (c.flex * 10).clamp(8, 48).toDouble()],
+    landscape: true,
   );
 }
 
@@ -74,7 +75,8 @@ Uint8List buildReportXlsx(ReportDoc d) {
 Future<Uint8List> loadReportPdfFont() async =>
     (await rootBundle.load('assets/fonts/pdf/ipag.ttf')).buffer.asUint8List();
 
-/// The report as an A4 portrait PDF: a heading with the conditions, the
+/// The report as an A4 landscape PDF (0218: the columns grew past a
+/// portrait page): a heading with the conditions, the
 /// table with its heading row on every page, light stripes, the numeric
 /// columns right-aligned and summed at the end, and page numbers.
 Future<Uint8List> buildReportPdf(ReportDoc d, Uint8List fontBytes, {bool compress = true}) async {
@@ -86,12 +88,12 @@ Future<Uint8List> buildReportPdf(ReportDoc d, Uint8List fontBytes, {bool compres
   const line = PdfColor.fromInt(0xFFD7DBE0);
   const head = PdfColor.fromInt(0xFFEEF1F4);
   const stripe = PdfColor.fromInt(0xFFF8F9FA);
-  // Narrow tables read larger; wide ones shrink to fit the portrait page.
-  final size = t.columns.length <= 6 ? 8.5 : (t.columns.length <= 10 ? 7.5 : 6.5);
+  // Narrow tables read larger; wide ones shrink to fit the page.
+  final size = t.columns.length <= 8 ? 8.5 : (t.columns.length <= 12 ? 7.5 : 7.0);
   final doc = pw.Document(
       title: d.title, compress: compress, theme: pw.ThemeData.withFont(base: font, bold: font));
   doc.addPage(pw.MultiPage(
-    pageFormat: PdfPageFormat.a4,
+    pageFormat: PdfPageFormat.a4.landscape,
     margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 40),
     header: (ctx) => ctx.pageNumber == 1
         ? pw.SizedBox()

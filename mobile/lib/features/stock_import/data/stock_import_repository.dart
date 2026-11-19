@@ -33,6 +33,10 @@ abstract class StockImportRepository {
   /// cell by cell, so it can be set beside the original later.
   Future<ApiResult<bool>> note(int importId, List<ReadRow> read, {required bool byAi, int? documentId});
 
+  /// 識別コード (0218) set on an import's lines (line no → code; empty takes
+  /// it off). How many lines changed.
+  Future<ApiResult<int>> setClassCodes(int importId, Map<int, String> codes);
+
   /// Imports already in with the same file or the same lines (0147).
   Future<ApiResult<List<DuplicateImport>>> duplicates({String? file, String? lines});
 
@@ -233,6 +237,19 @@ class StockImportRepositoryImpl implements StockImportRepository {
       return ApiSuccess(r.data == true);
     } on DioException catch (e) {
       return mapDioError<bool>(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<int>> setClassCodes(int importId, Map<int, String> codes) async {
+    try {
+      final r = await _rest.post('/rpc/stock_file_set_class_codes', data: {
+        'p_import_id': importId,
+        'p_codes': [for (final e in codes.entries) {'line_no': e.key, 'class_code': e.value}],
+      });
+      return ApiSuccess((r.data as num?)?.toInt() ?? 0);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
     }
   }
 

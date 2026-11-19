@@ -17268,4 +17268,170 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get umTierNone => '未设置';
+
+  @override
+  String get lgClassCode => '识别码';
+
+  @override
+  String get ccBulkTitle => '批量填写识别码';
+
+  @override
+  String get ccBulkIntro => '把供应商按商品类别标注的记号（HL、BL 等）批量填入勾选的行。留空应用时，会去掉所选行的识别码。';
+
+  @override
+  String get ccInvalid => '请输入最多6个英文字母（可含数字）';
+
+  @override
+  String get ccSearch => '按品名、JAN、代码筛选';
+
+  @override
+  String get ccPickEmpty => '仅空白行';
+
+  @override
+  String ccApply(int n) {
+    return '填入 $n 行';
+  }
+
+  @override
+  String ccClear(int n) {
+    return '从 $n 行去掉';
+  }
+
+  @override
+  String ccSaved(int n) {
+    return '已为 $n 行保存识别码';
+  }
+
+  @override
+  String get reportFilterNote => '入库时备注';
+
+  @override
+  String get reportPick => '从列表选择';
+
+  @override
+  String get reportOnlyMovements => '仅对出入库履历有效';
+
+  @override
+  String get reportNoteHelp => '按导入文件时填写的备注内容筛选（仅出入库履历）';
+
+  @override
+  String get pcTitle => '商品分类';
+
+  @override
+  String get pcIntro =>
+      '商品按“文具 > 书写工具 > 圆珠笔 > 油性”这样从大类到小类分层。层数不限。导入文件并确认后，AI 会在补充品名、重量的同时加上分类。人工修改过的分类不会被 AI 覆盖。';
+
+  @override
+  String get pcClassify => '用 AI 为未分类商品分类';
+
+  @override
+  String pcClassifying(int done, int total) {
+    return '分类中 $done/$total';
+  }
+
+  @override
+  String pcClassified(int n, int total) {
+    return '已为 $total 件中的 $n 件设置分类';
+  }
+
+  @override
+  String get pcNothingToDo => '没有未分类的商品';
+
+  @override
+  String get pcRename => '改名';
+
+  @override
+  String get pcNodeName => '分类名';
+
+  @override
+  String get pcEmpty => '还没有分类。导入确认后或点击上方按钮，由 AI 分类。';
+
+  @override
+  String pcCount(int n) {
+    return '$n 件';
+  }
+
+  @override
+  String get pcPathHint => '大类 > 中类 > 小类（用 > 分隔，层数不限）';
+
+  @override
+  String pcCategorizing(int done, int total) {
+    return '正在分类 $done/$total';
+  }
+
+  @override
+  String get saTab => '供应商回复';
+
+  @override
+  String get saTabHelp => '保存供应商回复的“能否供货、数量、交期”的回复文件和备注';
+
+  @override
+  String get saIntro =>
+      '保存供应商发来的回复（库存、交期、报价等）的文件和备注。文件可当场打开确认，之后也可下载。可关联到对应的到货希望清单。';
+
+  @override
+  String get saAdd => '添加回复';
+
+  @override
+  String get saEdit => '编辑回复';
+
+  @override
+  String get saSupplier => '供应商';
+
+  @override
+  String get saAnsweredOn => '回复日期';
+
+  @override
+  String saAnsweredAt(String day) {
+    return '回复 $day';
+  }
+
+  @override
+  String get saRequest => '对应的到货希望清单';
+
+  @override
+  String get saNoRequest => '不指定';
+
+  @override
+  String get saTitleField => '标题';
+
+  @override
+  String get saNote => '备注（回复要点、数量、交期等）';
+
+  @override
+  String get saPickFiles => '选择文件';
+
+  @override
+  String get saNeedSupplier => '请输入供应商';
+
+  @override
+  String get saSaved => '已保存回复';
+
+  @override
+  String saRemoveQ(String name) {
+    return '要删除 $name 的回复吗？';
+  }
+
+  @override
+  String saFileRemoveQ(String name) {
+    return '要移除 $name 吗？';
+  }
+
+  @override
+  String get saSearch => '按供应商、标题、备注、文件名筛选';
+
+  @override
+  String get saEmpty => '还没有回复。请通过“添加回复”上传供应商发来的文件。';
+
+  @override
+  String get saNoMatch => '没有符合条件的回复';
+
+  @override
+  String get saView => '打开查看';
+
+  @override
+  String get saDownload => '下载';
+
+  @override
+  String get saNoFiles => '无文件';
 }

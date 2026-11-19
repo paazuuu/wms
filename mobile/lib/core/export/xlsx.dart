@@ -25,9 +25,13 @@ class XlsxSheet {
     this.top = const [],
     this.bottom = const [],
     this.lists = const [],
+    this.landscape = false,
   });
 
   final String name;
+
+  /// Printed on A4 landscape, fitted to the page's width.
+  final bool landscape;
 
   /// Cells that offer a list to choose from: (range such as B2:B20, the
   /// list as a formula such as BOX_TYPES!\$A\$2:\$A\$9).
@@ -48,9 +52,18 @@ Uint8List buildXlsx({
   List<double>? widths,
   List<List<Object?>> top = const [],
   List<List<Object?>> bottom = const [],
+  bool landscape = false,
 }) =>
     buildXlsxBook([
-      XlsxSheet(name: sheetName, headers: headers, rows: rows, flagged: flagged, widths: widths, top: top, bottom: bottom),
+      XlsxSheet(
+          name: sheetName,
+          headers: headers,
+          rows: rows,
+          flagged: flagged,
+          widths: widths,
+          top: top,
+          bottom: bottom,
+          landscape: landscape),
     ]);
 
 /// A cell worked out by Excel when the file is opened: [formula] without
@@ -87,6 +100,7 @@ String _sheetXml(XlsxSheet x) {
   final sheet = StringBuffer()
     ..write('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
     ..write('<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">')
+    ..write(x.landscape ? '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>' : '')
     ..write('<sheetViews><sheetView workbookViewId="0"><pane ySplit="${head + 1}" topLeftCell="A${head + 2}" '
         'activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>');
   final widths = x.widths;
@@ -133,6 +147,10 @@ String _sheetXml(XlsxSheet x) {
           '<formula1>${_esc(formula.startsWith('=') ? formula.substring(1) : formula)}</formula1></dataValidation>');
     }
     sheet.write('</dataValidations>');
+  }
+  if (x.landscape) {
+    sheet.write('<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>'
+        '<pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>');
   }
   sheet.write('</worksheet>');
   return sheet.toString();

@@ -156,6 +156,8 @@ import 'package:wms_mobile/features/shelf_notes/data/shelf_notes_repository.dart
     show ShelfNote, canWriteShelfNotesProvider, shelfNotesProvider, shelfNotesRepositoryProvider;
 import 'package:wms_mobile/features/product/data/web_photos.dart' show webPhotoRepositoryProvider;
 import 'package:wms_mobile/features/product/data/market_names.dart' show marketNameRepositoryProvider;
+import 'package:wms_mobile/features/product/data/product_category_repository.dart' show productCategoryRepositoryProvider;
+import 'package:wms_mobile/features/purchase_request/data/supplier_answer_repository.dart' show supplierAnswerRepositoryProvider;
 import 'package:wms_mobile/features/payments/data/payments_repository.dart' show paymentsRepositoryProvider;
 import 'fake_payments_repository.dart';
 import 'fake_purchase_price_repository.dart';
@@ -176,6 +178,8 @@ import 'package:wms_mobile/features/profit/data/profit_repository.dart';
 import 'fake_profit_repository.dart';
 import 'package:wms_mobile/features/requirements/requirements_repository.dart';
 import 'fake_requirements_repository.dart';
+import 'fake_product_category_repository.dart';
+import 'fake_supplier_answer_repository.dart';
 
 /// In-memory stand-in for the platform keychain/keystore. The real plugin has
 /// no test-harness implementation and its platform channel simply never
@@ -252,6 +256,10 @@ List<Override> _defaultOverrides() => [
       referenceRepositoryProvider.overrideWithValue(FakeReferenceRepository()),
       // Names looked up on the web (0164): none found.
       marketNameRepositoryProvider.overrideWithValue(FakeMarketNameRepository()),
+      // 商品カテゴリー (0218): no tree, nothing classified.
+      productCategoryRepositoryProvider.overrideWithValue(FakeProductCategoryRepository()),
+      // 仕入先回答 (0218): none yet.
+      supplierAnswerRepositoryProvider.overrideWithValue(FakeSupplierAnswerRepository()),
       webPhotoRepositoryProvider.overrideWithValue(FakeWebPhotoRepository()),
       paymentsRepositoryProvider.overrideWithValue(FakePaymentsRepository()),
       // 仕入れ値の履歴 (0187) and 出荷リストで出庫 (0188): none.
@@ -3800,7 +3808,18 @@ class FakeReportRepository implements ReportRepository {
   FakeReportRepository({
     this.rowsBySource = const {},
     List<ReportDefinition> savedDefinitions = const [],
+    this.codes = const [],
+    this.notes = const [],
   }) : _saved = List.of(savedDefinitions);
+
+  final List<String> codes;
+  final List<String> notes;
+
+  @override
+  Future<ApiResult<List<String>>> classCodes() async => ApiSuccess(codes);
+
+  @override
+  Future<ApiResult<List<String>>> importNotes() async => ApiSuccess(notes);
 
   final Map<ReportSource, List<Map<String, dynamic>>> rowsBySource;
   List<ReportDefinition> _saved;

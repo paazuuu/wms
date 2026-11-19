@@ -41,6 +41,7 @@ import '../../stock_history/presentation/stock_history_views.dart';
 import '../../outbound/presentation/outbound_downloads.dart';
 import '../../outbound_file/data/shipping_list_export.dart';
 import '../../../core/ui/popconfirm.dart';
+import 'product_categories_screen.dart';
 
 /// 商品マスタ: what each product is — its names, codes, attributes, size and
 /// weight (0125), base unit, pack units and tracking (0057-0060). Suppliers,
@@ -581,6 +582,15 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                     icon: const Icon(Icons.menu_book_outlined),
                     onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => JanCatalogScreen(canManage: canManage),
+                    )),
+                  ),
+                  // 商品カテゴリー (0218): the tree, and the AI to place what has none.
+                  IconButton(
+                    key: const ValueKey('pl-categories'),
+                    tooltip: l10n.pcTitle,
+                    icon: const Icon(Icons.account_tree_outlined),
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => ProductCategoriesScreen(canManage: canManage),
                     )),
                   ),
                   // Weights still missing, looked up by the AI all at once (0149).
@@ -1242,8 +1252,15 @@ class _FilterBar extends ConsumerWidget {
               key: const ValueKey('pf-category'),
               label: summary(l10n.pfCategory, filter.categories),
               active: filter.categories.isNotEmpty,
+              // As a tree: each level under the one above it, indented.
               options: [
-                for (final e in facets.categories.entries) (e.key, e.key, e.value, filter.categories.contains(e.key)),
+                for (final e in (facets.categories.entries.toList()..sort((a, b) => a.key.compareTo(b.key))))
+                  (
+                    e.key,
+                    '${'　' * (categoryLevels(e.key).length - 1)}${e.key.split(' > ').last}',
+                    e.value,
+                    filter.categories.contains(e.key)
+                  ),
               ],
               onChanged: (v, on) => set(
                   filter.copyWith(categories: on ? {...filter.categories, v} : ({...filter.categories}..remove(v)))),

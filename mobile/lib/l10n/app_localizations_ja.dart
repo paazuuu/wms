@@ -17393,4 +17393,172 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get umTierNone => '未設定';
+
+  @override
+  String get lgClassCode => '識別コード';
+
+  @override
+  String get ccBulkTitle => '識別コードをまとめて入力';
+
+  @override
+  String get ccBulkIntro =>
+      '仕入先が商品のくくりごとに付けている記号（HL・BL など）を、選んだ行にまとめて入れます。空欄のまま適用すると、選んだ行の識別コードを外します。';
+
+  @override
+  String get ccInvalid => '英字（と数字）6文字までで入力してください';
+
+  @override
+  String get ccSearch => '品名・JAN・コードで絞り込み';
+
+  @override
+  String get ccPickEmpty => '空欄の行だけ';
+
+  @override
+  String ccApply(int n) {
+    return '$n行に入れる';
+  }
+
+  @override
+  String ccClear(int n) {
+    return '$n行から外す';
+  }
+
+  @override
+  String ccSaved(int n) {
+    return '識別コードを$n行に保存しました';
+  }
+
+  @override
+  String get reportFilterNote => '入荷時メモ';
+
+  @override
+  String get reportPick => '一覧から選ぶ';
+
+  @override
+  String get reportOnlyMovements => '入出庫履歴だけに効きます';
+
+  @override
+  String get reportNoteHelp => 'ファイルを取り込んだときに書いたメモの一部で絞り込みます（入出庫履歴だけ）';
+
+  @override
+  String get pcTitle => '商品カテゴリー';
+
+  @override
+  String get pcIntro =>
+      '商品を「文房具 > 筆記具 > ボールペン > 油性」のように、大きな分類から細かい分類へ階層で分けます。階層の深さに決まりはありません。ファイルを取り込んで確認が終わると、AIが商品名・重量と一緒にカテゴリーも付けます。人が直したカテゴリーをAIが上書きすることはありません。';
+
+  @override
+  String get pcClassify => 'カテゴリーのない商品をAIで分類';
+
+  @override
+  String pcClassifying(int done, int total) {
+    return '分類中 $done/$total';
+  }
+
+  @override
+  String pcClassified(int n, int total) {
+    return '$total件中 $n件にカテゴリーを付けました';
+  }
+
+  @override
+  String get pcNothingToDo => 'カテゴリーのない商品はありません';
+
+  @override
+  String get pcRename => '名前を変える';
+
+  @override
+  String get pcNodeName => 'カテゴリー名';
+
+  @override
+  String get pcEmpty => 'まだカテゴリーがありません。取込の確認後か、上のボタンでAIが分類します。';
+
+  @override
+  String pcCount(int n) {
+    return '$n件';
+  }
+
+  @override
+  String get pcPathHint => '大分類 > 中分類 > 小分類（> で区切る。何段でも可）';
+
+  @override
+  String pcCategorizing(int done, int total) {
+    return 'カテゴリーを分類中 $done/$total';
+  }
+
+  @override
+  String get saTab => '仕入先回答';
+
+  @override
+  String get saTabHelp =>
+      '仕入先から届いた「供給できるか・数量・納期」の回答書（在庫回答・納期回答）を、ファイルとメモでためておく場所です';
+
+  @override
+  String get saIntro =>
+      '仕入先から届いた回答書（在庫回答・納期回答・見積など）を、ファイルとメモでためておきます。ファイルはその場で開いて確認でき、あとからダウンロードできます。どの入荷希望リストへの回答かも付けられます。';
+
+  @override
+  String get saAdd => '回答を追加';
+
+  @override
+  String get saEdit => '回答を編集';
+
+  @override
+  String get saSupplier => '仕入先';
+
+  @override
+  String get saAnsweredOn => '回答日';
+
+  @override
+  String saAnsweredAt(String day) {
+    return '回答 $day';
+  }
+
+  @override
+  String get saRequest => '対象の入荷希望リスト';
+
+  @override
+  String get saNoRequest => '指定しない';
+
+  @override
+  String get saTitleField => '件名';
+
+  @override
+  String get saNote => 'メモ（回答の要点・数量・納期など）';
+
+  @override
+  String get saPickFiles => 'ファイルを選ぶ';
+
+  @override
+  String get saNeedSupplier => '仕入先を入力してください';
+
+  @override
+  String get saSaved => '回答を保存しました';
+
+  @override
+  String saRemoveQ(String name) {
+    return '$name の回答を削除しますか？';
+  }
+
+  @override
+  String saFileRemoveQ(String name) {
+    return '$name を外しますか？';
+  }
+
+  @override
+  String get saSearch => '仕入先・件名・メモ・ファイル名で絞り込み';
+
+  @override
+  String get saEmpty => 'まだ回答がありません。「回答を追加」から、仕入先から届いたファイルを入れてください。';
+
+  @override
+  String get saNoMatch => '条件に合う回答はありません';
+
+  @override
+  String get saView => '開いて見る';
+
+  @override
+  String get saDownload => 'ダウンロード';
+
+  @override
+  String get saNoFiles => 'ファイルなし';
 }

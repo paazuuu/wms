@@ -47,7 +47,9 @@ class ProductFilter extends Equatable {
   bool matches(Product p, {int? warehouseId, StockFilter? stockIn, int Function(String jan)? awaiting}) {
     if (lifecycles.isNotEmpty && !lifecycles.contains(p.lifecycle)) return false;
     if (makers.isNotEmpty && !makers.contains(p.maker ?? '')) return false;
-    if (categories.isNotEmpty && !categories.contains(p.category ?? '')) return false;
+    // A category takes in everything under it (0218): 文房具 > ペン holds
+    // 文房具 > ペン > ボールペン.
+    if (categories.isNotEmpty && !categories.any((c) => inCategory(p.category, c))) return false;
     if (supplierIds.isNotEmpty && !p.suppliers.any((s) => supplierIds.contains(s.id))) return false;
     if (withoutImages && p.imageCount > 0) return false;
     if (marks.isNotEmpty && !marks.any(p.marks.contains)) return false;
@@ -164,8 +166,10 @@ class ProductFacets extends Equatable {
       if (p.lifecycle == ProductLifecycle.archived) continue;
       final m = p.maker?.trim() ?? '';
       if (m.isNotEmpty) makers[m] = (makers[m] ?? 0) + 1;
-      final c = p.category?.trim() ?? '';
-      if (c.isNotEmpty) categories[c] = (categories[c] ?? 0) + 1;
+      // Each level of its path, so a level up can be chosen too (0218).
+      for (final c in categoryLevels(p.category)) {
+        categories[c] = (categories[c] ?? 0) + 1;
+      }
       for (final s in p.suppliers) {
         suppliers[s.id] = (s.name, (suppliers[s.id]?.$2 ?? 0) + 1);
       }
@@ -179,3 +183,26 @@ class ProductFacets extends Equatable {
 
 final productFacetsProvider = Provider.autoDispose<ProductFacets>((ref) =>
     ProductFacets.of(ref.watch(productListProvider).valueOrNull ?? const []));
+
+/// The steps of a category path ("文房具 > ペン > ボールペン") — however it
+/// was typed — written the one way.
+List<String> _steps(String? path) => [
+      for (final s in (path ?? '').split(RegExp(r'\s*[>＞]\s*')))
+        if (s.trim().isNotEmpty) s.trim(),
+    ];
+
+/// Every level of [path], from the top: 文房具, 文房具 > ペン, 文房具 > ペン > ボールペン.
+List<String> categoryLevels(String? path) {
+  final steps = _steps(path);
+  return [for (var i = 1; i <= steps.length; i++) steps.take(i).join(' > ')];
+}
+
+/// Whether [path] is [level] or under it.
+bool inCategory(String? path, String level) {
+  final p = _steps(path), l = _steps(level);
+  if (l.isEmpty || p.length < l.length) return false;
+  for (var i = 0; i < l.length; i++) {
+    if (p[i] != l[i]) return false;
+  }
+  return true;
+}

@@ -267,8 +267,10 @@ void main() {
     ]);
     expect(rows.length - header - 1, 5);
     expect(rows[header + 1][7], _jan1);
-    expect(rows[header + 1][18], '→ テストペン 青: 検品待ち（ファイル 15個）');
-    expect(rows[header + 1][23], '検品待ち');
+    // 識別コード (0218) beside 注番.
+    expect(rows[header][16], '識別コード');
+    expect(rows[header + 1][19], '→ テストペン 青: 検品待ち（ファイル 15個）');
+    expect(rows[header + 1][24], '検品待ち');
   });
 }
 

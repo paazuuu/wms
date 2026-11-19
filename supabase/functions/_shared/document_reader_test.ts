@@ -1,5 +1,6 @@
 // deno test --allow-env supabase/functions/_shared/document_reader_test.ts
 import * as XLSX from "npm:xlsx@0.18.5";
+import { cleanCategoryPaths, classCodeColumn, classCodeOf, codeBesideDate, inferClassCodes, type ReadLine as ClassLine } from "./document_reader.ts";
 import { assert, assertEquals } from "jsr:@std/assert";
 import {
   readPayee,
@@ -1003,4 +1004,28 @@ Deno.test("the 振込先 and totals read again from the invoice: the AI's answer
   // Nothing printed: nothing made up.
   const none = await readPayee(new Uint8Array([1]), "image/png", "x.png", async () => ({ bank: null, account_number: null, total: null }));
   assertEquals([none.payee, none.totals, none.by], [null, null, null]);
+});
+
+Deno.test("識別コード (0218): read as a code, beside a date, from its own column", () => {
+  assertEquals(classCodeOf(" hl "), "HL");
+  assertEquals(classCodeOf("20261027 HL"), "HL");
+  assertEquals(classCodeOf("11月5日 BL"), "BL");
+  assertEquals(classCodeOf("ＨＬ"), "HL");
+  assertEquals(classCodeOf("2026-10-27"), null);
+  assertEquals(classCodeOf("ボールペン"), null);
+  assertEquals(codeBesideDate("HL 9E"), null, "an order number is not a date");
+  assertEquals(classCodeColumn([["a", "HL"], ["b", "BL"], ["c", "HL"]], new Set([0])), 1);
+  assertEquals(classCodeColumn([["a", "HL"], ["b", "HL"]], new Set([0])), -1, "one kind throughout is not taken");
+  const lines = [{ delivery_date: "11月5日 HL" }, { delivery_date: "11月5日 BL" }, { delivery_date: "11月5日" }] as unknown as ClassLine[];
+  inferClassCodes(lines);
+  assertEquals(lines.map((l) => [l.class_code ?? null, l.delivery_date]), [["HL", "11月5日"], ["BL", "11月5日"], [null, "11月5日"]]);
+});
+
+Deno.test("商品カテゴリー (0218): the AI's paths kept to what can be one", () => {
+  assertEquals(cleanCategoryPaths([
+    { index: 0, path: [" 文房具 ", "筆記具", "", "ボールペン", "ボールペン", "油性"] },
+    { index: 1, path: [] },
+    { index: 9, path: ["文房具"] },
+    { index: 0, path: ["二度目"] },
+  ], [0, 1]), [{ index: 0, path: ["文房具", "筆記具", "ボールペン", "油性"] }]);
 });

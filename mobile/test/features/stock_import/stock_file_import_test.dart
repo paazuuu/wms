@@ -32,7 +32,9 @@ import '../../support/fake_market_name_repository.dart';
 import '../../support/fake_payments_repository.dart';
 import '../../support/harness.dart';
 import 'package:wms_mobile/features/requirements/requirements_repository.dart';
+import 'package:wms_mobile/features/product/data/product_category_repository.dart' show productCategoryRepositoryProvider;
 import '../../support/fake_requirements_repository.dart';
+import '../../support/fake_product_category_repository.dart';
 
 // Synthetic JANs with a correct check digit.
 const _jan1 = '4909999000014';
@@ -724,6 +726,12 @@ void main() {
     final repo = _FakeStock({_jan1: 'テストペン 青'}, priceBook: book);
     // jan2 found on the web; jan3 in a catalog but nowhere named.
     final names = FakeMarketNameRepository(names: {_jan2: 'テストノート A罫 B5'});
+    // 商品カテゴリー (0218): placed by the AI after the check.
+    final cats = FakeProductCategoryRepository(paths: {
+      _jan1: ['文房具', '筆記具', 'ボールペン'],
+      _jan2: ['文房具', 'ノート'],
+      _jan3: ['文房具', '消しゴム'],
+    });
     final catalog = FakeJanCatalogRepository(hits: {
       _jan3: const JanCatalogHit(
           jan: _jan3, found: true, covered: true, catalogName: 'テスト総合カタログ', pageNumber: '67',
@@ -737,6 +745,7 @@ void main() {
       stockImportRepositoryProvider.overrideWithValue(repo),
       priceBookRepositoryProvider.overrideWithValue(book),
       marketNameRepositoryProvider.overrideWithValue(names),
+      productCategoryRepositoryProvider.overrideWithValue(cats),
       janCatalogRepositoryProvider.overrideWithValue(catalog),
       productLibraryCanManageProvider.overrideWithValue(true),
       stockFilePickerProvider.overrideWithValue(() async => (name: 'a.csv', bytes: csv)),
@@ -757,6 +766,10 @@ void main() {
         findsOneWidget);
     // The library's product is not asked about; the two new ones are, once.
     expect(names.asked.single.map((a) => a.jan), [_jan2, _jan3]);
+    // Every line placed in the tree at the same time, with what is known of it.
+    expect(cats.asked.map((a) => a.jan), [_jan1, _jan2, _jan3]);
+    expect(cats.asked[1].name, 'テストノート A罫 B5');
+    expect(cats.applied, hasLength(3));
 
     await _tick(tester);
     await tester.tap(find.byKey(const ValueKey('sf-apply')));
@@ -767,6 +780,10 @@ void main() {
     // library then says 未登録), and not asked about again.
     expect(book.imports.single.lines.map((l) => l['product_name']), ['テストノート A罫 B5', 'TE-1']);
     expect(names.asked, hasLength(1));
+    // The products just registered take their category too, without asking again.
+    await tester.pumpAndSettle();
+    expect(cats.asked, hasLength(3));
+    expect(cats.applied.skip(3).map((e) => (e.$1.jan, e.$2.last)), [(_jan2, 'ノート'), (_jan3, '消しゴム')]);
   });
 
   testWidgets('unticked, only what the library has goes in', (tester) async {

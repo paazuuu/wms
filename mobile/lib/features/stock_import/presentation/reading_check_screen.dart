@@ -13,6 +13,7 @@ import '../../product/presentation/product_labels.dart' show gramsText;
 import '../../notation/presentation/notation_labels.dart';
 import '../domain/stock_file.dart';
 import 'import_view_screen.dart' show OriginalFileView;
+import 'class_code_dialog.dart';
 
 /// A column of the check table: its key ([ReadRow]'s own five, else a
 /// [LedgerFields] key) and how wide it is.
@@ -32,6 +33,8 @@ const _core = <_Col>[
 /// The ledger's columns, in its order; shown when the file had them.
 /// 単価 and 金額 first: what a quantity is checked against.
 const _ledger = <_Col>[
+  // 識別コード (0218): always shown, to be filled in where it was not read.
+  (key: 'class_code', width: 80),
   (key: 'unit_price', width: 80),
   (key: 'amount', width: 96),
   (key: 'unit', width: 50),
@@ -305,7 +308,10 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
         if (widget.catalogLookup != null) ...[_catalogCol, _weightCol],
         ..._core.skip(1),
         for (final c in _ledger)
-          if (_allColumns || _rows.any((r) => r[c.key].isNotEmpty || _value(r.original, c.key).isNotEmpty)) c,
+          if (c.key == 'class_code' ||
+              _allColumns ||
+              _rows.any((r) => r[c.key].isNotEmpty || _value(r.original, c.key).isNotEmpty))
+            c,
         if (widget.results != null) _resultCol,
       ];
 
@@ -328,8 +334,28 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
         'serial' => l10n.lgSerial,
         'order_number' => l10n.lgOrderNumber,
         'supplier' => l10n.lgSupplier,
+        'class_code' => l10n.lgClassCode,
         _ => key,
       };
+
+  /// 識別コードをまとめて入力 (0218): one code onto the lines chosen.
+  Future<void> _bulkClassCode() async {
+    final live = [for (final r in _rows) if (!r.removed) r];
+    final picked = await showClassCodeBulkDialog(context, [
+      for (final r in live)
+        ClassCodeRow(
+          lineNo: r.original.lineNo,
+          label: [r['maker'], r['name'].isNotEmpty ? r['name'] : r['code'], r['jan']].where((v) => v.isNotEmpty).join('  '),
+          code: r['class_code'],
+        ),
+    ]);
+    if (picked == null || !mounted) return;
+    setState(() {
+      for (final r in live) {
+        if (picked.lineNos.contains(r.original.lineNo)) r.cells['class_code']!.text = picked.code;
+      }
+    });
+  }
 
   void _add() {
     final next = _rows.fold<int>(0, (m, r) => math.max(m, r.original.lineNo)) + 1;
@@ -371,6 +397,12 @@ class _ReadingCheckScreenState extends State<ReadingCheckScreen> {
           if (!widget.readOnly)
             TextButton.icon(
                 key: const ValueKey('rc-add'), onPressed: _add, icon: const Icon(Icons.add), label: Text(l10n.rcAdd)),
+          if (!widget.readOnly)
+            TextButton.icon(
+                key: const ValueKey('rc-class-code'),
+                onPressed: _bulkClassCode,
+                icon: const Icon(Icons.label_outline),
+                label: Text(l10n.ccBulkTitle)),
           FilterChip(
             key: const ValueKey('rc-all-columns'),
             label: Text(l10n.rcAllColumns),

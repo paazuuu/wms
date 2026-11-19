@@ -79,7 +79,7 @@ void main() {
     final bytes = await buildReportPdf(d, _font(), compress: false);
     final text = latin1.decode(bytes);
     expect(text, startsWith('%PDF-'));
-    expect(text, contains('/MediaBox[0 0 595.27559 841.88976]'), reason: 'A4 portrait');
+    expect(text, contains('/MediaBox[0 0 841.88976 595.27559]'), reason: 'A4 landscape');
     expect(text, contains('IPAGothic'), reason: 'the Japanese font is in it');
   });
 
@@ -141,5 +141,20 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('report-filter-reset')));
     await tester.pumpAndSettle();
     expect(find.text('3 件'), findsOneWidget);
+  });
+
+  test('入出庫履歴 (0218): the day without its time, the 識別コード, the upload memo in full', () {
+    final t = reportTable(const ReportResult(source: ReportSource.stockMovements, rows: [
+      {
+        'id': 1, 'movement_date': '2026-11-05', 'warehouse_name': '本倉庫', 'movement_type': 'ADJUST',
+        'class_code': 'HL', 'jan_code': '4909999000014', 'product_name': 'テストペン', 'quantity': 5,
+        'quantity_before': 0, 'quantity_after': 5, 'import_supplier': 'テスト商事', 'import_note': '11月便 箱潰れあり',
+      },
+    ]));
+    expect(t.columns.map((c) => c.label).toList(),
+        ['日付', '倉庫', '種類', '識別コード', 'JAN', '商品名', '変更前', '数量', '変更後', '仕入先', '入荷時メモ']);
+    expect(t.rows.single.first, '2026/11/05');
+    expect(t.rows.single[3], 'HL');
+    expect(t.columns.last.wrap, isTrue);
   });
 }

@@ -18,16 +18,19 @@ final reportFileSaverProvider =
 /// The Japanese for the PDF (overridden in tests).
 final reportPdfFontProvider = Provider<Future<Uint8List> Function()>((_) => loadReportPdfFont);
 
-/// Rows on one A4 page of the preview when every row is one line.
-const reportRowsPerPage = 30;
+/// The page drawn: A4 landscape (297 × 210) at 1123 × 794 (0218: the
+/// columns grew past a portrait page), with its margins.
+const reportPageWidth = 1123.0;
+const reportPageHeight = 794.0;
+const _side = 48.0, _top = 48.0, _bottom = 40.0;
 
 /// The preview's text size for a table of [columns] columns.
-double reportFontSize(int columns) => columns <= 6 ? 12.0 : (columns <= 10 ? 11.0 : 9.5);
+double reportFontSize(int columns) => columns <= 8 ? 12.0 : (columns <= 12 ? 11.0 : 10.0);
 
 /// How many lines [text] takes in a column [flex] of [flexSum] wide on the
-/// 698px page, at [size]: wide (CJK) characters count whole, others half.
+/// page, at [size]: wide (CJK) characters count whole, others half.
 int reportLines(String text, double flex, double flexSum, double size, {int max = 6}) {
-  final width = 698 * flex / flexSum - 10;
+  final width = (reportPageWidth - 2 * _side) * flex / flexSum - 10;
   var units = 0.0, lines = 1;
   for (final r in text.runes) {
     if (r == 10) {
@@ -58,7 +61,7 @@ double reportRowHeight(ReportTable t, List<String> row) {
 /// The rows split into A4 pages by the height they take: the first page
 /// holds the title and [conditionLines] lines of conditions above them.
 List<List<List<String>>> paginateReport(ReportTable t, {int conditionLines = 0}) {
-  const body = 1123 - 48 - 40 - 26 /* heading row */ - 26 /* total */ - 24 /* footer */;
+  const body = reportPageHeight - _top - _bottom - 26 /* heading row */ - 26 /* total */ - 24 /* footer */;
   final first = body - (36 + 8 + (conditionLines + 1) * 15 + 14);
   const later = body - 24;
   final pages = <List<List<String>>>[];
@@ -78,7 +81,7 @@ List<List<List<String>>> paginateReport(ReportTable t, {int conditionLines = 0})
   return pages;
 }
 
-/// A report's result as it will print: A4 portrait pages with the title and
+/// A report's result as it will print: A4 landscape pages with the title and
 /// the conditions on the first, the table with its heading on every page,
 /// and the total at the end — narrowed by any column's values, and saved as
 /// Excel or PDF just as it is shown.
@@ -245,7 +248,7 @@ class _ReportViewState extends ConsumerState<ReportView> {
           padding: const EdgeInsets.only(bottom: AppSpacing.lg),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 820),
+              constraints: const BoxConstraints(maxWidth: 1180),
               child: _A4Page(
                 key: ValueKey('report-page-${n + 1}'),
                 doc: doc,
@@ -261,7 +264,7 @@ class _ReportViewState extends ConsumerState<ReportView> {
   }
 }
 
-/// One A4 portrait page (210 × 297), drawn at 794 × 1123 and scaled to fit:
+/// One A4 landscape page (297 × 210), drawn at 1123 × 794 and scaled to fit:
 /// white paper with dark ink whatever the app's design.
 class _A4Page extends StatelessWidget {
   const _A4Page({super.key, required this.doc, required this.rows, required this.page, required this.pages, this.totals});
@@ -304,7 +307,7 @@ class _A4Page extends StatelessWidget {
         );
 
     return AspectRatio(
-      aspectRatio: 210 / 297,
+      aspectRatio: 297 / 210,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -315,10 +318,10 @@ class _A4Page extends StatelessWidget {
           fit: BoxFit.contain,
           alignment: Alignment.topCenter,
           child: SizedBox(
-            width: 794,
-            height: 1123,
+            width: reportPageWidth,
+            height: reportPageHeight,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(48, 48, 48, 40),
+              padding: const EdgeInsets.fromLTRB(_side, _top, _side, _bottom),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 if (page == 1) ...[
                   Text(doc.title, style: style(bold: true, s: 22)),

@@ -66,6 +66,11 @@ final _time = DateFormat('y/MM/dd HH:mm');
 
 /// Headings for the keys the sources send; a key not here keeps its name.
 const _labels = {
+  // 入出庫履歴 (0218): the day in Japan's time, no time of day.
+  'movement_date': '日付',
+  'class_code': '識別コード',
+  'import_supplier': '仕入先',
+  'import_note': '入荷時メモ',
   'created_at': '日時',
   'jan_code': 'JAN',
   'product_name': '商品名',
@@ -94,15 +99,19 @@ const _hidden = {'id', 'warehouse_id', 'actor_user_id', 'product_id', 'company_i
 
 /// The order the known keys are shown in; others follow as they come.
 const _order = [
-  'created_at', 'warehouse_name', 'country_code', 'movement_type', 'event_type', 'entity_type', 'entity_id',
-  'jan_code', 'product_name', 'name', 'category', 'status', 'quantity_before', 'quantity', 'quantity_after',
-  'price', 'details',
+  'movement_date', 'created_at', 'warehouse_name', 'country_code', 'movement_type', 'event_type', 'entity_type',
+  'entity_id', 'class_code', 'jan_code', 'product_name', 'name', 'category', 'status', 'quantity_before', 'quantity',
+  'quantity_after', 'price', 'details', 'import_supplier', 'import_note',
 ];
 
 const _numericKeys = {'quantity', 'quantity_before', 'quantity_after', 'price'};
 const _summedKeys = {'quantity'};
 
+/// Long text shown in full over several lines.
+const _wrapKeys = {'import_note'};
+
 const _flex = {
+  'movement_date': 1.3, 'class_code': 0.9, 'import_supplier': 1.6, 'import_note': 2.4,
   'created_at': 2.0, 'product_name': 2.5, 'name': 2.5, 'details': 3.0, 'jan_code': 1.6, 'warehouse_name': 1.3,
   'quantity_before': 0.9, 'quantity': 0.9, 'quantity_after': 0.9, 'price': 1.0, 'country_code': 0.6,
 };
@@ -123,6 +132,10 @@ const _words = {
 
 String _cell(String key, Object? v) {
   if (v == null) return '';
+  if (key == 'movement_date') {
+    final d = DateTime.tryParse('$v');
+    if (d != null) return _day.format(d);
+  }
   if (key == 'created_at' || key.endsWith('_at')) {
     final d = DateTime.tryParse('$v')?.toLocal();
     if (d != null) return d.hour == 0 && d.minute == 0 && d.second == 0 ? _day.format(d) : _time.format(d);
@@ -150,7 +163,10 @@ ReportTable reportTable(ReportResult result) {
     columns: [
       for (final k in shown)
         ReportColumn(k, _labels[k] ?? k,
-            numeric: _numericKeys.contains(k), summed: _summedKeys.contains(k), flex: _flex[k] ?? 1.2),
+            numeric: _numericKeys.contains(k),
+            summed: _summedKeys.contains(k),
+            flex: _flex[k] ?? 1.2,
+            wrap: _wrapKeys.contains(k)),
     ],
     rows: [
       for (final r in result.rows) [for (final k in shown) _cell(k, r[k])],

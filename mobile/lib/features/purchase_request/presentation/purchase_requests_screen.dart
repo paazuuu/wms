@@ -12,6 +12,7 @@ import '../../warehouse_context/application/warehouse_providers.dart';
 import '../data/purchase_request_repository.dart';
 import '../domain/purchase_request.dart';
 import 'purchase_request_screen.dart';
+import 'supplier_answers_tab.dart';
 import '../../../core/ui/popconfirm.dart';
 
 /// 入荷希望リスト (0140, 0205): the wishes from downstream — each list an end
@@ -61,22 +62,35 @@ class _PurchaseRequestsScreenState extends ConsumerState<PurchaseRequestsScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.featPurchaseRequest),
-          bottom: TabBar(tabs: [
-            Tab(key: const ValueKey('wl-tab-lists'), text: l10n.wlTabLists),
-            Tab(key: const ValueKey('wl-tab-summary'), text: l10n.wlTabSummary),
-          ]),
+      length: 3,
+      child: Builder(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text(l10n.featPurchaseRequest),
+            bottom: TabBar(tabs: [
+              Tab(key: const ValueKey('wl-tab-lists'), text: l10n.wlTabLists),
+              Tab(key: const ValueKey('wl-tab-summary'), text: l10n.wlTabSummary),
+              // 仕入先回答 (0218): what suppliers answered, kept as files.
+              Tooltip(
+                message: l10n.saTabHelp,
+                child: Tab(key: const ValueKey('wl-tab-answers'), text: l10n.saTab),
+              ),
+            ]),
+          ),
+          // A new list from the lists and the summary; the answers have their own button.
+          floatingActionButton: ListenableBuilder(
+            listenable: DefaultTabController.of(context),
+            builder: (context, _) => DefaultTabController.of(context).index == 2
+                ? const SizedBox.shrink()
+                : FloatingActionButton.extended(
+                    key: const ValueKey('pr-new'),
+                    onPressed: () => _openList(),
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n.prNew),
+                  ),
+          ),
+          body: TabBarView(children: [_lists(context), _summary(context), const SupplierAnswersTab()]),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          key: const ValueKey('pr-new'),
-          onPressed: () => _openList(),
-          icon: const Icon(Icons.add),
-          label: Text(l10n.prNew),
-        ),
-        body: TabBarView(children: [_lists(context), _summary(context)]),
       ),
     );
   }

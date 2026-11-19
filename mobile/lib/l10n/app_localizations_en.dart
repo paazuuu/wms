@@ -17750,4 +17750,176 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get umTierNone => 'Not set';
+
+  @override
+  String get lgClassCode => 'Class code';
+
+  @override
+  String get ccBulkTitle => 'Set class codes';
+
+  @override
+  String get ccBulkIntro =>
+      'The supplier\'s code for a group of goods (HL, BL …), set on the lines you tick. Applying it empty takes the code off those lines.';
+
+  @override
+  String get ccInvalid => 'Up to 6 letters (and digits)';
+
+  @override
+  String get ccSearch => 'Filter by name, JAN or code';
+
+  @override
+  String get ccPickEmpty => 'Empty ones only';
+
+  @override
+  String ccApply(int n) {
+    return 'Set on $n lines';
+  }
+
+  @override
+  String ccClear(int n) {
+    return 'Take off $n lines';
+  }
+
+  @override
+  String ccSaved(int n) {
+    return 'Class code saved on $n lines';
+  }
+
+  @override
+  String get reportFilterNote => 'Upload memo';
+
+  @override
+  String get reportPick => 'Pick from the list';
+
+  @override
+  String get reportOnlyMovements => 'Applies to 入出庫履歴 only';
+
+  @override
+  String get reportNoteHelp =>
+      'Words of the memo written when the file was taken in (入出庫履歴 only)';
+
+  @override
+  String get pcTitle => 'Product categories';
+
+  @override
+  String get pcIntro =>
+      'Products sorted from broad to narrow, as in 文房具 > 筆記具 > ボールペン > 油性, as deep as needed. When a file is taken in and checked, the AI adds the category along with the name and weight. The AI never overwrites a category a person set.';
+
+  @override
+  String get pcClassify => 'Classify products with no category';
+
+  @override
+  String pcClassifying(int done, int total) {
+    return 'Classifying $done/$total';
+  }
+
+  @override
+  String pcClassified(int n, int total) {
+    return 'Categories set on $n of $total';
+  }
+
+  @override
+  String get pcNothingToDo => 'Every product has a category';
+
+  @override
+  String get pcRename => 'Rename';
+
+  @override
+  String get pcNodeName => 'Category name';
+
+  @override
+  String get pcEmpty =>
+      'No categories yet. The AI sorts products after a file is checked, or with the button above.';
+
+  @override
+  String pcCount(int n) {
+    return '$n';
+  }
+
+  @override
+  String get pcPathHint =>
+      'Broad > narrower > narrowest (split by >, any depth)';
+
+  @override
+  String pcCategorizing(int done, int total) {
+    return 'Categorising $done/$total';
+  }
+
+  @override
+  String get saTab => 'Supplier answers';
+
+  @override
+  String get saTabHelp =>
+      'Where the answers suppliers send back — what they can supply, how many and by when — are kept as files with a memo';
+
+  @override
+  String get saIntro =>
+      'Answers from suppliers (stock, lead times, quotes) kept as files with a memo: opened on the spot, downloaded again later, tied to the wish list they answer.';
+
+  @override
+  String get saAdd => 'Add an answer';
+
+  @override
+  String get saEdit => 'Edit the answer';
+
+  @override
+  String get saSupplier => 'Supplier';
+
+  @override
+  String get saAnsweredOn => 'Answered on';
+
+  @override
+  String saAnsweredAt(String day) {
+    return 'Answered $day';
+  }
+
+  @override
+  String get saRequest => 'Wish list it answers';
+
+  @override
+  String get saNoRequest => 'None';
+
+  @override
+  String get saTitleField => 'Subject';
+
+  @override
+  String get saNote => 'Memo (what was answered: quantities, dates …)';
+
+  @override
+  String get saPickFiles => 'Choose files';
+
+  @override
+  String get saNeedSupplier => 'Enter the supplier';
+
+  @override
+  String get saSaved => 'Answer saved';
+
+  @override
+  String saRemoveQ(String name) {
+    return 'Remove the answer from $name?';
+  }
+
+  @override
+  String saFileRemoveQ(String name) {
+    return 'Take $name off?';
+  }
+
+  @override
+  String get saSearch => 'Filter by supplier, subject, memo or file';
+
+  @override
+  String get saEmpty =>
+      'No answers yet. Add the files suppliers sent with “Add an answer”.';
+
+  @override
+  String get saNoMatch => 'No answer matches';
+
+  @override
+  String get saView => 'Open to view';
+
+  @override
+  String get saDownload => 'Download';
+
+  @override
+  String get saNoFiles => 'No files';
 }

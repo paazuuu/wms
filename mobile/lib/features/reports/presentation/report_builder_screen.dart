@@ -40,6 +40,10 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
   final _status = TextEditingController();
   final _janCode = TextEditingController();
   final _category = TextEditingController();
+  /// 入出庫履歴 (0218): the 識別コード, and words of the memo written when the
+  /// stock's file was taken in.
+  final _classCode = TextEditingController();
+  final _note = TextEditingController();
   /// Null: every date.
   ReportPeriod? _period;
 
@@ -57,6 +61,8 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
     _status.dispose();
     _janCode.dispose();
     _category.dispose();
+    _classCode.dispose();
+    _note.dispose();
     super.dispose();
   }
 
@@ -76,6 +82,12 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
         if (_status.text.trim().isNotEmpty) 'status': _status.text.trim(),
         if (_janCode.text.trim().isNotEmpty) 'jan_code': _janCode.text.trim(),
         if (_category.text.trim().isNotEmpty) 'category': _category.text.trim(),
+        if (_classCode.text.trim().isNotEmpty) 'class_code': _classCode.text.trim().toUpperCase(),
+        if (_note.text.trim().isNotEmpty) 'note': _note.text.trim(),
+        // The days in Japan's time, for 入出庫履歴 (0218): a day is a JST day
+        // wherever the report is run.
+        if (_dateFrom != null) 'day_from': _ymd(_dateFrom!),
+        if (_dateTo != null) 'day_to': _ymd(_dateTo!),
         // From the day's start to its very end, in this device's time, so
         // the last day is in the report.
         if (_dateFrom != null)
@@ -84,17 +96,30 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
           'date_to': DateTime(_dateTo!.year, _dateTo!.month, _dateTo!.day, 23, 59, 59, 999).toUtc().toIso8601String(),
       };
 
-  /// 状態・JAN・カテゴリ, typed in a dialog from the ⋮ menu.
+  static String _ymd(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  /// 状態・JAN・カテゴリ・識別コード・入荷時メモ, typed (or picked) in a
+  /// dialog from the ⋮ menu.
   Future<void> _editConditions() async {
+    final codes = await ref.read(reportClassCodesProvider.future).catchError((_) => const <String>[]);
+    final notes = await ref.read(reportImportNotesProvider.future).catchError((_) => const <String>[]);
+    if (!mounted) return;
     final r = await showDialog<List<String>>(
       context: context,
-      builder: (_) => _ConditionsDialog(values: [_status.text, _janCode.text, _category.text]),
+      builder: (_) => _ConditionsDialog(
+        values: [_status.text, _janCode.text, _category.text, _classCode.text, _note.text],
+        codes: codes,
+        notes: notes,
+      ),
     );
     if (r == null || !mounted) return;
     setState(() {
       _status.text = r[0];
       _janCode.text = r[1];
       _category.text = r[2];
+      _classCode.text = r[3];
+      _note.text = r[4];
     });
   }
 
@@ -119,6 +144,8 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
         if (_status.text.trim().isNotEmpty) l10n.reportCondItem(l10n.reportFilterStatus, _status.text.trim()),
         if (_janCode.text.trim().isNotEmpty) l10n.reportCondItem(l10n.reportFilterJan, _janCode.text.trim()),
         if (_category.text.trim().isNotEmpty) l10n.reportCondItem(l10n.reportFilterCategory, _category.text.trim()),
+        if (_classCode.text.trim().isNotEmpty) l10n.reportCondItem(l10n.lgClassCode, _classCode.text.trim().toUpperCase()),
+        if (_note.text.trim().isNotEmpty) l10n.reportCondItem(l10n.reportFilterNote, _note.text.trim()),
       ];
 
   Future<void> _run() async {
@@ -180,6 +207,8 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
       _status.text = (def.filters['status'] ?? '').toString();
       _janCode.text = (def.filters['jan_code'] ?? '').toString();
       _category.text = (def.filters['category'] ?? '').toString();
+      _classCode.text = (def.filters['class_code'] ?? '').toString();
+      _note.text = (def.filters['note'] ?? '').toString();
       final from = DateTime.tryParse('${def.filters['date_from']}')?.toLocal();
       final to = DateTime.tryParse('${def.filters['date_to']}')?.toLocal();
       _period = from == null || to == null
@@ -239,6 +268,8 @@ class _ReportBuilderScreenState extends ConsumerState<ReportBuilderScreen> {
       (l10n.reportFilterStatus, _status),
       (l10n.reportFilterJan, _janCode),
       (l10n.reportFilterCategory, _category),
+      (l10n.lgClassCode, _classCode),
+      (l10n.reportFilterNote, _note),
     ].where((e) => e.$2.text.trim().isNotEmpty).toList();
 
     return Scaffold(
@@ -471,9 +502,13 @@ class _NameDialogState extends State<_NameDialog> {
 
 /// 状態・JAN・カテゴリ: the conditions used now and then.
 class _ConditionsDialog extends StatefulWidget {
-  const _ConditionsDialog({required this.values});
+  const _ConditionsDialog({required this.values, this.codes = const [], this.notes = const []});
 
   final List<String> values;
+
+  /// What 識別コード and 入荷時メモ can be picked from (0218).
+  final List<String> codes;
+  final List<String> notes;
 
   @override
   State<_ConditionsDialog> createState() => _ConditionsDialogState();
@@ -493,9 +528,37 @@ class _ConditionsDialogState extends State<_ConditionsDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    Widget field(String key, int i, String label) => Padding(
+    Widget field(String key, int i, String label, {List<String> pick = const [], String? helper}) => Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-          child: TextField(key: ValueKey(key), controller: _c[i], decoration: InputDecoration(labelText: label)),
+          child: TextField(
+            key: ValueKey(key),
+            controller: _c[i],
+            decoration: InputDecoration(
+              labelText: label,
+              helperText: helper,
+              helperMaxLines: 2,
+              // Typed, or picked from what is there.
+              suffixIcon: pick.isEmpty
+                  ? null
+                  : PopupMenuButton<String>(
+                      key: ValueKey('$key-pick'),
+                      tooltip: l10n.reportPick,
+                      icon: const Icon(Icons.arrow_drop_down),
+                      onSelected: (v) => setState(() => _c[i].text = v),
+                      itemBuilder: (_) => [
+                        for (final v in pick)
+                          PopupMenuItem(
+                            value: v,
+                            key: ValueKey('$key-pick-$v'),
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 320),
+                              child: Text(v, maxLines: 2, overflow: TextOverflow.ellipsis),
+                            ),
+                          ),
+                      ],
+                    ),
+            ),
+          ),
         );
     return AlertDialog(
       title: Text(l10n.rpMore),
@@ -505,6 +568,8 @@ class _ConditionsDialogState extends State<_ConditionsDialog> {
           field('report-status', 0, l10n.reportFilterStatus),
           field('report-jan', 1, l10n.reportFilterJan),
           field('report-category', 2, l10n.reportFilterCategory),
+          field('report-class-code', 3, l10n.lgClassCode, pick: widget.codes, helper: l10n.reportOnlyMovements),
+          field('report-note', 4, l10n.reportFilterNote, pick: widget.notes, helper: l10n.reportNoteHelp),
         ]),
       ),
       actions: [

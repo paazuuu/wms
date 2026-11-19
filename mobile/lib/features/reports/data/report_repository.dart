@@ -23,12 +23,37 @@ abstract class ReportRepository {
   });
 
   Future<ApiResult<bool>> delete(int id);
+
+  /// 識別コード in use (0218), for the pick list.
+  Future<ApiResult<List<String>>> classCodes();
+
+  /// The memos written when files were taken in (0218), newest first.
+  Future<ApiResult<List<String>>> importNotes();
 }
 
 class ReportRepositoryImpl implements ReportRepository {
   ReportRepositoryImpl(this._dio);
 
   final Dio _dio;
+
+  Future<ApiResult<List<String>>> _texts(String rpc, String? field) async {
+    try {
+      final r = await _dio.post('/rpc/$rpc');
+      final list = r.data is List ? r.data as List : const [];
+      return ApiSuccess([
+        for (final e in list)
+          if (field == null ? e != null : (e is Map && e[field] != null)) '${field == null ? e : (e as Map)[field]}',
+      ]);
+    } on DioException catch (e) {
+      return mapDioError(e);
+    }
+  }
+
+  @override
+  Future<ApiResult<List<String>>> classCodes() => _texts('class_codes_in_use', 'code');
+
+  @override
+  Future<ApiResult<List<String>>> importNotes() => _texts('stock_import_notes', null);
 
   @override
   Future<ApiResult<ReportResult>> run(
