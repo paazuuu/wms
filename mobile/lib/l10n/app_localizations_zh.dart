@@ -17007,7 +17007,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get reportPreviewHint => '以A4纵向显示，下载的PDF也是同样版式。';
+  String get reportPreviewHint => '以A4横向显示，下载的PDF也是同样版式。';
 
   @override
   String reportPageOf(int page, int pages) {

@@ -30059,7 +30059,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportPreviewHint.
   ///
   /// In ja, this message translates to:
-  /// **'A4縦で表示しています。ダウンロードするPDFも同じ形です。'**
+  /// **'A4横で表示しています。ダウンロードするPDFも同じ形です。'**
   String get reportPreviewHint;
 
   /// No description provided for @reportPageOf.

@@ -73,6 +73,7 @@ const _labels = {
   'import_note': '入荷時メモ',
   'created_at': '日時',
   'jan_code': 'JAN',
+  'product_code': '品番',
   'product_name': '商品名',
   'name': '商品名',
   'warehouse_name': '倉庫',
@@ -100,7 +101,7 @@ const _hidden = {'id', 'warehouse_id', 'actor_user_id', 'product_id', 'company_i
 /// The order the known keys are shown in; others follow as they come.
 const _order = [
   'movement_date', 'created_at', 'warehouse_name', 'country_code', 'movement_type', 'event_type', 'entity_type',
-  'entity_id', 'class_code', 'jan_code', 'product_name', 'name', 'category', 'status', 'quantity_before', 'quantity',
+  'entity_id', 'class_code', 'jan_code', 'product_code', 'product_name', 'name', 'category', 'status', 'quantity_before', 'quantity',
   'quantity_after', 'price', 'details', 'import_supplier', 'import_note',
 ];
 
@@ -111,21 +112,34 @@ const _summedKeys = {'quantity'};
 const _wrapKeys = {'import_note'};
 
 const _flex = {
-  'movement_date': 1.3, 'class_code': 0.9, 'import_supplier': 1.6, 'import_note': 2.4,
+  'movement_date': 1.3, 'class_code': 0.9, 'product_code': 1.4, 'import_supplier': 1.6, 'import_note': 2.4,
   'created_at': 2.0, 'product_name': 2.5, 'name': 2.5, 'details': 3.0, 'jan_code': 1.6, 'warehouse_name': 1.3,
   'quantity_before': 0.9, 'quantity': 0.9, 'quantity_after': 0.9, 'price': 1.0, 'country_code': 0.6,
 };
 
 /// Movement and status codes in words.
 const _words = {
+  // What moved the stock (stock_movements.movement_type; 0220 names a
+  // 発注 file's stock apart from a correction by hand).
+  'IMPORT_IN': '入荷（ファイル取込）',
+  'IMPORT_FIX': '取込の取消・修正',
+  'OPENING': '期首在庫',
   'ADJUST': '在庫調整',
   'RECEIVE': '入荷',
   'RECEIPT': '入荷',
+  'RECEIPT_CANCEL': '入荷の取消',
+  'PUTAWAY': '棚入れ',
   'SHIP': '出庫',
+  'SHIP_CANCEL': '出庫の取消',
   'TRANSFER_IN': '移動（入）',
   'TRANSFER_OUT': '移動（出）',
   'COUNT': '棚卸',
   'PICK': 'ピッキング',
+  'WORK_ORDER_CONSUME': '流通加工（材料）',
+  'WORK_ORDER_PRODUCE': '流通加工（完成品）',
+  'SCRAP': '廃棄',
+  'RETURN_TO_SUPPLIER': '仕入先へ返品',
+  'RELABEL': '貼り替え',
   'active': '有効',
   'inactive': '無効',
 };

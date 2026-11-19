@@ -157,4 +157,16 @@ void main() {
     expect(t.rows.single[3], 'HL');
     expect(t.columns.last.wrap, isTrue);
   });
+
+  test('入出庫履歴 (0220): the 品番 beside the JAN, and what moved the stock in plain words', () {
+    final t = reportTable(const ReportResult(source: ReportSource.stockMovements, rows: [
+      {'movement_date': '2026-11-19', 'movement_type': 'IMPORT_IN', 'jan_code': '4909999000014', 'product_code': 'TP-07B', 'quantity': 5},
+      {'movement_date': '2026-11-19', 'movement_type': 'IMPORT_FIX', 'jan_code': '4909999000014', 'product_code': 'TP-07B', 'quantity': -5},
+      {'movement_date': '2026-11-19', 'movement_type': 'ADJUST', 'jan_code': '4909999000014', 'product_code': 'TP-07B', 'quantity': 1},
+      {'movement_date': '2026-11-19', 'movement_type': 'RETURN_TO_SUPPLIER', 'jan_code': '4909999000014', 'quantity': -1},
+    ]));
+    expect(t.columns.map((c) => c.label).toList(), ['日付', '種類', 'JAN', '品番', '数量']);
+    expect([for (final r in t.rows) r[1]], ['入荷（ファイル取込）', '取込の取消・修正', '在庫調整', '仕入先へ返品']);
+    expect(t.rows.first[3], 'TP-07B');
+  });
 }

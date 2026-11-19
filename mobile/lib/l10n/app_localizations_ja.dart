@@ -17130,7 +17130,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get reportPreviewHint => 'A4縦で表示しています。ダウンロードするPDFも同じ形です。';
+  String get reportPreviewHint => 'A4横で表示しています。ダウンロードするPDFも同じ形です。';
 
   @override
   String reportPageOf(int page, int pages) {

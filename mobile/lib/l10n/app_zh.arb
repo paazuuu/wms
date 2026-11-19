@@ -5352,7 +5352,7 @@
   "reportCondPeriod": "期间: {from} 〜 {to}",
   "reportCondItem": "{label}: {value}",
   "reportCondColumn": "筛选（{column}）: {values}",
-  "reportPreviewHint": "以A4纵向显示，下载的PDF也是同样版式。",
+  "reportPreviewHint": "以A4横向显示，下载的PDF也是同样版式。",
   "reportPageOf": "{page} / {pages}",
   "reportTotal": "合计",
   "reportMadeAt": "生成 {when}",

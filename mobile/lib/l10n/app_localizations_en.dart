@@ -17474,7 +17474,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportPreviewHint =>
-      'Shown as A4 portrait pages; the PDF is laid out the same way.';
+      'Shown as A4 landscape pages; the PDF is laid out the same way.';
 
   @override
   String reportPageOf(int page, int pages) {

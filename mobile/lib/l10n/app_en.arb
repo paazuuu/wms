@@ -5352,7 +5352,7 @@
   "reportCondPeriod": "Period: {from} – {to}",
   "reportCondItem": "{label}: {value}",
   "reportCondColumn": "Filter ({column}): {values}",
-  "reportPreviewHint": "Shown as A4 portrait pages; the PDF is laid out the same way.",
+  "reportPreviewHint": "Shown as A4 landscape pages; the PDF is laid out the same way.",
   "reportPageOf": "{page} / {pages}",
   "reportTotal": "Total",
   "reportMadeAt": "Made {when}",

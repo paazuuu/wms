@@ -12,6 +12,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/export/save_bytes.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/open_window.dart';
+import '../../../core/ui/reading_swarm.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../payments/data/payments_repository.dart';
@@ -1070,11 +1071,13 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
             Padding(
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const LinearProgressIndicator(),
+                // The AI reading takes a while: something to watch meanwhile.
                 if (_aiReading) ...[
+                  const ReadingSwarm(),
                   const SizedBox(height: AppSpacing.xs),
                   Text(l10n.sfAiReading, key: const ValueKey('sf-ai-reading'), style: muted),
-                ],
+                ] else
+                  const LinearProgressIndicator(),
                 if (_judgingHeadings) ...[
                   const SizedBox(height: AppSpacing.xs),
                   Text(l10n.sfJudgingHeadings, key: const ValueKey('sf-judging-headings'), style: muted),
