@@ -15469,5 +15469,16 @@
   "saNoMatch": "条件に合う回答はありません",
   "saView": "開いて見る",
   "saDownload": "ダウンロード",
-  "saNoFiles": "ファイルなし"
+  "saNoFiles": "ファイルなし",
+  "ntFlagJanByCode": "JANは品番から補いました（{source}）。元の書類と見比べてください",
+  "@ntFlagJanByCode": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "ntJanFromLibrary": "商品ライブラリー",
+  "ntJanFromSupplier": "仕入先の品番",
+  "ntJanFromCatalog": "メーカーカタログ"
 }

@@ -158,6 +158,7 @@ import 'package:wms_mobile/features/product/data/web_photos.dart' show webPhotoR
 import 'package:wms_mobile/features/product/data/market_names.dart' show marketNameRepositoryProvider;
 import 'package:wms_mobile/features/product/data/product_category_repository.dart' show productCategoryRepositoryProvider;
 import 'package:wms_mobile/features/purchase_request/data/supplier_answer_repository.dart' show supplierAnswerRepositoryProvider;
+import 'package:wms_mobile/features/stock_import/data/jan_by_code_repository.dart' show janByCodeRepositoryProvider;
 import 'package:wms_mobile/features/payments/data/payments_repository.dart' show paymentsRepositoryProvider;
 import 'fake_payments_repository.dart';
 import 'fake_purchase_price_repository.dart';
@@ -180,6 +181,7 @@ import 'package:wms_mobile/features/requirements/requirements_repository.dart';
 import 'fake_requirements_repository.dart';
 import 'fake_product_category_repository.dart';
 import 'fake_supplier_answer_repository.dart';
+import 'fake_jan_by_code_repository.dart';
 
 /// In-memory stand-in for the platform keychain/keystore. The real plugin has
 /// no test-harness implementation and its platform channel simply never
@@ -260,6 +262,8 @@ List<Override> _defaultOverrides() => [
       productCategoryRepositoryProvider.overrideWithValue(FakeProductCategoryRepository()),
       // 仕入先回答 (0218): none yet.
       supplierAnswerRepositoryProvider.overrideWithValue(FakeSupplierAnswerRepository()),
+      // JANs by 品番 (0221): none found.
+      janByCodeRepositoryProvider.overrideWithValue(FakeJanByCodeRepository()),
       webPhotoRepositoryProvider.overrideWithValue(FakeWebPhotoRepository()),
       paymentsRepositoryProvider.overrideWithValue(FakePaymentsRepository()),
       // 仕入れ値の履歴 (0187) and 出荷リストで出庫 (0188): none.

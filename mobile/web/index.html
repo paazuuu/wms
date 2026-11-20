@@ -41,6 +41,11 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <!-- The PDF preview (printing → pdf.js): 5.x reads JBIG2 images only
+       through a WebAssembly decoder the printing package does not set up, so
+       scans whose text is JBIG2 (many scanned invoices) were drawn without
+       their text. 4.10.38 decodes JBIG2 itself. -->
+  <script>window.dartPdfJsVersion = "4.10.38";</script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

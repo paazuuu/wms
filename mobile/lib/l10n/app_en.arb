@@ -5477,5 +5477,9 @@
   "saNoMatch": "No answer matches",
   "saView": "Open to view",
   "saDownload": "Download",
-  "saNoFiles": "No files"
+  "saNoFiles": "No files",
+  "ntFlagJanByCode": "JAN found from the 品番 ({source}); check it against the original",
+  "ntJanFromLibrary": "product library",
+  "ntJanFromSupplier": "the supplier's code",
+  "ntJanFromCatalog": "maker catalog"
 }

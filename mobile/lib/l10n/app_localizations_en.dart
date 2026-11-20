@@ -17922,4 +17922,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saNoFiles => 'No files';
+
+  @override
+  String ntFlagJanByCode(String source) {
+    return 'JAN found from the 品番 ($source); check it against the original';
+  }
+
+  @override
+  String get ntJanFromLibrary => 'product library';
+
+  @override
+  String get ntJanFromSupplier => 'the supplier\'s code';
+
+  @override
+  String get ntJanFromCatalog => 'maker catalog';
 }

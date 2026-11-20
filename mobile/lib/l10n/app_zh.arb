@@ -5477,5 +5477,9 @@
   "saNoMatch": "没有符合条件的回复",
   "saView": "打开查看",
   "saDownload": "下载",
-  "saNoFiles": "无文件"
+  "saNoFiles": "无文件",
+  "ntFlagJanByCode": "JAN 由品番补全（{source}），请与原件核对",
+  "ntJanFromLibrary": "商品库",
+  "ntJanFromSupplier": "供应商品番",
+  "ntJanFromCatalog": "厂商目录"
 }

@@ -45,6 +45,7 @@ import 'stock_inspection_screen.dart';
 import '../../requirements/requirements_repository.dart';
 import '../../product/data/product_category_repository.dart';
 import '../../product/domain/product.dart' show Product;
+import '../data/jan_by_code_repository.dart';
 
 /// A chosen file: its name and bytes, or null when nothing was chosen.
 typedef PickStockFile = Future<({String name, Uint8List bytes})?> Function();
@@ -249,7 +250,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           _docRegistration = data.registrationNumber;
           _docPayee = data.hasPayee;
           readDate = data.docDate;
-          sheet = stockSheetFromRead([
+          // An invoice with a maker and a 品番 but no JAN: the JAN found by
+          // the 品番 (0221), to be checked beside the original.
+          final read = await fillJansByCode(ref.read(janByCodeRepositoryProvider), [
             for (final l in data.lines)
               ReadRow(
                 lineNo: l.lineNo,
@@ -262,6 +265,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                 ledger: LedgerFields.fromJson(l.ledger),
               ),
           ]);
+          if (!mounted) return;
+          sheet = stockSheetFromRead(read);
         case ApiFailure(:final message):
           setState(() {
             _busy = false;

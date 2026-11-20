@@ -3,12 +3,15 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-/// While the AI reads a file: a sheet of paper with a swarm of pointers
-/// going over it line by line, the lines behind them marked as read, and
-/// how long it has taken so far. Only to look at — it knows nothing of the
-/// reading's real progress. Still when the device asks for less motion.
+/// While the AI reads a file: a crowd of named pointers flying all over the
+/// box and, between them, drawing the document's frame — the outer box,
+/// the heading band, row and column lines, a box for each word — each
+/// pointer tracing its own piece in its own colour, then the next. When the
+/// page is done it fades and a new one is started. Only to look at: it
+/// knows nothing of the reading's real progress. Still (one finished page)
+/// when the device asks for less motion.
 class ReadingSwarm extends StatefulWidget {
-  const ReadingSwarm({super.key, this.height = 240, this.cursors = 18, this.seed = 7});
+  const ReadingSwarm({super.key, this.height = 260, this.cursors = 16, this.seed = 7});
 
   final double height;
   final int cursors;
@@ -18,40 +21,90 @@ class ReadingSwarm extends StatefulWidget {
   State<ReadingSwarm> createState() => _ReadingSwarmState();
 }
 
+/// One piece of the frame: a polyline a pointer traces, and how much of it
+/// is drawn.
+class _Shape {
+  _Shape(this.points, {this.fill = false}) {
+    for (var i = 1; i < points.length; i++) {
+      length += (points[i] - points[i - 1]).distance;
+    }
+  }
+
+  final List<Offset> points;
+  final bool fill;
+  double length = 0;
+  double drawn = 0;
+  bool taken = false;
+  Color? color;
+
+  bool get done => drawn >= length;
+
+  /// The point [d] along it.
+  Offset at(double d) {
+    var left = d.clamp(0.0, length);
+    for (var i = 1; i < points.length; i++) {
+      final seg = (points[i] - points[i - 1]).distance;
+      if (left <= seg || i == points.length - 1) {
+        return Offset.lerp(points[i - 1], points[i], seg == 0 ? 1 : (left / seg).clamp(0.0, 1.0))!;
+      }
+      left -= seg;
+    }
+    return points.last;
+  }
+
+  /// The part drawn so far.
+  Path drawnPath() {
+    final p = Path()..moveTo(points.first.dx, points.first.dy);
+    var left = drawn.clamp(0.0, length);
+    for (var i = 1; i < points.length && left > 0; i++) {
+      final seg = (points[i] - points[i - 1]).distance;
+      final end = left >= seg ? points[i] : Offset.lerp(points[i - 1], points[i], left / seg)!;
+      p.lineTo(end.dx, end.dy);
+      left -= seg;
+    }
+    return p;
+  }
+}
+
 class _Cursor {
-  _Cursor(this.pos, this.offset, this.color, this.tag);
+  _Cursor(this.pos, this.color, this.name);
 
   Offset pos;
   Offset vel = Offset.zero;
-
-  /// Where in the swarm it likes to be, around the reading point.
-  Offset offset;
   final Color color;
-  final bool tag;
+  final String name;
+  _Shape? task;
+  bool drawing = false;
+  Offset? wanderTo;
 }
 
-/// The rows of the sheet and the reading point on it.
-const _rows = 12;
-const _rowSeconds = 1.6;
+enum _Phase { build, hold, fade }
 
 class _ReadingSwarmState extends State<ReadingSwarm> with SingleTickerProviderStateMixin {
   late final Ticker _ticker = createTicker(_tick);
   late final math.Random _rnd = math.Random(widget.seed);
   final List<_Cursor> _cursors = [];
+  List<_Shape> _shapes = [];
   Duration _last = Duration.zero;
   double _t = 0;
+  double _phaseT = 0;
+  _Phase _phase = _Phase.build;
   Size _size = Size.zero;
 
   static const _palette = [
-    Color(0xFF2563EB), Color(0xFFDB2777), Color(0xFF059669), Color(0xFFD97706), Color(0xFF7C3AED), Color(0xFF0891B2),
+    Color(0xFF2563EB), Color(0xFFDB2777), Color(0xFF059669), Color(0xFFD97706),
+    Color(0xFF7C3AED), Color(0xFF0891B2), Color(0xFFDC2626), Color(0xFF65A30D),
   ];
+  static const _names = ['AI', 'JAN', '品番', '数量', '単価', '金額', 'メーカー', '識別', '日付', '合計', '品名', '確認'];
+  static const _drawSpeed = 340.0, _flySpeed = 900.0;
+
+  bool get _still => MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    if (still && _ticker.isActive) _ticker.stop();
-    if (!still && !_ticker.isActive) _ticker.start();
+    if (_still && _ticker.isActive) _ticker.stop();
+    if (!_still && !_ticker.isActive) _ticker.start();
   }
 
   @override
@@ -60,33 +113,82 @@ class _ReadingSwarmState extends State<ReadingSwarm> with SingleTickerProviderSt
     super.dispose();
   }
 
-  void _seed(Size size) {
+  void _start(Size size) {
     _cursors.clear();
     for (var i = 0; i < widget.cursors; i++) {
-      final a = _rnd.nextDouble() * math.pi * 2, r = 18 + _rnd.nextDouble() * 46;
       _cursors.add(_Cursor(
         Offset(_rnd.nextDouble() * size.width, _rnd.nextDouble() * size.height),
-        Offset(math.cos(a) * r, math.sin(a) * r * 0.55),
         _palette[i % _palette.length],
-        i % 6 == 0,
+        _names[i % _names.length],
       ));
+    }
+    _shapes = _layout(size);
+    _phase = _Phase.build;
+    _phaseT = 0;
+    if (_still) {
+      for (final s in _shapes) {
+        s
+          ..drawn = s.length
+          ..taken = true
+          ..color = _palette[_rnd.nextInt(_palette.length)];
+      }
     }
   }
 
-  /// The paper's rectangle in a box of [size].
-  static Rect paperOf(Size size) {
-    final w = math.min(size.width - 32, 560.0);
-    return Rect.fromLTWH((size.width - w) / 2, 14, w, size.height - 40);
+  /// A page's frame, a little different each time: its pieces in the order
+  /// they are drawn — outline, heading band, lines, then the words.
+  List<_Shape> _layout(Size size) {
+    List<Offset> rect(Rect r) => [r.topLeft, r.topRight, r.bottomRight, r.bottomLeft, r.topLeft];
+    final area = Rect.fromLTWH(18, 14, size.width - 36, size.height - 38);
+    final shapes = <_Shape>[];
+    // Title and date at the top.
+    shapes.add(_Shape(rect(Rect.fromLTWH(area.left, area.top, area.width * (0.22 + _rnd.nextDouble() * 0.1), 14)), fill: true));
+    shapes.add(_Shape(rect(Rect.fromLTWH(area.right - area.width * 0.16, area.top, area.width * 0.16, 14))));
+    final table = Rect.fromLTRB(area.left, area.top + 26, area.right, area.bottom);
+    shapes.add(_Shape(rect(table)));
+    final head = Rect.fromLTWH(table.left, table.top, table.width, 18);
+    shapes.add(_Shape(rect(head), fill: true));
+    final rows = 5 + _rnd.nextInt(3);
+    final rowH = (table.height - head.height) / rows;
+    for (var r = 1; r < rows; r++) {
+      final y = head.bottom + r * rowH;
+      shapes.add(_Shape([Offset(table.left, y), Offset(table.right, y)]));
+    }
+    final weights = [2.8, 1.5, 1.0, 1.0, 1.2, 0.8];
+    final sum = weights.fold<double>(0, (a, b) => a + b);
+    final xs = <double>[table.left];
+    for (final w in weights) {
+      xs.add(xs.last + table.width * w / sum);
+    }
+    for (var c = 1; c < xs.length - 1; c++) {
+      shapes.add(_Shape([Offset(xs[c], table.top), Offset(xs[c], table.bottom)]));
+    }
+    // A box round each word, row by row.
+    for (var r = -1; r < rows; r++) {
+      final top = r < 0 ? head.top + 5 : head.bottom + r * rowH + rowH / 2 - 4;
+      for (var c = 0; c < xs.length - 1; c++) {
+        final cell = xs[c + 1] - xs[c];
+        final w = cell * (0.35 + _rnd.nextDouble() * 0.5);
+        final left = c == 0 || c == 1 ? xs[c] + 6 : xs[c + 1] - 6 - w;
+        shapes.add(_Shape(rect(Rect.fromLTWH(left, top, w, 8)), fill: r < 0 || _rnd.nextDouble() < 0.25));
+      }
+    }
+    return shapes;
   }
 
-  /// Where the reading is at time [t]: along row [row], [along] of the way.
-  static ({int row, double along, Offset at}) focusAt(Rect paper, double t) {
-    final step = t / _rowSeconds;
-    final row = step.floor() % _rows;
-    final along = step - step.floor();
-    final top = paper.top + 22, gap = (paper.height - 34) / _rows;
-    final x = paper.left + 22 + along * (paper.width - 44);
-    return (row: row, along: along, at: Offset(x, top + row * gap + gap * 0.35));
+  Offset _anywhere() => Offset(_rnd.nextDouble() * _size.width, _rnd.nextDouble() * _size.height);
+
+  /// Toward [target] at [speed], curving a little as it goes.
+  void _fly(_Cursor c, Offset target, double speed, double dt, int i) {
+    var d = target - c.pos;
+    final dist = d.distance;
+    if (dist < 0.5) return;
+    d = d / dist;
+    final bend = math.sin(_t * 2.6 + i) * 0.55;
+    final dir = Offset(d.dx * math.cos(bend) - d.dy * math.sin(bend), d.dx * math.sin(bend) + d.dy * math.cos(bend));
+    final want = dir * math.min(speed, dist * 6);
+    c.vel += (want - c.vel) * math.min(1.0, dt * 7);
+    c.pos += c.vel * dt;
   }
 
   void _tick(Duration now) {
@@ -94,27 +196,49 @@ class _ReadingSwarmState extends State<ReadingSwarm> with SingleTickerProviderSt
     _last = now;
     if (_size.isEmpty) return;
     _t += dt;
-    final focus = focusAt(paperOf(_size), _t).at;
-    for (final c in _cursors) {
-      // Toward its place around the reading point, apart from the others,
-      // with a little wandering of its own.
-      var steer = (focus + c.offset - c.pos) * 3.2;
-      for (final o in _cursors) {
-        if (identical(o, c)) continue;
-        final d = c.pos - o.pos;
-        final dist = d.distance;
-        if (dist > 0 && dist < 22) steer += d / dist * (22 - dist) * 9;
+    _phaseT += dt;
+    var next = 0;
+    for (final (i, c) in _cursors.indexed) {
+      if (_phase == _Phase.build && c.task == null) {
+        while (next < _shapes.length && _shapes[next].taken) {
+          next++;
+        }
+        if (next < _shapes.length) {
+          c.task = _shapes[next]
+            ..taken = true
+            ..color = c.color;
+          c.drawing = false;
+        }
       }
-      steer += Offset(_rnd.nextDouble() - 0.5, _rnd.nextDouble() - 0.5) * 160;
-      c.vel = (c.vel + steer * dt) * 0.9;
-      final speed = c.vel.distance;
-      if (speed > 420) c.vel = c.vel / speed * 420;
-      c.pos += c.vel * dt;
-      // Now and then a new place in the swarm.
-      if (_rnd.nextDouble() < dt * 0.25) {
-        final a = _rnd.nextDouble() * math.pi * 2, r = 18 + _rnd.nextDouble() * 46;
-        c.offset = Offset(math.cos(a) * r, math.sin(a) * r * 0.55);
+      final s = c.task;
+      if (s != null && !c.drawing) {
+        _fly(c, s.at(0), _flySpeed, dt, i);
+        if ((c.pos - s.at(0)).distance < 6) c.drawing = true;
+      } else if (s != null) {
+        s.drawn += _drawSpeed * dt;
+        c.pos = s.at(s.drawn);
+        c.vel = Offset.zero;
+        if (s.done) c.task = null;
+      } else {
+        // Nothing to draw: about the whole box.
+        final to = c.wanderTo ??= _anywhere();
+        _fly(c, to, _flySpeed * 0.6, dt, i);
+        if ((c.pos - to).distance < 10) c.wanderTo = null;
       }
+    }
+    switch (_phase) {
+      case _Phase.build when _shapes.every((s) => s.done):
+        _phase = _Phase.hold;
+        _phaseT = 0;
+      case _Phase.hold when _phaseT > 1.4:
+        _phase = _Phase.fade;
+        _phaseT = 0;
+      case _Phase.fade when _phaseT > 0.8:
+        _shapes = _layout(_size);
+        _phase = _Phase.build;
+        _phaseT = 0;
+      default:
+        break;
     }
     setState(() {});
   }
@@ -128,25 +252,38 @@ class _ReadingSwarmState extends State<ReadingSwarm> with SingleTickerProviderSt
         final size = Size(c.maxWidth, widget.height);
         if (size != _size) {
           _size = size;
-          _seed(size);
+          _start(size);
         }
         final secs = _t.floor();
+        final fade = _phase == _Phase.fade ? (1 - _phaseT / 0.8).clamp(0.0, 1.0) : 1.0;
         return Stack(children: [
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: CustomPaint(
-                key: const ValueKey('reading-swarm'),
-                painter: _SwarmPainter(cursors: _cursors, t: _t, accent: scheme.primary),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CustomPaint(
+                  key: const ValueKey('reading-swarm'),
+                  painter: _SwarmPainter(
+                    shapes: _shapes,
+                    cursors: _still ? const [] : _cursors,
+                    fade: fade,
+                    settled: _phase != _Phase.build,
+                    ink: scheme.onSurfaceVariant,
+                    // The app's own type, so the names read in Japanese too.
+                    labelStyle: (Theme.of(context).textTheme.labelSmall ?? const TextStyle())
+                        .copyWith(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w700),
+                  ),
+                ),
               ),
             ),
           ),
           Positioned(
             right: 12,
-            bottom: 6,
+            bottom: 4,
             child: Text(
               '${secs ~/ 60}:${(secs % 60).toString().padLeft(2, '0')}',
               key: const ValueKey('reading-swarm-time'),
@@ -160,56 +297,54 @@ class _ReadingSwarmState extends State<ReadingSwarm> with SingleTickerProviderSt
 }
 
 class _SwarmPainter extends CustomPainter {
-  _SwarmPainter({required this.cursors, required this.t, required this.accent});
+  _SwarmPainter({
+    required this.shapes,
+    required this.cursors,
+    required this.fade,
+    required this.settled,
+    required this.ink,
+    required this.labelStyle,
+  });
 
+  final TextStyle labelStyle;
+
+  final List<_Shape> shapes;
   final List<_Cursor> cursors;
-  final double t;
-  final Color accent;
+  final double fade;
+
+  /// The page is finished: its lines settle into one quiet colour.
+  final bool settled;
+  final Color ink;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paper = _ReadingSwarmState.paperOf(size);
-    final focus = _ReadingSwarmState.focusAt(paper, t);
-    // The sheet: white paper whatever the app's design.
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(paper.shift(const Offset(0, 2)), const Radius.circular(6)),
-      Paint()..color = const Color(0x22000000),
-    );
-    canvas.drawRRect(RRect.fromRectAndRadius(paper, const Radius.circular(6)), Paint()..color = Colors.white);
-    final top = paper.top + 22, gap = (paper.height - 34) / _rows;
-    final bar = Paint()..color = const Color(0xFFE3E6EA);
-    final read = Paint()..color = accent.withValues(alpha: 0.12);
-    final now = Paint()..color = accent.withValues(alpha: 0.28);
-    // A table's rows: a name, a code, figures — different lengths per row.
-    const cols = [0.0, 0.42, 0.62, 0.78, 1.0];
-    for (var r = 0; r < _rows; r++) {
-      final y = top + r * gap;
-      final rowRect = Rect.fromLTWH(paper.left + 14, y - 3, paper.width - 28, gap * 0.7 + 6);
-      if (r < focus.row) canvas.drawRRect(RRect.fromRectAndRadius(rowRect, const Radius.circular(3)), read);
-      if (r == focus.row) {
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-              Rect.fromLTWH(rowRect.left, rowRect.top, rowRect.width * focus.along, rowRect.height), const Radius.circular(3)),
-          now,
+    for (final s in shapes) {
+      if (s.drawn <= 0) continue;
+      final color = settled ? ink : (s.color ?? ink);
+      if (s.done && s.fill && s.points.length == 5) {
+        canvas.drawRect(
+          Rect.fromPoints(s.points[0], s.points[2]),
+          Paint()..color = color.withValues(alpha: 0.16 * fade),
         );
       }
-      for (var k = 0; k < cols.length - 1; k++) {
-        final left = paper.left + 22 + (paper.width - 44) * cols[k];
-        final span = (paper.width - 44) * (cols[k + 1] - cols[k]) - 10;
-        final fill = 0.45 + 0.5 * ((r * 7 + k * 3) % 5) / 4;
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(Rect.fromLTWH(left, y, span * fill, gap * 0.36), const Radius.circular(2)),
-          bar,
-        );
-      }
+      canvas.drawPath(
+        s.drawnPath(),
+        Paint()
+          ..color = color.withValues(alpha: (settled ? 0.55 : 0.9) * fade)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round,
+      );
     }
     for (final c in cursors) {
-      _cursor(canvas, c.pos, c.color, c.tag);
+      _cursor(canvas, c);
     }
   }
 
-  /// A pointer, tip at [at].
-  void _cursor(Canvas canvas, Offset at, Color color, bool tag) {
+  /// A pointer, tip at its position, with its name beside it.
+  void _cursor(Canvas canvas, _Cursor c) {
+    final at = c.pos;
     final p = Path()
       ..moveTo(at.dx, at.dy)
       ..lineTo(at.dx, at.dy + 16)
@@ -219,22 +354,21 @@ class _SwarmPainter extends CustomPainter {
       ..lineTo(at.dx + 6.8, at.dy + 11.2)
       ..lineTo(at.dx + 12, at.dy + 11.2)
       ..close();
-    canvas.drawPath(p.shift(const Offset(0.8, 1.2)), Paint()..color = const Color(0x33000000));
-    canvas.drawPath(p, Paint()..color = color);
+    canvas.drawPath(p.shift(const Offset(0.8, 1.2)), Paint()..color = const Color(0x40000000));
+    canvas.drawPath(p, Paint()..color = c.color);
     canvas.drawPath(
         p,
         Paint()
           ..color = Colors.white
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.2);
-    if (!tag) return;
     final label = TextPainter(
-      text: const TextSpan(text: 'AI', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700)),
+      text: TextSpan(text: c.name, style: labelStyle),
       textDirection: TextDirection.ltr,
     )..layout();
-    final box = Rect.fromLTWH(at.dx + 11, at.dy + 15, label.width + 8, label.height + 3);
-    canvas.drawRRect(RRect.fromRectAndRadius(box, const Radius.circular(4)), Paint()..color = color);
-    label.paint(canvas, Offset(box.left + 4, box.top + 1.5));
+    final box = Rect.fromLTWH(at.dx + 11, at.dy + 15, label.width + 10, label.height + 4);
+    canvas.drawRRect(RRect.fromRectAndRadius(box, const Radius.circular(5)), Paint()..color = c.color);
+    label.paint(canvas, Offset(box.left + 5, box.top + 2));
   }
 
   @override

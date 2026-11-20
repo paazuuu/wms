@@ -17561,4 +17561,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get saNoFiles => 'ファイルなし';
+
+  @override
+  String ntFlagJanByCode(String source) {
+    return 'JANは品番から補いました（$source）。元の書類と見比べてください';
+  }
+
+  @override
+  String get ntJanFromLibrary => '商品ライブラリー';
+
+  @override
+  String get ntJanFromSupplier => '仕入先の品番';
+
+  @override
+  String get ntJanFromCatalog => 'メーカーカタログ';
 }

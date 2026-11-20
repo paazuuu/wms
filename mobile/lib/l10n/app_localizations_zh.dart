@@ -17434,4 +17434,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get saNoFiles => '无文件';
+
+  @override
+  String ntFlagJanByCode(String source) {
+    return 'JAN 由品番补全（$source），请与原件核对';
+  }
+
+  @override
+  String get ntJanFromLibrary => '商品库';
+
+  @override
+  String get ntJanFromSupplier => '供应商品番';
+
+  @override
+  String get ntJanFromCatalog => '厂商目录';
 }

@@ -30811,6 +30811,30 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ファイルなし'**
   String get saNoFiles;
+
+  /// No description provided for @ntFlagJanByCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANは品番から補いました（{source}）。元の書類と見比べてください'**
+  String ntFlagJanByCode(String source);
+
+  /// No description provided for @ntJanFromLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品ライブラリー'**
+  String get ntJanFromLibrary;
+
+  /// No description provided for @ntJanFromSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の品番'**
+  String get ntJanFromSupplier;
+
+  /// No description provided for @ntJanFromCatalog.
+  ///
+  /// In ja, this message translates to:
+  /// **'メーカーカタログ'**
+  String get ntJanFromCatalog;
 }
 
 class _AppLocalizationsDelegate

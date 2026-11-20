@@ -84,6 +84,8 @@ Set<String> doubtfulCells(ReadRow r) => {
           'jan_check' || 'no_jan' || 'jan_code_mismatch' || 'jan_restore_mismatch' || 'ai_disagree:raw_jan_code' => {
               'jan'
             },
+          // Found from the 品番 (0221): to be set beside the original.
+          'jan_by_code:library' || 'jan_by_code:supplier' || 'jan_by_code:catalog' => {'jan'},
           'no_quantity' || 'qty_from_amount' || 'qty_from_cases' || 'ai_disagree:planned_quantity' => {'quantity'},
           'ai_disagree:product_name' => {'name'},
           'ai_disagree:product_code' => {'code'},

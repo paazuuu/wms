@@ -29,6 +29,7 @@ import '../warehouse_context/application/warehouse_providers.dart';
 import '../warehouse_context/domain/warehouse.dart';
 import 'unplanned_flow.dart';
 import 'unplanned_waiting_tab.dart';
+import '../stock_import/data/jan_by_code_repository.dart';
 
 /// 予定外の入荷 (0181, 0182): goods a regular supplier brought without an
 /// order or an invoice first — nothing to import. It goes the way 発注 goes:
@@ -141,6 +142,21 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
           });
           return;
         }
+        // A note with a 品番 but no JAN: the JAN found by the 品番 (0221).
+        final rows = await fillJansByCode(ref.read(janByCodeRepositoryProvider), [
+          for (final l in data.lines)
+            ReadRow(
+              lineNo: l.lineNo,
+              jan: l.janCode,
+              name: l.supplierName,
+              quantity: l.quantity,
+              maker: l.maker,
+              code: l.productCode,
+              flags: l.flags,
+              ledger: LedgerFields.fromJson(l.ledger),
+            ),
+        ]);
+        if (!mounted) return;
         setState(() {
           _reading = false;
           _fileName = f.name;
@@ -148,19 +164,7 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
           _documentId = data.documentId;
           if ((data.supplierName ?? '').trim().isNotEmpty) _supplier.text = data.supplierName!.trim();
           _noteDate = DateTime.tryParse((data.docDate ?? '').replaceAll('/', '-'));
-          _readRows = [
-            for (final l in data.lines)
-              ReadRow(
-                lineNo: l.lineNo,
-                jan: l.janCode,
-                name: l.supplierName,
-                quantity: l.quantity,
-                maker: l.maker,
-                code: l.productCode,
-                flags: l.flags,
-                ledger: LedgerFields.fromJson(l.ledger),
-              ),
-          ];
+          _readRows = rows;
           _readChecked = false;
           _sheet = null;
         });

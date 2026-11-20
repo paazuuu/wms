@@ -33,8 +33,10 @@ import '../../support/fake_payments_repository.dart';
 import '../../support/harness.dart';
 import 'package:wms_mobile/features/requirements/requirements_repository.dart';
 import 'package:wms_mobile/features/product/data/product_category_repository.dart' show productCategoryRepositoryProvider;
+import 'package:wms_mobile/features/stock_import/data/jan_by_code_repository.dart' show janByCodeRepositoryProvider;
 import '../../support/fake_requirements_repository.dart';
 import '../../support/fake_product_category_repository.dart';
+import '../../support/fake_jan_by_code_repository.dart';
 
 // Synthetic JANs with a correct check digit.
 const _jan1 = '4909999000014';
@@ -1024,6 +1026,31 @@ void main() {
     // 船場支店 and the blank row are not products, and not errors either.
     expect(find.textContaining('商品ではない行 1'), findsOneWidget);
     expect(find.byKey(const ValueKey('sf-left-out')), findsNothing);
+  });
+
+  testWidgets('an invoice with 品番 and no JAN: the JAN found by the 品番, marked to check; the rest still asked for (0221)',
+      (tester) async {
+    final reader = FakeMasterImportRepository(
+      readResult: const MasterRead(lines: [
+        MasterLine(lineNo: 1, maker: '三菱鉛筆', productCode: 'UB150.15', supplierName: '水性BP UB-150 赤', quantity: '200'),
+        MasterLine(lineNo: 2, maker: '三菱鉛筆', productCode: 'UMNS05.14', supplierName: 'ユニボールワン', quantity: '600'),
+      ]),
+    );
+    final byCode = FakeJanByCodeRepository({'UB150.15': (jan: _jan1, source: 'catalog')});
+    await _pumpCsv(tester, '%PDF', products: {_jan1: 'テスト水性BP 赤'}, reader: reader, name: '請求書.pdf',
+        extra: [janByCodeRepositoryProvider.overrideWithValue(byCode)]);
+    // Asked about by their 品番 and maker.
+    expect(byCode.asked.single.map((r) => (r.code, r.maker)), [('UB150.15', '三菱鉛筆'), ('UMNS05.14', '三菱鉛筆')]);
+    // In the check: the JAN filled in for the first, yellow to look at.
+    final jan1 = tester.widget<TextField>(find.byKey(const ValueKey('rc-1-jan')));
+    expect(jan1.controller!.text, _jan1);
+    final jan2 = tester.widget<TextField>(find.byKey(const ValueKey('rc-2-jan')));
+    expect(jan2.controller!.text, '');
+    await tester.tap(find.byKey(const ValueKey('rc-ok')));
+    await tester.pumpAndSettle();
+    // The first goes in; the second is still left out for want of a JAN.
+    expect(find.byKey(const ValueKey('sf-left-out')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sf-name-$_jan1')), findsOneWidget);
   });
 
   testWidgets('the 確認用Excel has every row; corrected and chosen again, the corrections are known', (tester) async {
