@@ -15,6 +15,7 @@ import '../../evidence/presentation/evidence_screen.dart';
 import '../../exceptions/presentation/exception_list_screen.dart';
 import '../../notation/presentation/notation_training_screen.dart';
 import '../../qc/presentation/held_stock_screen.dart';
+import '../../reading_audit/presentation/reading_audit_screen.dart';
 import '../../inventory/presentation/expiring_lots_screen.dart';
 import '../../inventory/presentation/replenishment_screen.dart';
 import '../../inventory/presentation/reservations_screen.dart';
@@ -638,6 +639,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _requirements,
             requiredAnyOf: ['user.manage'],
           ),
+          // 読み取り検査: what file readings could not read, misread or read
+          // more than one way, for improving the reader (kept in this browser).
+          FeatureEntry(
+            id: 'reading_audit',
+            icon: Icons.plagiarism_outlined,
+            status: FeatureStatus.ready,
+            builder: _readingAudit,
+            requiredAnyOf: ['user.manage', 'ai.review', 'audit.view'],
+          ),
           FeatureEntry(
             id: 'connectors',
             icon: Icons.hub_outlined,
@@ -776,6 +786,7 @@ Widget _userManagement(BuildContext _) => const UserManagementScreen();
 Widget _menuVisibility(BuildContext _) => const MenuVisibilityScreen();
 Widget _requirements(BuildContext _) => const RequirementsScreen();
 Widget _aiHealth(BuildContext _) => const AiHealthScreen();
+Widget _readingAudit(BuildContext _) => const ReadingAuditScreen();
 Widget _companyProfile(BuildContext _) => const CompanyProfileScreen();
 Widget _evidence(BuildContext _) => const EvidenceScreen();
 

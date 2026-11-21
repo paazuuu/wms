@@ -37,6 +37,8 @@ import 'package:wms_mobile/features/stock_import/data/jan_by_code_repository.dar
 import '../../support/fake_requirements_repository.dart';
 import '../../support/fake_product_category_repository.dart';
 import '../../support/fake_jan_by_code_repository.dart';
+import 'package:wms_mobile/features/reading_audit/data/reading_audit_store.dart';
+import 'package:wms_mobile/features/reading_audit/domain/reading_audit.dart';
 
 // Synthetic JANs with a correct check digit.
 const _jan1 = '4909999000014';
@@ -1062,6 +1064,41 @@ void main() {
     expect(find.byKey(const ValueKey('sf-name-$_jan1')), findsOneWidget);
     expect(find.byKey(const ValueKey('jan-source-catalog')), findsOneWidget);
     expect(find.byKey(const ValueKey('jan-source-web')), findsOneWidget);
+  });
+
+  testWidgets('読み取り検査: what the reading missed, misread, read two ways and covered is kept, as checked', (tester) async {
+    final reader = FakeMasterImportRepository(
+      readResult: const MasterRead(supplierName: 'テスト商事', lines: [
+        MasterLine(lineNo: 1, janCode: _jan1, supplierName: 'テストペン', quantity: '100',
+            flags: ['ai_disagree:planned_quantity'], alternatives: {'planned_quantity': '10'}),
+        MasterLine(lineNo: 2, maker: '三菱鉛筆', productCode: 'UB150.15', supplierName: '水性BP', quantity: '5'),
+        MasterLine(lineNo: 3, supplierName: 'ノート', quantity: '3', flags: ['no_jan']),
+      ]),
+    );
+    final byCode = FakeJanByCodeRepository(const {'UB150.15': (jan: _jan2, source: 'catalog')});
+    await _pumpCsv(tester, '%PDF', products: {_jan1: 'テストペン 青', _jan2: 'テスト水性BP'}, reader: reader,
+        name: '請求書.pdf', extra: [janByCodeRepositoryProvider.overrideWithValue(byCode)]);
+    final container = ProviderScope.containerOf(tester.element(find.byType(StockFileImportScreen, skipOffstage: false)));
+    // Kept as soon as it is read, before any check.
+    var audit = container.read(readingAuditProvider).single;
+    expect((audit.fileName, audit.source, audit.byAi, audit.supplier, audit.lineCount),
+        ('請求書.pdf', AuditSource.stockFile, true, 'テスト商事', 3));
+    expect(audit.count(AuditKind.misread), 0);
+
+    // A person takes the other reading of the quantity.
+    await tester.enterText(find.byKey(const ValueKey('rc-1-quantity')), '10');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('rc-ok')));
+    await tester.pumpAndSettle();
+    final all = container.read(readingAuditProvider);
+    expect(all, hasLength(1), reason: 'the same reading, kept once');
+    audit = all.single;
+    String texts(AuditKind k) => [for (final i in audit.issues) if (i.kind == k) '${i.lineNo} ${i.field} ${i.detail} ${i.remedy ?? ''}'].join('\n');
+    expect(texts(AuditKind.ambiguous), allOf(contains('1 数量'), contains('「100」'), contains('「10」')));
+    expect(texts(AuditKind.misread), contains('読み取り「100」→ 人が「10」に修正'));
+    expect(texts(AuditKind.remedied), allOf(contains('2 JAN'), contains(_jan2)));
+    expect(texts(AuditKind.missing), contains('3 JAN'));
+    expect(texts(AuditKind.unresolved), contains('3 JAN'));
   });
 
   testWidgets('the 確認用Excel has every row; corrected and chosen again, the corrections are known', (tester) async {

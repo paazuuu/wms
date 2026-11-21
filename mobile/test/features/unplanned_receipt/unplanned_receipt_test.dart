@@ -19,6 +19,9 @@ import 'package:wms_mobile/features/unplanned_receipt/unplanned_receipt_screen.d
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
+import 'package:wms_mobile/features/reading_audit/data/reading_audit_store.dart';
+import 'package:wms_mobile/features/reading_audit/domain/reading_audit.dart';
+
 import '../../support/harness.dart';
 
 const _pen = '4909999000014';
@@ -133,7 +136,8 @@ class _Stock implements StockImportRepository {
 Override _signedIn(List<String> p) => authControllerProvider
     .overrideWith((ref) => fakeAuthControllerFor(AuthUser(id: 'u1', email: 'a@b.test', name: '倉庫', permissions: p)));
 
-Future<_Stock> _pump(WidgetTester tester, {List<String> perms = const ['inventory.adjust'], bool readNote = true}) async {
+Future<_Stock> _pump(WidgetTester tester,
+    {List<String> perms = const ['inventory.adjust'], bool readNote = true, Future<void> Function()? onCheck}) async {
   await tester.binding.setSurfaceSize(const Size(1000, 1600));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   final reader = _Reader(const MasterRead(
@@ -167,6 +171,7 @@ Future<_Stock> _pump(WidgetTester tester, {List<String> perms = const ['inventor
     expect(reader.purpose, 'ocr');
     // First what the AI read, beside the note, as 発注 does.
     expect(find.text('読み取り結果の確認'), findsOneWidget);
+    await onCheck?.call();
     await tester.tap(find.byKey(const ValueKey('rc-ok')));
     await tester.pumpAndSettle();
   }
@@ -174,6 +179,21 @@ Future<_Stock> _pump(WidgetTester tester, {List<String> perms = const ['inventor
 }
 
 void main() {
+  testWidgets('読み取り検査: a clean note leaves nothing; a quantity a person corrects is kept as misread', (tester) async {
+    await _pump(tester, onCheck: () async {
+      final c = ProviderScope.containerOf(tester.element(find.byType(UnplannedReceiptScreen, skipOffstage: false)));
+      expect(c.read(readingAuditProvider), isEmpty);
+      await tester.enterText(find.byKey(const ValueKey('rc-2-quantity')), '12');
+      await tester.pump();
+    });
+    final c = ProviderScope.containerOf(tester.element(find.byType(UnplannedReceiptScreen)));
+    final a = c.read(readingAuditProvider).single;
+    expect((a.source, a.fileName, a.supplier), (AuditSource.unplanned, '納品書_1102.pdf', 'テスト商事株式会社'));
+    expect([for (final i in a.issues) (i.kind, i.lineNo, i.detail)], [
+      (AuditKind.misread, 2, '読み取り「10」→ 人が「12」に修正'),
+    ]);
+  });
+
   testWidgets('予定外の入荷 goes as 発注: the note read, checked in the table, new products registered, then 検品 with all ticked (0182)',
       (tester) async {
     final stock = await _pump(tester);

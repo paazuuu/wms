@@ -13,6 +13,8 @@ import '../../l10n/app_localizations.dart';
 import '../delivery_note/delivery_note.dart' show askCameraOrFile, deliveryNotePickerProvider;
 import '../jan_catalog/data/jan_catalog_repository.dart';
 import '../master_import/data/master_import_repository.dart';
+import '../master_import/domain/master_import.dart' show MasterProblem;
+import '../master_import/presentation/master_import_labels.dart' show masterProblemText;
 import '../product/application/product_providers.dart';
 import '../product/domain/product.dart';
 import '../product_library/presentation/product_thumb.dart';
@@ -30,6 +32,9 @@ import '../warehouse_context/domain/warehouse.dart';
 import 'unplanned_flow.dart';
 import 'unplanned_waiting_tab.dart';
 import '../stock_import/data/jan_by_code_repository.dart';
+import '../reading_audit/data/reading_audit_store.dart';
+import '../reading_audit/domain/reading_audit.dart';
+import '../reading_audit/presentation/reading_audit_builder.dart';
 
 /// 予定外の入荷 (0181, 0182): goods a regular supplier brought without an
 /// order or an invoice first — nothing to import. It goes the way 発注 goes:
@@ -63,6 +68,12 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
   int? _warehouseId;
   final _supplier = TextEditingController();
   final _scan = TextEditingController();
+
+  /// 読み取り検査: this note's record, its rows as first read, and the AI's
+  /// other readings.
+  String? _auditId;
+  List<ReadRow>? _auditRead;
+  Map<int, Map<String, String>> _alternatives = const {};
 
   /// The note, as read and checked.
   String? _fileName;
@@ -133,6 +144,9 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
     // Row by row as the note has them; kept as the inspection's evidence.
     final r = await ref.read(masterImportRepositoryProvider).read(f.name, f.bytes, keepRows: true, purpose: 'ocr');
     if (!mounted) return;
+    final auditId = newReadingAuditId();
+    void failed(String why) => ref.read(readingAuditProvider.notifier).put(
+        auditOfFailure(l10n, id: auditId, source: AuditSource.unplanned, fileName: f.name, byAi: true, reason: why));
     switch (r) {
       case ApiSuccess(:final data):
         if (data.lines.isEmpty) {
@@ -140,6 +154,9 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
             _reading = false;
             _error = l10n.urNoJanRead;
           });
+          failed(data.aiFailure != null
+              ? '${l10n.urNoJanRead}（${masterProblemText(l10n, MasterProblem('ai_unavailable', value: data.aiFailure))}）'
+              : l10n.urNoJanRead);
           return;
         }
         // A note with a 品番 but no JAN: the JAN found by the 品番 (0221).
@@ -167,13 +184,21 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
           _readRows = rows;
           _readChecked = false;
           _sheet = null;
+          _auditId = auditId;
+          _auditRead = rows;
+          _alternatives = {
+            for (final l in data.lines)
+              if (l.alternatives.isNotEmpty) l.lineNo: l.alternatives,
+          };
         });
+        _keepAudit(problems: stockSheetFromRead(rows).problems);
         await _openTable();
       case ApiFailure(:final message):
         setState(() {
           _reading = false;
           _error = humanizeApiErrorMessage(l10n, message);
         });
+        failed(_error!);
     }
   }
 
@@ -199,7 +224,27 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
       _sheet = stockSheetFromRead(checked);
       _readChecked = true;
     });
+    _keepAudit(checked: checked, problems: _sheet!.problems);
     await _lookup();
+  }
+
+  /// 読み取り検査: what the note's reading could not read, misread or read
+  /// more than one way — as read, then as a person left it.
+  void _keepAudit({List<ReadRow>? checked, List<StockFileProblem> problems = const []}) {
+    final read = _auditRead, id = _auditId, name = _fileName;
+    if (read == null || id == null || name == null) return;
+    ref.read(readingAuditProvider.notifier).put(auditOfStockRead(
+          AppLocalizations.of(context),
+          id: id,
+          source: AuditSource.unplanned,
+          fileName: name,
+          byAi: true,
+          read: read,
+          checked: checked,
+          problems: problems,
+          alternatives: _alternatives,
+          supplier: _supplier.text,
+        ));
   }
 
   Future<void> _lookup() async {

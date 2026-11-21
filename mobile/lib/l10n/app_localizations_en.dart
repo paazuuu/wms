@@ -17962,4 +17962,279 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get jsbCatalog => 'Catalog';
+
+  @override
+  String get featReadingAudit => 'Reading audit';
+
+  @override
+  String get featReadingAuditDesc =>
+      'Records, for improving the system, what file readings in ordering, unplanned arrivals and shipping could not read, misread or found several readings for (saved as Markdown).';
+
+  @override
+  String raIntro(int max) {
+    return 'Each time a file is read in ordering, unplanned arrivals or shipping, this records the items that could not be read, misreadings (what a person corrected), places with several possible readings, and what the system\'s own remedies covered (with the remedy) or could not. It is for development and improvement: it is not saved to the database, only in this browser, up to the latest $max.';
+  }
+
+  @override
+  String get raEmpty =>
+      'Nothing recorded yet. When a file reading runs into trouble, it shows here.';
+
+  @override
+  String get raSaveAll => 'Save shown as Markdown';
+
+  @override
+  String get raSaveOne => 'Save as Markdown';
+
+  @override
+  String get raCopy => 'Copy text';
+
+  @override
+  String get raCopied => 'Copied';
+
+  @override
+  String raSaved(String name) {
+    return 'Saved: $name';
+  }
+
+  @override
+  String get raClear => 'Clear all records';
+
+  @override
+  String get raClearConfirm =>
+      'Clear all reading audit records kept in this browser?';
+
+  @override
+  String get raRemoveOne => 'Remove this record';
+
+  @override
+  String get raAllScreens => 'All screens';
+
+  @override
+  String get raAllKinds => 'All kinds';
+
+  @override
+  String raShown(int shown, int total) {
+    return '$shown of $total';
+  }
+
+  @override
+  String get raScreenStock => 'Ordering (file import)';
+
+  @override
+  String get raScreenUnplanned => 'Unplanned arrival';
+
+  @override
+  String get raScreenOutbound => 'Shipping (file import)';
+
+  @override
+  String get raByAi => 'Read by the AI (PDF, image …)';
+
+  @override
+  String get raBySheet => 'Read as a sheet (Excel, CSV)';
+
+  @override
+  String get raKindMissing => 'Not read';
+
+  @override
+  String get raKindMisread => 'Misread';
+
+  @override
+  String get raKindAmbiguous => 'Several readings';
+
+  @override
+  String get raKindRemedied => 'Covered';
+
+  @override
+  String get raKindUnresolved => 'Not covered';
+
+  @override
+  String get raKindDoubt => 'To check';
+
+  @override
+  String raKindCount(String kind, int count) {
+    return '$kind $count';
+  }
+
+  @override
+  String raLine(int no) {
+    return 'Row $no';
+  }
+
+  @override
+  String raRemedy(String text) {
+    return '→ Remedy: $text';
+  }
+
+  @override
+  String get raFieldHeading => 'Heading';
+
+  @override
+  String get raFieldRows => 'Row split';
+
+  @override
+  String get raFieldLine => 'Row';
+
+  @override
+  String get raFieldFile => 'Whole file';
+
+  @override
+  String get raEmptyValue => '(empty)';
+
+  @override
+  String raRemedyJanByCode(String source, String jan) {
+    return 'JAN found by the product code in $source ($jan)';
+  }
+
+  @override
+  String raRemedyJanRestored(String jan) {
+    return 'Restored a broken JAN (exponent notation …) to its digits ($jan)';
+  }
+
+  @override
+  String raRemedyQtyFromAmount(String qty) {
+    return 'Quantity worked out as amount ÷ unit price ($qty)';
+  }
+
+  @override
+  String raRemedyQtyFromCases(String qty) {
+    return 'Quantity worked out as cases × per case ($qty)';
+  }
+
+  @override
+  String get raJanNotPrinted => 'The document does not print a JAN';
+
+  @override
+  String raHumanFilled(String value) {
+    return 'A person entered \"$value\"';
+  }
+
+  @override
+  String raCandidates(String read, String other) {
+    return 'Read \"$read\" / other reading \"$other\"';
+  }
+
+  @override
+  String raReadAs(String value) {
+    return 'Read \"$value\"';
+  }
+
+  @override
+  String raRemovedRow(String text) {
+    return 'A person took this row out (read: $text)';
+  }
+
+  @override
+  String get raNotRead => 'Not read: left empty';
+
+  @override
+  String raHumanCleared(String read) {
+    return 'A person cleared \"$read\"';
+  }
+
+  @override
+  String raCorrected(String read, String fixed) {
+    return 'Read \"$read\" → corrected to \"$fixed\"';
+  }
+
+  @override
+  String raLeftNoJan(String value) {
+    return 'Left out: still no JAN (read: $value)';
+  }
+
+  @override
+  String raLeftBadQuantity(String value) {
+    return 'Left out: quantity still unreadable (read: $value)';
+  }
+
+  @override
+  String raAddedRow(String text) {
+    return 'A row the reading missed, added by a person ($text)';
+  }
+
+  @override
+  String raHeadingUnknown(String heading) {
+    return 'A heading the app does not know: \"$heading\"';
+  }
+
+  @override
+  String raHeadingNotPlaced(String heading) {
+    return 'Could not tell what the heading \"$heading\" means; the column was not read';
+  }
+
+  @override
+  String raNotReadAtAll(String reason) {
+    return 'Could not be read: $reason';
+  }
+
+  @override
+  String raNoColumn(String column) {
+    return 'No \"$column\" column found';
+  }
+
+  @override
+  String get raJanHeadingMissing => 'No JAN heading found';
+
+  @override
+  String raJanColumnGuessed(String column) {
+    return 'JAN column guessed from what it holds (column $column)';
+  }
+
+  @override
+  String raSkippedRow(String text) {
+    return 'Row not read (no quantity, JAN or product code): $text';
+  }
+
+  @override
+  String raJanInvalid(String raw) {
+    return 'The JAN cell \"$raw\" does not read as a JAN';
+  }
+
+  @override
+  String raFoundByCode(String code) {
+    return 'Product found by its code \"$code\"';
+  }
+
+  @override
+  String raJanUnknown(String jan) {
+    return 'JAN $jan is not in the product library (possibly misread)';
+  }
+
+  @override
+  String raNoJanNoCode(String code) {
+    return 'No JAN, and no product has the code \"$code\"';
+  }
+
+  @override
+  String raSeveralProducts(String code) {
+    return 'Several products have the code \"$code\"';
+  }
+
+  @override
+  String get raMdDate => 'Date';
+
+  @override
+  String get raMdScreen => 'Screen';
+
+  @override
+  String get raMdReadBy => 'Read by';
+
+  @override
+  String get raMdSupplier => 'Supplier';
+
+  @override
+  String get raMdLines => 'Rows read';
+
+  @override
+  String get raMdIssues => 'Findings';
+
+  @override
+  String get raMdRemedy => 'Remedy';
+
+  @override
+  String raMdAllTitle(int count) {
+    return 'Reading audit ($count)';
+  }
+
+  @override
+  String get raMdExported => 'Exported';
 }

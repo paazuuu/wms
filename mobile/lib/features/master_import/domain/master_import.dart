@@ -36,7 +36,12 @@ class MasterLine extends Equatable {
     this.knownProductId,
     this.knownName,
     this.ledger = const {},
+    this.alternatives = const {},
   });
+
+  /// Other readings the reader found for a field (product_code, quantity …):
+  /// what it could also be, for a person to choose and for 読み取り検査.
+  final Map<String, String> alternatives;
 
   /// What the reader gave for a purchase ledger's (明細) other columns
   /// (0150) — dates, number, supplier, prices, amount, 注番 — as it gave them.
@@ -106,6 +111,10 @@ class MasterLine extends Equatable {
         for (final k in ledgerKeys)
           if (l[k] != null && _s(l[k]).isNotEmpty) k: l[k],
       },
+      alternatives: {
+        for (final e in ((l['alternatives'] as Map?) ?? const {}).entries)
+          if (e.value != null && _s(e.value).isNotEmpty) '${e.key}': _s(e.value),
+      },
     );
   }
 
@@ -142,6 +151,7 @@ class MasterLine extends Equatable {
         knownProductId: knownProductId,
         knownName: knownName,
         ledger: ledger,
+        alternatives: alternatives,
       );
 
   /// The JAN as digits when it reads as one, else as written.

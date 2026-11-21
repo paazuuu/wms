@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/export/xlsx.dart';
 import 'package:wms_mobile/features/master_import/data/master_import_repository.dart';
@@ -9,6 +10,8 @@ import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_detail_screen.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_screen.dart';
 import 'package:wms_mobile/features/stock_import/domain/ai_read_sheet.dart';
+import 'package:wms_mobile/features/reading_audit/data/reading_audit_store.dart';
+import 'package:wms_mobile/features/reading_audit/domain/reading_audit.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
@@ -69,6 +72,39 @@ void main() {
     expect(repo.posted.single.path, '1/1-明細.pdf');
     expect([for (final l in repo.posted.single.lines) (l.productId, l.quantity)], [(1, 5)]);
     expect(repo.readPaths.values.single, '1/1-明細_読み取り結果.xlsx');
+  });
+
+  testWidgets('読み取り検査: a PDF list\'s doubts and the rows no product was found for are kept', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final ai = FakeMasterImportRepository(
+      readResult: const MasterRead(lines: [
+        MasterLine(lineNo: 1, janCode: '4909999000014', name: 'テストペン', quantity: '5', flags: ['jan_check']),
+        MasterLine(lineNo: 2, janCode: '4909999000021', name: 'テストノート', quantity: '2',
+            flags: ['ai_disagree:planned_quantity'], alternatives: {'planned_quantity': '20'}),
+      ]),
+    );
+    await pumpApp(tester, const OutboundFileScreen(), overrides: [
+      outboundFileRepositoryProvider.overrideWithValue(FakeOutboundFileRepository(matcher: _match)),
+      masterImportRepositoryProvider.overrideWithValue(ai),
+      outboundFilePickerProvider.overrideWithValue(() async => (name: '明細.pdf', bytes: Uint8List.fromList([37, 80, 68, 70]))),
+      writeWarehouseIdProvider.overrideWithValue(1),
+      warehouseRepositoryProvider.overrideWithValue(FakeWarehouseRepository(const WarehouseOverview(
+        warehouses: [Warehouse(id: 1, code: 'WH-01', name: '本倉庫')],
+        totals: WarehouseTotals(),
+      ))),
+      activeWarehouseIdProvider.overrideWith((ref) => null),
+    ]);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('of-pick')));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(tester.element(find.byType(OutboundFileScreen)));
+    final audit = container.read(readingAuditProvider).single;
+    expect((audit.fileName, audit.source, audit.byAi), ('明細.pdf', AuditSource.outbound, true));
+    String of(AuditKind k) => [for (final i in audit.issues) if (i.kind == k) '${i.lineNo} ${i.detail}'].join('\n');
+    // The AI's lines are rows 2 and 3 of the sheet made from them.
+    expect(of(AuditKind.doubt), allOf(contains('2 '), contains('3 JAN 4909999000021')));
+    expect(of(AuditKind.ambiguous), allOf(contains('3 '), contains('「2」'), contains('「20」')));
   });
 
   testWidgets('the detail offers the reading (Excel) beside the file', (tester) async {

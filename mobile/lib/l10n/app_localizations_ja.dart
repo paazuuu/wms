@@ -17601,4 +17601,277 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get jsbCatalog => 'カタログ';
+
+  @override
+  String get featReadingAudit => '読み取り検査';
+
+  @override
+  String get featReadingAuditDesc =>
+      '発注・予定外の入荷・出庫でファイルを読み取ったとき、読み取れなかった項目・読み間違い・候補が複数出た箇所を、システム改善のために文章で記録します（MDで保存）。';
+
+  @override
+  String raIntro(int max) {
+    return '発注・予定外の入荷・出庫でファイルを読み取るたびに、読み取れなかった項目、読み間違い（人が直したもの）、候補が複数出た箇所、システムの対処で補えたもの（対処の内容つき）と補えなかったものを記録します。開発・改善のための記録で、データベースには保存せず、このブラウザーだけに最新$max件まで残ります。';
+  }
+
+  @override
+  String get raEmpty => 'まだ記録はありません。ファイルを読み取って問題が見つかると、ここに表示されます。';
+
+  @override
+  String get raSaveAll => '表示中をMDで保存';
+
+  @override
+  String get raSaveOne => 'MDで保存';
+
+  @override
+  String get raCopy => '文章をコピー';
+
+  @override
+  String get raCopied => 'コピーしました';
+
+  @override
+  String raSaved(String name) {
+    return '保存しました: $name';
+  }
+
+  @override
+  String get raClear => '記録をすべて消す';
+
+  @override
+  String get raClearConfirm => 'このブラウザーにある読み取り検査の記録をすべて消しますか？';
+
+  @override
+  String get raRemoveOne => 'この記録を消す';
+
+  @override
+  String get raAllScreens => 'すべての画面';
+
+  @override
+  String get raAllKinds => 'すべての種類';
+
+  @override
+  String raShown(int shown, int total) {
+    return '$shown件 / 全$total件';
+  }
+
+  @override
+  String get raScreenStock => '発注（ファイル取込）';
+
+  @override
+  String get raScreenUnplanned => '予定外の入荷';
+
+  @override
+  String get raScreenOutbound => '出庫（ファイル取込）';
+
+  @override
+  String get raByAi => 'AIで読み取り（PDF・画像など）';
+
+  @override
+  String get raBySheet => '表として読み取り（Excel・CSV）';
+
+  @override
+  String get raKindMissing => '読み取れなかった';
+
+  @override
+  String get raKindMisread => '読み間違い';
+
+  @override
+  String get raKindAmbiguous => '候補が複数';
+
+  @override
+  String get raKindRemedied => '対処できた';
+
+  @override
+  String get raKindUnresolved => '対処できなかった';
+
+  @override
+  String get raKindDoubt => '要確認';
+
+  @override
+  String raKindCount(String kind, int count) {
+    return '$kind $count件';
+  }
+
+  @override
+  String raLine(int no) {
+    return '$no行目';
+  }
+
+  @override
+  String raRemedy(String text) {
+    return '→ 対処: $text';
+  }
+
+  @override
+  String get raFieldHeading => '見出し';
+
+  @override
+  String get raFieldRows => '行の区切り';
+
+  @override
+  String get raFieldLine => '行';
+
+  @override
+  String get raFieldFile => 'ファイル全体';
+
+  @override
+  String get raEmptyValue => '（空）';
+
+  @override
+  String raRemedyJanByCode(String source, String jan) {
+    return '$sourceから品番でJANを補った（$jan）';
+  }
+
+  @override
+  String raRemedyJanRestored(String jan) {
+    return '崩れたJAN（指数表記など）を元の桁に戻した（$jan）';
+  }
+
+  @override
+  String raRemedyQtyFromAmount(String qty) {
+    return '金額 ÷ 単価で数量を出した（$qty）';
+  }
+
+  @override
+  String raRemedyQtyFromCases(String qty) {
+    return 'ケース数 × 入数で数量を出した（$qty）';
+  }
+
+  @override
+  String get raJanNotPrinted => '書類にJANが印字されていない';
+
+  @override
+  String raHumanFilled(String value) {
+    return '人が「$value」を入力';
+  }
+
+  @override
+  String raCandidates(String read, String other) {
+    return '読み取り「$read」／ 別の候補「$other」';
+  }
+
+  @override
+  String raReadAs(String value) {
+    return '読み取り「$value」';
+  }
+
+  @override
+  String raRemovedRow(String text) {
+    return '人がこの行を取り込みから外した（読み取り: $text）';
+  }
+
+  @override
+  String get raNotRead => '読み取れず空のまま';
+
+  @override
+  String raHumanCleared(String read) {
+    return '読み取り「$read」を人が消した';
+  }
+
+  @override
+  String raCorrected(String read, String fixed) {
+    return '読み取り「$read」→ 人が「$fixed」に修正';
+  }
+
+  @override
+  String raLeftNoJan(String value) {
+    return 'JANが無いまま取り込めず（読み取り: $value）';
+  }
+
+  @override
+  String raLeftBadQuantity(String value) {
+    return '数量が読めないまま取り込めず（読み取り: $value）';
+  }
+
+  @override
+  String raAddedRow(String text) {
+    return '読み取れなかった行を人が追加（$text）';
+  }
+
+  @override
+  String raHeadingUnknown(String heading) {
+    return 'アプリの辞書にない見出し「$heading」';
+  }
+
+  @override
+  String raHeadingNotPlaced(String heading) {
+    return '見出し「$heading」の意味を判断できず、この列は読まなかった';
+  }
+
+  @override
+  String raNotReadAtAll(String reason) {
+    return '読み取れなかった: $reason';
+  }
+
+  @override
+  String raNoColumn(String column) {
+    return '「$column」の列が見つからない';
+  }
+
+  @override
+  String get raJanHeadingMissing => 'JANの見出しが見つからない';
+
+  @override
+  String raJanColumnGuessed(String column) {
+    return '列の中身からJANの列を推定（$column列目）';
+  }
+
+  @override
+  String raSkippedRow(String text) {
+    return '数量・JAN・品番が無いため読まなかった行: $text';
+  }
+
+  @override
+  String raJanInvalid(String raw) {
+    return 'JAN欄「$raw」をJANとして読めない';
+  }
+
+  @override
+  String raFoundByCode(String code) {
+    return '品番「$code」で商品を特定';
+  }
+
+  @override
+  String raJanUnknown(String jan) {
+    return 'JAN $jan が商品ライブラリーに無い（読み間違いの可能性）';
+  }
+
+  @override
+  String raNoJanNoCode(String code) {
+    return 'JANが無く、品番「$code」に合う商品も無い';
+  }
+
+  @override
+  String raSeveralProducts(String code) {
+    return '品番「$code」に合う商品が複数ある';
+  }
+
+  @override
+  String get raMdDate => '日時';
+
+  @override
+  String get raMdScreen => '画面';
+
+  @override
+  String get raMdReadBy => '読み方';
+
+  @override
+  String get raMdSupplier => '仕入先';
+
+  @override
+  String get raMdLines => '読み取った行数';
+
+  @override
+  String get raMdIssues => '指摘';
+
+  @override
+  String get raMdRemedy => '対処';
+
+  @override
+  String raMdAllTitle(int count) {
+    return '読み取り検査（$count件）';
+  }
+
+  @override
+  String get raMdExported => '出力日時';
 }

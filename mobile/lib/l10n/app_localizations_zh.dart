@@ -17474,4 +17474,277 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get jsbCatalog => '目录';
+
+  @override
+  String get featReadingAudit => '读取检查';
+
+  @override
+  String get featReadingAuditDesc =>
+      '记录订货、计划外入库、出库读取文件时未能读取的项目、读错之处及出现多个候选的地方，用于改进系统（可保存为MD）。';
+
+  @override
+  String raIntro(int max) {
+    return '每次在订货、计划外入库、出库中读取文件时，记录未能读取的项目、读错之处（人工修改的内容）、出现多个候选的地方，以及系统处理已补上（附处理方法）和未能补上的内容。仅用于开发改进，不保存到数据库，只保留在此浏览器中（最近$max条）。';
+  }
+
+  @override
+  String get raEmpty => '暂无记录。读取文件发现问题时会显示在这里。';
+
+  @override
+  String get raSaveAll => '将显示内容保存为MD';
+
+  @override
+  String get raSaveOne => '保存为MD';
+
+  @override
+  String get raCopy => '复制文本';
+
+  @override
+  String get raCopied => '已复制';
+
+  @override
+  String raSaved(String name) {
+    return '已保存：$name';
+  }
+
+  @override
+  String get raClear => '清除全部记录';
+
+  @override
+  String get raClearConfirm => '要清除此浏览器中的全部读取检查记录吗？';
+
+  @override
+  String get raRemoveOne => '删除此记录';
+
+  @override
+  String get raAllScreens => '全部画面';
+
+  @override
+  String get raAllKinds => '全部类型';
+
+  @override
+  String raShown(int shown, int total) {
+    return '$shown条 / 共$total条';
+  }
+
+  @override
+  String get raScreenStock => '订货（文件导入）';
+
+  @override
+  String get raScreenUnplanned => '计划外入库';
+
+  @override
+  String get raScreenOutbound => '出库（文件导入）';
+
+  @override
+  String get raByAi => 'AI读取（PDF、图片等）';
+
+  @override
+  String get raBySheet => '作为表格读取（Excel、CSV）';
+
+  @override
+  String get raKindMissing => '未能读取';
+
+  @override
+  String get raKindMisread => '读错';
+
+  @override
+  String get raKindAmbiguous => '多个候选';
+
+  @override
+  String get raKindRemedied => '已处理';
+
+  @override
+  String get raKindUnresolved => '未能处理';
+
+  @override
+  String get raKindDoubt => '需确认';
+
+  @override
+  String raKindCount(String kind, int count) {
+    return '$kind $count条';
+  }
+
+  @override
+  String raLine(int no) {
+    return '第$no行';
+  }
+
+  @override
+  String raRemedy(String text) {
+    return '→ 处理：$text';
+  }
+
+  @override
+  String get raFieldHeading => '表头';
+
+  @override
+  String get raFieldRows => '行的划分';
+
+  @override
+  String get raFieldLine => '行';
+
+  @override
+  String get raFieldFile => '整个文件';
+
+  @override
+  String get raEmptyValue => '（空）';
+
+  @override
+  String raRemedyJanByCode(String source, String jan) {
+    return '根据品号从$source补上了JAN（$jan）';
+  }
+
+  @override
+  String raRemedyJanRestored(String jan) {
+    return '将损坏的JAN（指数表示等）恢复为原位数（$jan）';
+  }
+
+  @override
+  String raRemedyQtyFromAmount(String qty) {
+    return '用金额 ÷ 单价算出数量（$qty）';
+  }
+
+  @override
+  String raRemedyQtyFromCases(String qty) {
+    return '用箱数 × 入数算出数量（$qty）';
+  }
+
+  @override
+  String get raJanNotPrinted => '单据上没有印JAN';
+
+  @override
+  String raHumanFilled(String value) {
+    return '人工输入了「$value」';
+  }
+
+  @override
+  String raCandidates(String read, String other) {
+    return '读取「$read」／ 其他候选「$other」';
+  }
+
+  @override
+  String raReadAs(String value) {
+    return '读取「$value」';
+  }
+
+  @override
+  String raRemovedRow(String text) {
+    return '人工将此行排除（读取：$text）';
+  }
+
+  @override
+  String get raNotRead => '未能读取，为空';
+
+  @override
+  String raHumanCleared(String read) {
+    return '人工删除了读取的「$read」';
+  }
+
+  @override
+  String raCorrected(String read, String fixed) {
+    return '读取「$read」→ 人工改为「$fixed」';
+  }
+
+  @override
+  String raLeftNoJan(String value) {
+    return '仍无JAN，未能导入（读取：$value）';
+  }
+
+  @override
+  String raLeftBadQuantity(String value) {
+    return '数量仍无法读取，未能导入（读取：$value）';
+  }
+
+  @override
+  String raAddedRow(String text) {
+    return '人工补加了未读取的行（$text）';
+  }
+
+  @override
+  String raHeadingUnknown(String heading) {
+    return '应用词典中没有的表头「$heading」';
+  }
+
+  @override
+  String raHeadingNotPlaced(String heading) {
+    return '无法判断表头「$heading」的含义，未读取此列';
+  }
+
+  @override
+  String raNotReadAtAll(String reason) {
+    return '未能读取：$reason';
+  }
+
+  @override
+  String raNoColumn(String column) {
+    return '找不到「$column」列';
+  }
+
+  @override
+  String get raJanHeadingMissing => '找不到JAN表头';
+
+  @override
+  String raJanColumnGuessed(String column) {
+    return '根据列内容推断JAN列（第$column列）';
+  }
+
+  @override
+  String raSkippedRow(String text) {
+    return '因无数量、JAN、品号而未读取的行：$text';
+  }
+
+  @override
+  String raJanInvalid(String raw) {
+    return 'JAN栏「$raw」无法作为JAN读取';
+  }
+
+  @override
+  String raFoundByCode(String code) {
+    return '根据品号「$code」确定了商品';
+  }
+
+  @override
+  String raJanUnknown(String jan) {
+    return 'JAN $jan 不在商品库中（可能读错）';
+  }
+
+  @override
+  String raNoJanNoCode(String code) {
+    return '没有JAN，也没有与品号「$code」相符的商品';
+  }
+
+  @override
+  String raSeveralProducts(String code) {
+    return '与品号「$code」相符的商品有多个';
+  }
+
+  @override
+  String get raMdDate => '日期时间';
+
+  @override
+  String get raMdScreen => '画面';
+
+  @override
+  String get raMdReadBy => '读取方式';
+
+  @override
+  String get raMdSupplier => '供应商';
+
+  @override
+  String get raMdLines => '读取行数';
+
+  @override
+  String get raMdIssues => '问题';
+
+  @override
+  String get raMdRemedy => '处理';
+
+  @override
+  String raMdAllTitle(int count) {
+    return '读取检查（$count条）';
+  }
+
+  @override
+  String get raMdExported => '导出时间';
 }

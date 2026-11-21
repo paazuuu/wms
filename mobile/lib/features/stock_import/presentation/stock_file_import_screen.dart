@@ -47,6 +47,9 @@ import '../../product/data/product_category_repository.dart';
 import '../../product/domain/product.dart' show Product;
 import '../data/jan_by_code_repository.dart';
 import 'jan_source_badge.dart';
+import '../../reading_audit/data/reading_audit_store.dart';
+import '../../reading_audit/domain/reading_audit.dart';
+import '../../reading_audit/presentation/reading_audit_builder.dart';
 
 /// A chosen file: its name and bytes, or null when nothing was chosen.
 typedef PickStockFile = Future<({String name, Uint8List bytes})?> Function();
@@ -105,6 +108,12 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
 
   /// The AI is reading the file (it can take a minute for a long PDF).
   bool _aiReading = false;
+
+  /// 読み取り検査: this reading's record, the rows as first read, and the
+  /// other readings the AI gave.
+  String? _auditId;
+  List<ReadRow>? _auditRead;
+  Map<int, Map<String, String>> _alternatives = const {};
 
   /// JANs the AI is looking for on the web (0223): done, of how many.
   (int, int)? _webJans;
@@ -205,6 +214,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _openUnplanned = const [];
       _tieUnplanned = true;
       _covered = 0;
+      _auditId = newReadingAuditId();
+      _auditRead = null;
+      _alternatives = const {};
     });
     StockSheet? sheet;
     List<List<String>>? rows;
@@ -247,8 +259,13 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   ? masterProblemText(l10n, MasterProblem('ai_unavailable', value: data.aiFailure))
                   : l10n.sfAiNothing;
             });
+            _auditFailure(_error!);
             return;
           }
+          _alternatives = {
+            for (final l in data.lines)
+              if (l.alternatives.isNotEmpty) l.lineNo: l.alternatives,
+          };
           _documentId = data.documentId;
           _docSupplier = data.supplierName;
           _docRegistration = data.registrationNumber;
@@ -283,6 +300,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                 ? l10n.sfTooLong
                 : humanizeApiErrorMessage(l10n, message);
           });
+          _auditFailure(_error!);
           return;
       }
     }
@@ -293,6 +311,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _sheet = sheet;
       _docDate = date;
     });
+    _auditRead = sheet.read;
+    _keepAudit();
     // Read by the AI: first set beside the original and corrected in the table.
     if (sheet.byAi) {
       // What the library has is looked up first, for the 確認用Excel meanwhile.
@@ -334,11 +354,39 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       _tableChecked = true;
       _checked = false;
     });
+    _keepAudit(checked: rows);
     await _lookup();
     // The categories (0218) once the names are known: a name places a product
     // far better than its 品番 alone.
     _catWork = _lookUpNames().then((_) => _classify());
     unawaited(_catWork);
+  }
+
+  /// 読み取り検査: what this reading could not read, misread or read more
+  /// than one way — as read, then as a person left it on the check table.
+  void _keepAudit({List<ReadRow>? checked}) {
+    final sheet = _sheet, name = _fileName, id = _auditId;
+    if (sheet == null || name == null || id == null) return;
+    ref.read(readingAuditProvider.notifier).put(auditOfStockRead(
+          AppLocalizations.of(context),
+          id: id,
+          source: AuditSource.stockFile,
+          fileName: name,
+          byAi: sheet.byAi,
+          read: _auditRead ?? sheet.read,
+          checked: checked,
+          problems: sheet.problems,
+          alternatives: _alternatives,
+          sheet: sheet.byAi ? null : sheet,
+          supplier: _docSupplier,
+        ));
+  }
+
+  void _auditFailure(String reason) {
+    final name = _fileName, id = _auditId;
+    if (name == null || id == null) return;
+    ref.read(readingAuditProvider.notifier).put(auditOfFailure(AppLocalizations.of(context),
+        id: id, source: AuditSource.stockFile, fileName: name, byAi: true, reason: reason));
   }
 
   /// The chosen warehouse, as the screen shows it.

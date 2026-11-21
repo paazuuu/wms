@@ -30883,6 +30883,426 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'カタログ'**
   String get jsbCatalog;
+
+  /// No description provided for @featReadingAudit.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り検査'**
+  String get featReadingAudit;
+
+  /// No description provided for @featReadingAuditDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注・予定外の入荷・出庫でファイルを読み取ったとき、読み取れなかった項目・読み間違い・候補が複数出た箇所を、システム改善のために文章で記録します（MDで保存）。'**
+  String get featReadingAuditDesc;
+
+  /// No description provided for @raIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注・予定外の入荷・出庫でファイルを読み取るたびに、読み取れなかった項目、読み間違い（人が直したもの）、候補が複数出た箇所、システムの対処で補えたもの（対処の内容つき）と補えなかったものを記録します。開発・改善のための記録で、データベースには保存せず、このブラウザーだけに最新{max}件まで残ります。'**
+  String raIntro(int max);
+
+  /// No description provided for @raEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'まだ記録はありません。ファイルを読み取って問題が見つかると、ここに表示されます。'**
+  String get raEmpty;
+
+  /// No description provided for @raSaveAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中をMDで保存'**
+  String get raSaveAll;
+
+  /// No description provided for @raSaveOne.
+  ///
+  /// In ja, this message translates to:
+  /// **'MDで保存'**
+  String get raSaveOne;
+
+  /// No description provided for @raCopy.
+  ///
+  /// In ja, this message translates to:
+  /// **'文章をコピー'**
+  String get raCopy;
+
+  /// No description provided for @raCopied.
+  ///
+  /// In ja, this message translates to:
+  /// **'コピーしました'**
+  String get raCopied;
+
+  /// No description provided for @raSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました: {name}'**
+  String raSaved(String name);
+
+  /// No description provided for @raClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録をすべて消す'**
+  String get raClear;
+
+  /// No description provided for @raClearConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'このブラウザーにある読み取り検査の記録をすべて消しますか？'**
+  String get raClearConfirm;
+
+  /// No description provided for @raRemoveOne.
+  ///
+  /// In ja, this message translates to:
+  /// **'この記録を消す'**
+  String get raRemoveOne;
+
+  /// No description provided for @raAllScreens.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての画面'**
+  String get raAllScreens;
+
+  /// No description provided for @raAllKinds.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての種類'**
+  String get raAllKinds;
+
+  /// No description provided for @raShown.
+  ///
+  /// In ja, this message translates to:
+  /// **'{shown}件 / 全{total}件'**
+  String raShown(int shown, int total);
+
+  /// No description provided for @raScreenStock.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注（ファイル取込）'**
+  String get raScreenStock;
+
+  /// No description provided for @raScreenUnplanned.
+  ///
+  /// In ja, this message translates to:
+  /// **'予定外の入荷'**
+  String get raScreenUnplanned;
+
+  /// No description provided for @raScreenOutbound.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫（ファイル取込）'**
+  String get raScreenOutbound;
+
+  /// No description provided for @raByAi.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIで読み取り（PDF・画像など）'**
+  String get raByAi;
+
+  /// No description provided for @raBySheet.
+  ///
+  /// In ja, this message translates to:
+  /// **'表として読み取り（Excel・CSV）'**
+  String get raBySheet;
+
+  /// No description provided for @raKindMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取れなかった'**
+  String get raKindMissing;
+
+  /// No description provided for @raKindMisread.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み間違い'**
+  String get raKindMisread;
+
+  /// No description provided for @raKindAmbiguous.
+  ///
+  /// In ja, this message translates to:
+  /// **'候補が複数'**
+  String get raKindAmbiguous;
+
+  /// No description provided for @raKindRemedied.
+  ///
+  /// In ja, this message translates to:
+  /// **'対処できた'**
+  String get raKindRemedied;
+
+  /// No description provided for @raKindUnresolved.
+  ///
+  /// In ja, this message translates to:
+  /// **'対処できなかった'**
+  String get raKindUnresolved;
+
+  /// No description provided for @raKindDoubt.
+  ///
+  /// In ja, this message translates to:
+  /// **'要確認'**
+  String get raKindDoubt;
+
+  /// No description provided for @raKindCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{kind} {count}件'**
+  String raKindCount(String kind, int count);
+
+  /// No description provided for @raLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'{no}行目'**
+  String raLine(int no);
+
+  /// No description provided for @raRemedy.
+  ///
+  /// In ja, this message translates to:
+  /// **'→ 対処: {text}'**
+  String raRemedy(String text);
+
+  /// No description provided for @raFieldHeading.
+  ///
+  /// In ja, this message translates to:
+  /// **'見出し'**
+  String get raFieldHeading;
+
+  /// No description provided for @raFieldRows.
+  ///
+  /// In ja, this message translates to:
+  /// **'行の区切り'**
+  String get raFieldRows;
+
+  /// No description provided for @raFieldLine.
+  ///
+  /// In ja, this message translates to:
+  /// **'行'**
+  String get raFieldLine;
+
+  /// No description provided for @raFieldFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル全体'**
+  String get raFieldFile;
+
+  /// No description provided for @raEmptyValue.
+  ///
+  /// In ja, this message translates to:
+  /// **'（空）'**
+  String get raEmptyValue;
+
+  /// No description provided for @raRemedyJanByCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'{source}から品番でJANを補った（{jan}）'**
+  String raRemedyJanByCode(String source, String jan);
+
+  /// No description provided for @raRemedyJanRestored.
+  ///
+  /// In ja, this message translates to:
+  /// **'崩れたJAN（指数表記など）を元の桁に戻した（{jan}）'**
+  String raRemedyJanRestored(String jan);
+
+  /// No description provided for @raRemedyQtyFromAmount.
+  ///
+  /// In ja, this message translates to:
+  /// **'金額 ÷ 単価で数量を出した（{qty}）'**
+  String raRemedyQtyFromAmount(String qty);
+
+  /// No description provided for @raRemedyQtyFromCases.
+  ///
+  /// In ja, this message translates to:
+  /// **'ケース数 × 入数で数量を出した（{qty}）'**
+  String raRemedyQtyFromCases(String qty);
+
+  /// No description provided for @raJanNotPrinted.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類にJANが印字されていない'**
+  String get raJanNotPrinted;
+
+  /// No description provided for @raHumanFilled.
+  ///
+  /// In ja, this message translates to:
+  /// **'人が「{value}」を入力'**
+  String raHumanFilled(String value);
+
+  /// No description provided for @raCandidates.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り「{read}」／ 別の候補「{other}」'**
+  String raCandidates(String read, String other);
+
+  /// No description provided for @raReadAs.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り「{value}」'**
+  String raReadAs(String value);
+
+  /// No description provided for @raRemovedRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'人がこの行を取り込みから外した（読み取り: {text}）'**
+  String raRemovedRow(String text);
+
+  /// No description provided for @raNotRead.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取れず空のまま'**
+  String get raNotRead;
+
+  /// No description provided for @raHumanCleared.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り「{read}」を人が消した'**
+  String raHumanCleared(String read);
+
+  /// No description provided for @raCorrected.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り「{read}」→ 人が「{fixed}」に修正'**
+  String raCorrected(String read, String fixed);
+
+  /// No description provided for @raLeftNoJan.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANが無いまま取り込めず（読み取り: {value}）'**
+  String raLeftNoJan(String value);
+
+  /// No description provided for @raLeftBadQuantity.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量が読めないまま取り込めず（読み取り: {value}）'**
+  String raLeftBadQuantity(String value);
+
+  /// No description provided for @raAddedRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取れなかった行を人が追加（{text}）'**
+  String raAddedRow(String text);
+
+  /// No description provided for @raHeadingUnknown.
+  ///
+  /// In ja, this message translates to:
+  /// **'アプリの辞書にない見出し「{heading}」'**
+  String raHeadingUnknown(String heading);
+
+  /// No description provided for @raHeadingNotPlaced.
+  ///
+  /// In ja, this message translates to:
+  /// **'見出し「{heading}」の意味を判断できず、この列は読まなかった'**
+  String raHeadingNotPlaced(String heading);
+
+  /// No description provided for @raNotReadAtAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取れなかった: {reason}'**
+  String raNotReadAtAll(String reason);
+
+  /// No description provided for @raNoColumn.
+  ///
+  /// In ja, this message translates to:
+  /// **'「{column}」の列が見つからない'**
+  String raNoColumn(String column);
+
+  /// No description provided for @raJanHeadingMissing.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANの見出しが見つからない'**
+  String get raJanHeadingMissing;
+
+  /// No description provided for @raJanColumnGuessed.
+  ///
+  /// In ja, this message translates to:
+  /// **'列の中身からJANの列を推定（{column}列目）'**
+  String raJanColumnGuessed(String column);
+
+  /// No description provided for @raSkippedRow.
+  ///
+  /// In ja, this message translates to:
+  /// **'数量・JAN・品番が無いため読まなかった行: {text}'**
+  String raSkippedRow(String text);
+
+  /// No description provided for @raJanInvalid.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN欄「{raw}」をJANとして読めない'**
+  String raJanInvalid(String raw);
+
+  /// No description provided for @raFoundByCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番「{code}」で商品を特定'**
+  String raFoundByCode(String code);
+
+  /// No description provided for @raJanUnknown.
+  ///
+  /// In ja, this message translates to:
+  /// **'JAN {jan} が商品ライブラリーに無い（読み間違いの可能性）'**
+  String raJanUnknown(String jan);
+
+  /// No description provided for @raNoJanNoCode.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANが無く、品番「{code}」に合う商品も無い'**
+  String raNoJanNoCode(String code);
+
+  /// No description provided for @raSeveralProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'品番「{code}」に合う商品が複数ある'**
+  String raSeveralProducts(String code);
+
+  /// No description provided for @raMdDate.
+  ///
+  /// In ja, this message translates to:
+  /// **'日時'**
+  String get raMdDate;
+
+  /// No description provided for @raMdScreen.
+  ///
+  /// In ja, this message translates to:
+  /// **'画面'**
+  String get raMdScreen;
+
+  /// No description provided for @raMdReadBy.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み方'**
+  String get raMdReadBy;
+
+  /// No description provided for @raMdSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get raMdSupplier;
+
+  /// No description provided for @raMdLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取った行数'**
+  String get raMdLines;
+
+  /// No description provided for @raMdIssues.
+  ///
+  /// In ja, this message translates to:
+  /// **'指摘'**
+  String get raMdIssues;
+
+  /// No description provided for @raMdRemedy.
+  ///
+  /// In ja, this message translates to:
+  /// **'対処'**
+  String get raMdRemedy;
+
+  /// No description provided for @raMdAllTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取り検査（{count}件）'**
+  String raMdAllTitle(int count);
+
+  /// No description provided for @raMdExported.
+  ///
+  /// In ja, this message translates to:
+  /// **'出力日時'**
+  String get raMdExported;
 }
 
 class _AppLocalizationsDelegate

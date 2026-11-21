@@ -18,7 +18,10 @@ import '../../../l10n/app_localizations.dart';
 import '../../product/application/product_providers.dart';
 import '../../product/domain/product.dart';
 import '../../master_import/data/master_import_repository.dart';
-import '../../master_import/domain/master_import.dart' show MasterProblem;
+import '../../master_import/domain/master_import.dart' show MasterLine, MasterProblem;
+import '../../reading_audit/data/reading_audit_store.dart';
+import '../../reading_audit/domain/reading_audit.dart';
+import '../../reading_audit/presentation/reading_audit_builder.dart';
 import '../../master_import/presentation/master_import_labels.dart' show masterProblemText;
 import '../../stock_import/domain/ai_read_sheet.dart';
 import '../../stock_import/domain/stock_file.dart' show fileFingerprint, readStockFile;
@@ -477,6 +480,10 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
   bool _aiRead = false;
   bool _aiReading = false;
 
+  /// 読み取り検査: this file's record, and the lines the AI read.
+  String? _auditId;
+  List<MasterLine> _aiLines = const [];
+
   /// A PDF or a photo: the AI reads its rows (import-plan, nothing booked),
   /// made into a sheet read as an Excel is.
   Future<List<XlsxSheetRows>?> _readByAi(({String name, Uint8List bytes}) f) async {
@@ -493,13 +500,16 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
               : masterProblemText(l10n, MasterProblem('ai_unavailable', value: data.aiFailure)));
           _snack(why);
           setState(() => _fileError = l10n.ofFileError(why));
+          _auditFailure(f.name, why);
           return null;
         }
+        _aiLines = data.lines;
         return [aiReadAsSheet(data.lines)];
       case ApiFailure(:final message):
         final why = l10n.rdAiFailed(humanizeApiErrorMessage(l10n, message));
         _snack(why);
         setState(() => _fileError = l10n.ofFileError(why));
+        _auditFailure(f.name, why);
         return null;
     }
   }
@@ -510,6 +520,8 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
     if (f == null || !mounted) return;
     List<XlsxSheetRows> sheets;
     final byAi = !readsAsSheet(f.name);
+    _auditId = newReadingAuditId();
+    _aiLines = const [];
     if (byAi) {
       final read = await _readByAi(f);
       if (read == null || !mounted) return;
@@ -523,6 +535,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
       } on FormatException {
         _snack(l10n.ofReadFailed);
         setState(() => _fileError = l10n.ofFileError(l10n.ofFileErrorSheet));
+        _auditFailure(f.name, l10n.ofFileErrorSheet, byAi: false);
         return;
       }
     }
@@ -552,7 +565,29 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
       _matchError = null;
       _renumber();
     });
+    _keepAudit();
     await _match();
+  }
+
+  /// 読み取り検査: what this list's reading could not read or read more
+  /// than one way, and — once matched — the rows no product was found for.
+  void _keepAudit() {
+    final f = _file, id = _auditId, parsed = _parsed;
+    if (f == null || id == null || parsed == null) return;
+    ref.read(readingAuditProvider.notifier).put(auditOfOutbound(
+          AppLocalizations.of(context),
+          id: id,
+          fileName: f.name,
+          byAi: _aiRead,
+          sheet: parsed,
+          aiLines: _aiLines,
+          plan: _matches.isEmpty ? const [] : _plan,
+        ));
+  }
+
+  void _auditFailure(String fileName, String why, {bool byAi = true}) {
+    ref.read(readingAuditProvider.notifier).put(auditOfFailure(AppLocalizations.of(context),
+        id: _auditId ?? newReadingAuditId(), source: AuditSource.outbound, fileName: fileName, byAi: byAi, reason: why));
   }
 
   Future<void> _match() async {
@@ -576,7 +611,10 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
           _matchError = humanizeApiErrorMessage(AppLocalizations.of(context), message);
       }
     });
-    if (r is ApiSuccess) await _judgeCurrency();
+    if (r is ApiSuccess) {
+      _keepAudit();
+      await _judgeCurrency();
+    }
   }
 
   /// The warehouse chosen here when the app's own is 「すべての倉庫」: a list
