@@ -5,7 +5,7 @@ import 'package:wms_mobile/features/reading_audit/data/reading_audit_repository.
 import 'package:wms_mobile/features/reading_audit/domain/reading_audit.dart';
 
 /// 読み取り検査 in memory, as the server keeps it (0224): one per reading,
-/// none for a reading with nothing to say, a removed one stays removed.
+/// none for a reading with nothing to say; removing erases it and its file.
 class FakeReadingAuditRepository implements ReadingAuditRepository {
   FakeReadingAuditRepository([List<ReadingAudit> start = const []]) {
     for (final a in start) {
@@ -60,11 +60,18 @@ class FakeReadingAuditRepository implements ReadingAuditRepository {
   @override
   Future<ApiResult<List<ReadingAudit>>> list() async => ApiSuccess(kept);
 
+  /// Erased for good, files and all, as the reading-audit function does.
   @override
   Future<ApiResult<int>> remove(List<int> ids) async {
     var n = 0;
     for (final id in ids) {
-      if (_kept.values.any((a) => a.serverId == id) && removedIds.add(id)) n++;
+      final before = _kept.length;
+      _kept.removeWhere((_, a) => a.serverId == id);
+      if (_kept.length < before) {
+        n++;
+        removedIds.add(id);
+        files.remove(id);
+      }
     }
     return ApiSuccess(n);
   }

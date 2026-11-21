@@ -31307,13 +31307,13 @@ abstract class AppLocalizations {
   /// No description provided for @raRemoveShownConfirm.
   ///
   /// In ja, this message translates to:
-  /// **'表示中の{count}件の記録と、読み取ったファイルを一覧から削除しますか？'**
+  /// **'表示中の{count}件の記録と、読み取ったファイルを完全に削除しますか？元には戻せません。'**
   String raRemoveShownConfirm(int count);
 
   /// No description provided for @raRemoveConfirm.
   ///
   /// In ja, this message translates to:
-  /// **'この記録と読み取ったファイルを一覧から削除しますか？'**
+  /// **'この記録と読み取ったファイルを完全に削除しますか？元には戻せません。'**
   String get raRemoveConfirm;
 
   /// No description provided for @raRemoved.

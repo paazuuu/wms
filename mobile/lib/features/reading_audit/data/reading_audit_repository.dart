@@ -10,7 +10,8 @@ import '../../delivery/application/delivery_providers.dart';
 import '../domain/reading_audit.dart';
 
 /// 読み取り検査 on the server (0224): its own table and bucket, joined to
-/// nothing else — products, stock and the rest are never touched.
+/// nothing else — products, stock and the rest are never touched. Removing
+/// erases a reading and its file for good (the reading-audit function).
 const readingAuditBucket = 'reading-audits';
 
 /// What keeping a reading answered: its id (null: nothing to keep) and
@@ -27,17 +28,18 @@ abstract class ReadingAuditRepository {
   /// The readings kept, newest first.
   Future<ApiResult<List<ReadingAudit>>> list();
 
-  /// Taken out of the list, files and all; how many.
+  /// Erased for good, files and all (the reading-audit function); how many.
   Future<ApiResult<int>> remove(List<int> ids);
 
   Future<ApiResult<Uint8List>> fileBytes(String path);
 }
 
 class ReadingAuditRepositoryImpl implements ReadingAuditRepository {
-  ReadingAuditRepositoryImpl(this._rest, this._storage);
+  ReadingAuditRepositoryImpl(this._rest, this._storage, this._functions);
 
   final Dio _rest;
   final Dio _storage;
+  final Dio _functions;
 
   Future<ApiResult<T>> _rpc<T>(String name, Map<String, dynamic> body, T Function(Object? data) read) async {
     try {
@@ -74,8 +76,20 @@ class ReadingAuditRepositoryImpl implements ReadingAuditRepository {
       ]);
 
   @override
-  Future<ApiResult<int>> remove(List<int> ids) =>
-      _rpc('reading_audit_remove', {'p_ids': ids}, (d) => (d as num?)?.toInt() ?? 0);
+  Future<ApiResult<int>> remove(List<int> ids) async {
+    try {
+      final r = await _functions.post('/reading-audit', data: {'ids': ids});
+      final m = r.data is Map ? r.data as Map : const {};
+      // Erased, or — when a file would not go — at least out of the list.
+      final out = {
+        for (final v in [...(m['removed'] as List? ?? const []), ...(m['kept'] as List? ?? const [])])
+          if (v is num) v.toInt(),
+      };
+      return ApiSuccess(ids.where(out.contains).length);
+    } on DioException catch (e) {
+      return mapDioError<int>(e);
+    }
+  }
 
   @override
   Future<ApiResult<Uint8List>> fileBytes(String path) async {
@@ -90,7 +104,8 @@ class ReadingAuditRepositoryImpl implements ReadingAuditRepository {
 }
 
 final readingAuditRepositoryProvider = Provider<ReadingAuditRepository>(
-    (ref) => ReadingAuditRepositoryImpl(ref.watch(restDioProvider), ref.watch(storageDioProvider)));
+    (ref) => ReadingAuditRepositoryImpl(
+        ref.watch(restDioProvider), ref.watch(storageDioProvider), ref.watch(deliveryDioProvider)));
 
 final readingAuditsProvider = FutureProvider.autoDispose<List<ReadingAudit>>((ref) async =>
     (await ref.watch(readingAuditRepositoryProvider).list())

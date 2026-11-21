@@ -17876,11 +17876,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String raRemoveShownConfirm(int count) {
-    return '表示中の$count件の記録と、読み取ったファイルを一覧から削除しますか？';
+    return '表示中の$count件の記録と、読み取ったファイルを完全に削除しますか？元には戻せません。';
   }
 
   @override
-  String get raRemoveConfirm => 'この記録と読み取ったファイルを一覧から削除しますか？';
+  String get raRemoveConfirm => 'この記録と読み取ったファイルを完全に削除しますか？元には戻せません。';
 
   @override
   String raRemoved(int count) {

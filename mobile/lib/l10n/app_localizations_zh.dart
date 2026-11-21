@@ -17749,11 +17749,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String raRemoveShownConfirm(int count) {
-    return '要从列表中删除显示中的$count条记录及读取的文件吗？';
+    return '要彻底删除显示中的$count条记录及读取的文件吗？无法恢复。';
   }
 
   @override
-  String get raRemoveConfirm => '要从列表中删除此记录及读取的文件吗？';
+  String get raRemoveConfirm => '要彻底删除此记录及读取的文件吗？无法恢复。';
 
   @override
   String raRemoved(int count) {

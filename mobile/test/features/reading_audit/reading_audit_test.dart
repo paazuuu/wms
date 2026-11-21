@@ -152,10 +152,10 @@ void main() {
       expect(repo.files.values.single.$1, '請求書_1.pdf');
       await rec.keep(_sample('2', issues: const []), bytes: bytes);
       expect(repo.kept.map((a) => a.id), ['1']);
-      // Taken out of the list, it stays out.
+      // Removed: erased, its file with it.
       await repo.remove([repo.kept.single.serverId!]);
-      await rec.keep(_sample('1'));
       expect(repo.kept, isEmpty);
+      expect(repo.files, isEmpty);
     });
 
     test('as the server lists it', () {

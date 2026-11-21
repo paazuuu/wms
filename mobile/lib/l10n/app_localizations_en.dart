@@ -18238,12 +18238,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String raRemoveShownConfirm(int count) {
-    return 'Remove the $count records shown, with the files read, from the list?';
+    return 'Erase the $count records shown and the files read for good? This cannot be undone.';
   }
 
   @override
   String get raRemoveConfirm =>
-      'Remove this record and the file read from the list?';
+      'Erase this record and the file read for good? This cannot be undone.';
 
   @override
   String raRemoved(int count) {
