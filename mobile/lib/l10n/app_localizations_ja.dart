@@ -17938,4 +17938,137 @@ class AppLocalizationsJa extends AppLocalizations {
   String raRemoveOldConfirm(int days, int count) {
     return '$days日より前の$count件の記録と、読み取ったファイルを完全に削除しますか？元には戻せません。';
   }
+
+  @override
+  String get featErrorLog => 'エラーログ';
+
+  @override
+  String get featErrorLogDesc =>
+      'システムの中で起きたエラー（サーバーとの通信の失敗、画面の表示の失敗、予期しないエラー）を記録し、あとから確認・保存・削除できます。';
+
+  @override
+  String get elIntro =>
+      'アプリで起きたエラーを、起きた人・画面・時刻と一緒に自動で記録します。同じ人の同じエラーが10分以内に続いたときは1件にまとめて回数を数えます。ログインしていない間のエラーは記録しません。';
+
+  @override
+  String get elEmpty => 'この期間に記録されたエラーはありません。';
+
+  @override
+  String get elKindApi => '通信';
+
+  @override
+  String get elKindFlutter => '画面';
+
+  @override
+  String get elKindUncaught => '予期しない';
+
+  @override
+  String get elAllKinds => 'すべての種類';
+
+  @override
+  String elDays(int days) {
+    return '$days日以内';
+  }
+
+  @override
+  String get elAllDays => 'すべての期間';
+
+  @override
+  String get elSearchHint => '内容・画面・人で検索';
+
+  @override
+  String elShown(int shown, int total) {
+    return '$shown件 / 全$total件';
+  }
+
+  @override
+  String elTimes(int count) {
+    return '$count回';
+  }
+
+  @override
+  String get elRequest => '通信先';
+
+  @override
+  String get elPlace => '画面';
+
+  @override
+  String get elClient => '端末';
+
+  @override
+  String get elFirstAt => '最初';
+
+  @override
+  String get elDetail => '詳細';
+
+  @override
+  String get elCopy => '文章をコピー';
+
+  @override
+  String get elCopied => 'コピーしました';
+
+  @override
+  String get elSaveShown => '表示中をMDで保存';
+
+  @override
+  String get elSavePicked => '選択をMDで保存';
+
+  @override
+  String elSaved(String name) {
+    return '保存しました: $name';
+  }
+
+  @override
+  String get elPickAll => '表示中をすべて選ぶ';
+
+  @override
+  String get elPickNone => '選択を外す';
+
+  @override
+  String elPicked(int count) {
+    return '$count件を選択中';
+  }
+
+  @override
+  String get elRemove => '削除';
+
+  @override
+  String get elRemovePicked => '選択を削除';
+
+  @override
+  String get elRemoveShown => '表示中を削除';
+
+  @override
+  String get elRemoveOld => '古いエラーを削除';
+
+  @override
+  String elOlderThan(int days) {
+    return '$days日より前';
+  }
+
+  @override
+  String get elRemoveTitle => 'エラーを削除';
+
+  @override
+  String elRemoveConfirm(int count) {
+    return '$count件のエラーを完全に削除しますか？元には戻せません。';
+  }
+
+  @override
+  String elRemoveOldConfirm(int days) {
+    return '$days日より前のエラーをすべて完全に削除しますか？元には戻せません。';
+  }
+
+  @override
+  String elRemoved(int count) {
+    return '$count件を削除しました';
+  }
+
+  @override
+  String elMdTitle(int count) {
+    return 'エラーログ（$count件）';
+  }
+
+  @override
+  String get elMdExported => '出力日時';
 }

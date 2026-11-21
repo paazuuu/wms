@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/supabase_auth_interceptor.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/errors/error_reporter.dart';
 import '../../../core/providers.dart';
 import '../data/delivery_note_scanner.dart';
 import '../data/delivery_repository.dart';
@@ -40,6 +41,8 @@ final deliveryDioProvider = Provider<Dio>((ref) {
     storage: ref.watch(supabaseSessionStorageProvider),
     refresher: ref.watch(supabaseTokenRefresherProvider),
   ).attachTo(dio);
+  // エラーログ (0227): after the sign-in retry, so only real failures.
+  dio.interceptors.add(ErrorLogInterceptor());
   return dio;
 });
 
@@ -68,6 +71,8 @@ final restDioProvider = Provider<Dio>((ref) {
     storage: ref.watch(supabaseSessionStorageProvider),
     refresher: ref.watch(supabaseTokenRefresherProvider),
   ).attachTo(dio);
+  // エラーログ (0227): after the sign-in retry, so only real failures.
+  dio.interceptors.add(ErrorLogInterceptor());
   return dio;
 });
 
@@ -94,6 +99,8 @@ final storageDioProvider = Provider<Dio>((ref) {
     storage: ref.watch(supabaseSessionStorageProvider),
     refresher: ref.watch(supabaseTokenRefresherProvider),
   ).attachTo(dio);
+  // エラーログ (0227): after the sign-in retry, so only real failures.
+  dio.interceptors.add(ErrorLogInterceptor());
   return dio;
 });
 

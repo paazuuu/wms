@@ -16,6 +16,7 @@ import '../../exceptions/presentation/exception_list_screen.dart';
 import '../../notation/presentation/notation_training_screen.dart';
 import '../../qc/presentation/held_stock_screen.dart';
 import '../../reading_audit/presentation/reading_audit_screen.dart';
+import '../../error_log/presentation/error_log_screen.dart';
 import '../../inventory/presentation/expiring_lots_screen.dart';
 import '../../inventory/presentation/replenishment_screen.dart';
 import '../../inventory/presentation/reservations_screen.dart';
@@ -621,6 +622,15 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             builder: _auditLog,
             requiredAnyOf: ['audit.view'],
           ),
+          // エラーログ (0227): the errors the app ran into, kept on the
+          // server to look into, save and remove.
+          FeatureEntry(
+            id: 'error_log',
+            icon: Icons.bug_report_outlined,
+            status: FeatureStatus.ready,
+            builder: _errorLog,
+            requiredAnyOf: ['audit.view', 'user.manage'],
+          ),
           // Every uploaded file, kept as evidence and downloadable (0132).
           FeatureEntry(
             id: 'evidence',
@@ -792,6 +802,7 @@ Widget _menuVisibility(BuildContext _) => const MenuVisibilityScreen();
 Widget _requirements(BuildContext _) => const RequirementsScreen();
 Widget _aiHealth(BuildContext _) => const AiHealthScreen();
 Widget _readingAudit(BuildContext _) => const ReadingAuditScreen();
+Widget _errorLog(BuildContext _) => const ErrorLogScreen();
 Widget _companyProfile(BuildContext _) => const CompanyProfileScreen();
 Widget _evidence(BuildContext _) => const EvidenceScreen();
 

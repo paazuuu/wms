@@ -17811,4 +17811,137 @@ class AppLocalizationsZh extends AppLocalizations {
   String raRemoveOldConfirm(int days, int count) {
     return '要彻底删除$days天以前的$count条记录及读取的文件吗？无法恢复。';
   }
+
+  @override
+  String get featErrorLog => '错误日志';
+
+  @override
+  String get featErrorLogDesc =>
+      '记录系统中发生的错误（与服务器通信失败、画面显示失败、意外错误），可事后查看、保存、删除。';
+
+  @override
+  String get elIntro =>
+      '自动记录应用中发生的错误，以及发生的人、画面和时间。同一人在10分钟内连续发生的相同错误合并为1条并计数。未登录期间的错误不记录。';
+
+  @override
+  String get elEmpty => '此期间没有记录到错误。';
+
+  @override
+  String get elKindApi => '通信';
+
+  @override
+  String get elKindFlutter => '画面';
+
+  @override
+  String get elKindUncaught => '意外';
+
+  @override
+  String get elAllKinds => '全部类型';
+
+  @override
+  String elDays(int days) {
+    return '$days天以内';
+  }
+
+  @override
+  String get elAllDays => '全部期间';
+
+  @override
+  String get elSearchHint => '按内容、画面、人员搜索';
+
+  @override
+  String elShown(int shown, int total) {
+    return '$shown条 / 共$total条';
+  }
+
+  @override
+  String elTimes(int count) {
+    return '$count次';
+  }
+
+  @override
+  String get elRequest => '请求';
+
+  @override
+  String get elPlace => '画面';
+
+  @override
+  String get elClient => '终端';
+
+  @override
+  String get elFirstAt => '首次';
+
+  @override
+  String get elDetail => '详细';
+
+  @override
+  String get elCopy => '复制文本';
+
+  @override
+  String get elCopied => '已复制';
+
+  @override
+  String get elSaveShown => '将显示内容保存为MD';
+
+  @override
+  String get elSavePicked => '将所选保存为MD';
+
+  @override
+  String elSaved(String name) {
+    return '已保存：$name';
+  }
+
+  @override
+  String get elPickAll => '全选显示内容';
+
+  @override
+  String get elPickNone => '取消选择';
+
+  @override
+  String elPicked(int count) {
+    return '已选择$count条';
+  }
+
+  @override
+  String get elRemove => '删除';
+
+  @override
+  String get elRemovePicked => '删除所选';
+
+  @override
+  String get elRemoveShown => '删除显示内容';
+
+  @override
+  String get elRemoveOld => '删除旧错误';
+
+  @override
+  String elOlderThan(int days) {
+    return '$days天以前';
+  }
+
+  @override
+  String get elRemoveTitle => '删除错误';
+
+  @override
+  String elRemoveConfirm(int count) {
+    return '要彻底删除$count条错误吗？无法恢复。';
+  }
+
+  @override
+  String elRemoveOldConfirm(int days) {
+    return '要彻底删除$days天以前的全部错误吗？无法恢复。';
+  }
+
+  @override
+  String elRemoved(int count) {
+    return '已删除$count条';
+  }
+
+  @override
+  String elMdTitle(int count) {
+    return '错误日志（$count条）';
+  }
+
+  @override
+  String get elMdExported => '导出时间';
 }

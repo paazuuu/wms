@@ -15865,5 +15865,115 @@
         "type": "int"
       }
     }
-  }
+  },
+  "featErrorLog": "エラーログ",
+  "featErrorLogDesc": "システムの中で起きたエラー（サーバーとの通信の失敗、画面の表示の失敗、予期しないエラー）を記録し、あとから確認・保存・削除できます。",
+  "elIntro": "アプリで起きたエラーを、起きた人・画面・時刻と一緒に自動で記録します。同じ人の同じエラーが10分以内に続いたときは1件にまとめて回数を数えます。ログインしていない間のエラーは記録しません。",
+  "elEmpty": "この期間に記録されたエラーはありません。",
+  "elKindApi": "通信",
+  "elKindFlutter": "画面",
+  "elKindUncaught": "予期しない",
+  "elAllKinds": "すべての種類",
+  "elDays": "{days}日以内",
+  "@elDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "elAllDays": "すべての期間",
+  "elSearchHint": "内容・画面・人で検索",
+  "elShown": "{shown}件 / 全{total}件",
+  "@elShown": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "elTimes": "{count}回",
+  "@elTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "elRequest": "通信先",
+  "elPlace": "画面",
+  "elClient": "端末",
+  "elFirstAt": "最初",
+  "elDetail": "詳細",
+  "elCopy": "文章をコピー",
+  "elCopied": "コピーしました",
+  "elSaveShown": "表示中をMDで保存",
+  "elSavePicked": "選択をMDで保存",
+  "elSaved": "保存しました: {name}",
+  "@elSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "elPickAll": "表示中をすべて選ぶ",
+  "elPickNone": "選択を外す",
+  "elPicked": "{count}件を選択中",
+  "@elPicked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "elRemove": "削除",
+  "elRemovePicked": "選択を削除",
+  "elRemoveShown": "表示中を削除",
+  "elRemoveOld": "古いエラーを削除",
+  "elOlderThan": "{days}日より前",
+  "@elOlderThan": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "elRemoveTitle": "エラーを削除",
+  "elRemoveConfirm": "{count}件のエラーを完全に削除しますか？元には戻せません。",
+  "@elRemoveConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "elRemoveOldConfirm": "{days}日より前のエラーをすべて完全に削除しますか？元には戻せません。",
+  "@elRemoveOldConfirm": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "elRemoved": "{count}件を削除しました",
+  "@elRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "elMdTitle": "エラーログ（{count}件）",
+  "@elMdTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "elMdExported": "出力日時"
 }

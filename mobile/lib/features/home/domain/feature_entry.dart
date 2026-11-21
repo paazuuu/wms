@@ -118,6 +118,8 @@ class FeatureEntry {
         return l10n.featRequirements;
       case 'reading_audit':
         return l10n.featReadingAudit;
+      case 'error_log':
+        return l10n.featErrorLog;
       case 'company_profile':
         return l10n.featCompanyProfile;
       case 'evidence':
@@ -268,6 +270,8 @@ class FeatureEntry {
         return l10n.featRequirementsDesc;
       case 'reading_audit':
         return l10n.featReadingAuditDesc;
+      case 'error_log':
+        return l10n.featErrorLogDesc;
       case 'company_profile':
         return l10n.featCompanyProfileDesc;
       case 'evidence':

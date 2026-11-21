@@ -31405,6 +31405,228 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'{days}日より前の{count}件の記録と、読み取ったファイルを完全に削除しますか？元には戻せません。'**
   String raRemoveOldConfirm(int days, int count);
+
+  /// No description provided for @featErrorLog.
+  ///
+  /// In ja, this message translates to:
+  /// **'エラーログ'**
+  String get featErrorLog;
+
+  /// No description provided for @featErrorLogDesc.
+  ///
+  /// In ja, this message translates to:
+  /// **'システムの中で起きたエラー（サーバーとの通信の失敗、画面の表示の失敗、予期しないエラー）を記録し、あとから確認・保存・削除できます。'**
+  String get featErrorLogDesc;
+
+  /// No description provided for @elIntro.
+  ///
+  /// In ja, this message translates to:
+  /// **'アプリで起きたエラーを、起きた人・画面・時刻と一緒に自動で記録します。同じ人の同じエラーが10分以内に続いたときは1件にまとめて回数を数えます。ログインしていない間のエラーは記録しません。'**
+  String get elIntro;
+
+  /// No description provided for @elEmpty.
+  ///
+  /// In ja, this message translates to:
+  /// **'この期間に記録されたエラーはありません。'**
+  String get elEmpty;
+
+  /// No description provided for @elKindApi.
+  ///
+  /// In ja, this message translates to:
+  /// **'通信'**
+  String get elKindApi;
+
+  /// No description provided for @elKindFlutter.
+  ///
+  /// In ja, this message translates to:
+  /// **'画面'**
+  String get elKindFlutter;
+
+  /// No description provided for @elKindUncaught.
+  ///
+  /// In ja, this message translates to:
+  /// **'予期しない'**
+  String get elKindUncaught;
+
+  /// No description provided for @elAllKinds.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての種類'**
+  String get elAllKinds;
+
+  /// No description provided for @elDays.
+  ///
+  /// In ja, this message translates to:
+  /// **'{days}日以内'**
+  String elDays(int days);
+
+  /// No description provided for @elAllDays.
+  ///
+  /// In ja, this message translates to:
+  /// **'すべての期間'**
+  String get elAllDays;
+
+  /// No description provided for @elSearchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'内容・画面・人で検索'**
+  String get elSearchHint;
+
+  /// No description provided for @elShown.
+  ///
+  /// In ja, this message translates to:
+  /// **'{shown}件 / 全{total}件'**
+  String elShown(int shown, int total);
+
+  /// No description provided for @elTimes.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}回'**
+  String elTimes(int count);
+
+  /// No description provided for @elRequest.
+  ///
+  /// In ja, this message translates to:
+  /// **'通信先'**
+  String get elRequest;
+
+  /// No description provided for @elPlace.
+  ///
+  /// In ja, this message translates to:
+  /// **'画面'**
+  String get elPlace;
+
+  /// No description provided for @elClient.
+  ///
+  /// In ja, this message translates to:
+  /// **'端末'**
+  String get elClient;
+
+  /// No description provided for @elFirstAt.
+  ///
+  /// In ja, this message translates to:
+  /// **'最初'**
+  String get elFirstAt;
+
+  /// No description provided for @elDetail.
+  ///
+  /// In ja, this message translates to:
+  /// **'詳細'**
+  String get elDetail;
+
+  /// No description provided for @elCopy.
+  ///
+  /// In ja, this message translates to:
+  /// **'文章をコピー'**
+  String get elCopy;
+
+  /// No description provided for @elCopied.
+  ///
+  /// In ja, this message translates to:
+  /// **'コピーしました'**
+  String get elCopied;
+
+  /// No description provided for @elSaveShown.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中をMDで保存'**
+  String get elSaveShown;
+
+  /// No description provided for @elSavePicked.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択をMDで保存'**
+  String get elSavePicked;
+
+  /// No description provided for @elSaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました: {name}'**
+  String elSaved(String name);
+
+  /// No description provided for @elPickAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中をすべて選ぶ'**
+  String get elPickAll;
+
+  /// No description provided for @elPickNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択を外す'**
+  String get elPickNone;
+
+  /// No description provided for @elPicked.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件を選択中'**
+  String elPicked(int count);
+
+  /// No description provided for @elRemove.
+  ///
+  /// In ja, this message translates to:
+  /// **'削除'**
+  String get elRemove;
+
+  /// No description provided for @elRemovePicked.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択を削除'**
+  String get elRemovePicked;
+
+  /// No description provided for @elRemoveShown.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中を削除'**
+  String get elRemoveShown;
+
+  /// No description provided for @elRemoveOld.
+  ///
+  /// In ja, this message translates to:
+  /// **'古いエラーを削除'**
+  String get elRemoveOld;
+
+  /// No description provided for @elOlderThan.
+  ///
+  /// In ja, this message translates to:
+  /// **'{days}日より前'**
+  String elOlderThan(int days);
+
+  /// No description provided for @elRemoveTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'エラーを削除'**
+  String get elRemoveTitle;
+
+  /// No description provided for @elRemoveConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件のエラーを完全に削除しますか？元には戻せません。'**
+  String elRemoveConfirm(int count);
+
+  /// No description provided for @elRemoveOldConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'{days}日より前のエラーをすべて完全に削除しますか？元には戻せません。'**
+  String elRemoveOldConfirm(int days);
+
+  /// No description provided for @elRemoved.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件を削除しました'**
+  String elRemoved(int count);
+
+  /// No description provided for @elMdTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'エラーログ（{count}件）'**
+  String elMdTitle(int count);
+
+  /// No description provided for @elMdExported.
+  ///
+  /// In ja, this message translates to:
+  /// **'出力日時'**
+  String get elMdExported;
 }
 
 class _AppLocalizationsDelegate

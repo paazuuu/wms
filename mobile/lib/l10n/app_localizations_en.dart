@@ -18301,4 +18301,137 @@ class AppLocalizationsEn extends AppLocalizations {
   String raRemoveOldConfirm(int days, int count) {
     return 'Erase the $count records older than $days days and the files read for good? This cannot be undone.';
   }
+
+  @override
+  String get featErrorLog => 'Error log';
+
+  @override
+  String get featErrorLogDesc =>
+      'Errors that happened in the system — failed requests, screens that could not be drawn, unexpected errors — kept to look into, save and remove.';
+
+  @override
+  String get elIntro =>
+      'Errors in the app are kept automatically, with who met them, the screen and the time. The same error from the same person within ten minutes is counted on one entry. Nothing is kept before sign-in.';
+
+  @override
+  String get elEmpty => 'No errors were recorded in this period.';
+
+  @override
+  String get elKindApi => 'Request';
+
+  @override
+  String get elKindFlutter => 'Screen';
+
+  @override
+  String get elKindUncaught => 'Unexpected';
+
+  @override
+  String get elAllKinds => 'All kinds';
+
+  @override
+  String elDays(int days) {
+    return 'Last $days days';
+  }
+
+  @override
+  String get elAllDays => 'All time';
+
+  @override
+  String get elSearchHint => 'Search by text, screen or person';
+
+  @override
+  String elShown(int shown, int total) {
+    return '$shown of $total';
+  }
+
+  @override
+  String elTimes(int count) {
+    return '$count times';
+  }
+
+  @override
+  String get elRequest => 'Request';
+
+  @override
+  String get elPlace => 'Screen';
+
+  @override
+  String get elClient => 'Device';
+
+  @override
+  String get elFirstAt => 'First';
+
+  @override
+  String get elDetail => 'Details';
+
+  @override
+  String get elCopy => 'Copy text';
+
+  @override
+  String get elCopied => 'Copied';
+
+  @override
+  String get elSaveShown => 'Save shown as Markdown';
+
+  @override
+  String get elSavePicked => 'Save selected as Markdown';
+
+  @override
+  String elSaved(String name) {
+    return 'Saved: $name';
+  }
+
+  @override
+  String get elPickAll => 'Select all shown';
+
+  @override
+  String get elPickNone => 'Clear selection';
+
+  @override
+  String elPicked(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get elRemove => 'Remove';
+
+  @override
+  String get elRemovePicked => 'Remove selected';
+
+  @override
+  String get elRemoveShown => 'Remove shown';
+
+  @override
+  String get elRemoveOld => 'Remove old errors';
+
+  @override
+  String elOlderThan(int days) {
+    return 'Older than $days days';
+  }
+
+  @override
+  String get elRemoveTitle => 'Remove errors';
+
+  @override
+  String elRemoveConfirm(int count) {
+    return 'Erase $count errors for good? This cannot be undone.';
+  }
+
+  @override
+  String elRemoveOldConfirm(int days) {
+    return 'Erase every error older than $days days for good? This cannot be undone.';
+  }
+
+  @override
+  String elRemoved(int count) {
+    return 'Removed $count';
+  }
+
+  @override
+  String elMdTitle(int count) {
+    return 'Error log ($count)';
+  }
+
+  @override
+  String get elMdExported => 'Exported';
 }
