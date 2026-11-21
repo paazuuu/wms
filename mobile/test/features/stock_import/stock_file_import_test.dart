@@ -37,7 +37,8 @@ import 'package:wms_mobile/features/stock_import/data/jan_by_code_repository.dar
 import '../../support/fake_requirements_repository.dart';
 import '../../support/fake_product_category_repository.dart';
 import '../../support/fake_jan_by_code_repository.dart';
-import 'package:wms_mobile/features/reading_audit/data/reading_audit_store.dart';
+import 'package:wms_mobile/features/reading_audit/data/reading_audit_repository.dart';
+import '../../support/fake_reading_audit_repository.dart';
 import 'package:wms_mobile/features/reading_audit/domain/reading_audit.dart';
 
 // Synthetic JANs with a correct check digit.
@@ -1080,7 +1081,7 @@ void main() {
         name: '請求書.pdf', extra: [janByCodeRepositoryProvider.overrideWithValue(byCode)]);
     final container = ProviderScope.containerOf(tester.element(find.byType(StockFileImportScreen, skipOffstage: false)));
     // Kept as soon as it is read, before any check.
-    var audit = container.read(readingAuditProvider).single;
+    var audit = (container.read(readingAuditRepositoryProvider) as FakeReadingAuditRepository).kept.single;
     expect((audit.fileName, audit.source, audit.byAi, audit.supplier, audit.lineCount),
         ('請求書.pdf', AuditSource.stockFile, true, 'テスト商事', 3));
     expect(audit.count(AuditKind.misread), 0);
@@ -1090,8 +1091,12 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('rc-ok')));
     await tester.pumpAndSettle();
-    final all = container.read(readingAuditProvider);
+    final all = (container.read(readingAuditRepositoryProvider) as FakeReadingAuditRepository).kept;
     expect(all, hasLength(1), reason: 'the same reading, kept once');
+    // Kept on the server with the file read, uploaded once.
+    final repo = container.read(readingAuditRepositoryProvider) as FakeReadingAuditRepository;
+    expect(repo.files.values.single.$1, '請求書.pdf');
+    expect(all.single.filePath, isNotNull);
     audit = all.single;
     String texts(AuditKind k) => [for (final i in audit.issues) if (i.kind == k) '${i.lineNo} ${i.field} ${i.detail} ${i.remedy ?? ''}'].join('\n');
     expect(texts(AuditKind.ambiguous), allOf(contains('1 数量'), contains('「100」'), contains('「10」')));

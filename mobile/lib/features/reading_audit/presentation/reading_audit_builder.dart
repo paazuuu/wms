@@ -471,6 +471,7 @@ String auditToMarkdown(AppLocalizations l10n, ReadingAudit a, {int level = 1}) {
     ..writeln('- ${l10n.raMdScreen}: ${auditSourceLabel(l10n, a.source)}')
     ..writeln('- ${l10n.raMdReadBy}: ${a.byAi ? l10n.raByAi : l10n.raBySheet}');
   if (a.supplier != null) b.writeln('- ${l10n.raMdSupplier}: ${_md(a.supplier!)}');
+  if (a.byName != null) b.writeln('- ${_md(l10n.raBy(a.byName!))}');
   b
     ..writeln('- ${l10n.raMdLines}: ${a.lineCount}')
     ..writeln('- ${l10n.raMdIssues}: ${a.counts.map((c) => l10n.raKindCount(auditKindLabel(l10n, c.$1), c.$2)).join('、')}');

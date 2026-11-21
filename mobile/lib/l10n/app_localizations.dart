@@ -30893,19 +30893,19 @@ abstract class AppLocalizations {
   /// No description provided for @featReadingAuditDesc.
   ///
   /// In ja, this message translates to:
-  /// **'発注・予定外の入荷・出庫でファイルを読み取ったとき、読み取れなかった項目・読み間違い・候補が複数出た箇所を、システム改善のために文章で記録します（MDで保存）。'**
+  /// **'発注・予定外の入荷・出庫で読み取ったファイルの一覧と、読み取れなかった項目・読み間違い・候補が複数出た箇所の記録です（MDで保存・削除できます）。'**
   String get featReadingAuditDesc;
 
   /// No description provided for @raIntro.
   ///
   /// In ja, this message translates to:
-  /// **'発注・予定外の入荷・出庫でファイルを読み取るたびに、読み取れなかった項目、読み間違い（人が直したもの）、候補が複数出た箇所、システムの対処で補えたもの（対処の内容つき）と補えなかったものを記録します。開発・改善のための記録で、データベースには保存せず、このブラウザーだけに最新{max}件まで残ります。'**
-  String raIntro(int max);
+  /// **'発注・予定外の入荷・出庫で読み取ったファイルの一覧です。読み取れなかった項目、読み間違い（人が直したもの）、候補が複数出た箇所、システムの対処で補えたもの（対処の内容つき）と補えなかったものを、ファイルごとに記録します。サーバーに保存するので、別のPCやブラウザーからも見られます。開発・改善のための記録で、商品や在庫のデータとはつながっていません。'**
+  String get raIntro;
 
   /// No description provided for @raEmpty.
   ///
   /// In ja, this message translates to:
-  /// **'まだ記録はありません。ファイルを読み取って問題が見つかると、ここに表示されます。'**
+  /// **'まだ記録はありません。ファイルを読み取って問題が見つかると、ここに並びます。'**
   String get raEmpty;
 
   /// No description provided for @raSaveAll.
@@ -30938,22 +30938,10 @@ abstract class AppLocalizations {
   /// **'保存しました: {name}'**
   String raSaved(String name);
 
-  /// No description provided for @raClear.
-  ///
-  /// In ja, this message translates to:
-  /// **'記録をすべて消す'**
-  String get raClear;
-
-  /// No description provided for @raClearConfirm.
-  ///
-  /// In ja, this message translates to:
-  /// **'このブラウザーにある読み取り検査の記録をすべて消しますか？'**
-  String get raClearConfirm;
-
   /// No description provided for @raRemoveOne.
   ///
   /// In ja, this message translates to:
-  /// **'この記録を消す'**
+  /// **'削除'**
   String get raRemoveOne;
 
   /// No description provided for @raAllScreens.
@@ -31303,6 +31291,54 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'出力日時'**
   String get raMdExported;
+
+  /// No description provided for @raRemoveShown.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中を削除'**
+  String get raRemoveShown;
+
+  /// No description provided for @raRemoveTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'記録を削除'**
+  String get raRemoveTitle;
+
+  /// No description provided for @raRemoveShownConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中の{count}件の記録と、読み取ったファイルを一覧から削除しますか？'**
+  String raRemoveShownConfirm(int count);
+
+  /// No description provided for @raRemoveConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'この記録と読み取ったファイルを一覧から削除しますか？'**
+  String get raRemoveConfirm;
+
+  /// No description provided for @raRemoved.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件を削除しました'**
+  String raRemoved(int count);
+
+  /// No description provided for @raOpenFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'元のファイル'**
+  String get raOpenFile;
+
+  /// No description provided for @raBy.
+  ///
+  /// In ja, this message translates to:
+  /// **'読み取った人: {name}'**
+  String raBy(String name);
+
+  /// No description provided for @raSearchHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'ファイル名・仕入先で検索'**
+  String get raSearchHint;
 }
 
 class _AppLocalizationsDelegate

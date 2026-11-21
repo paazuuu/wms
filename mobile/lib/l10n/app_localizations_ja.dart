@@ -17607,15 +17607,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get featReadingAuditDesc =>
-      '発注・予定外の入荷・出庫でファイルを読み取ったとき、読み取れなかった項目・読み間違い・候補が複数出た箇所を、システム改善のために文章で記録します（MDで保存）。';
+      '発注・予定外の入荷・出庫で読み取ったファイルの一覧と、読み取れなかった項目・読み間違い・候補が複数出た箇所の記録です（MDで保存・削除できます）。';
 
   @override
-  String raIntro(int max) {
-    return '発注・予定外の入荷・出庫でファイルを読み取るたびに、読み取れなかった項目、読み間違い（人が直したもの）、候補が複数出た箇所、システムの対処で補えたもの（対処の内容つき）と補えなかったものを記録します。開発・改善のための記録で、データベースには保存せず、このブラウザーだけに最新$max件まで残ります。';
-  }
+  String get raIntro =>
+      '発注・予定外の入荷・出庫で読み取ったファイルの一覧です。読み取れなかった項目、読み間違い（人が直したもの）、候補が複数出た箇所、システムの対処で補えたもの（対処の内容つき）と補えなかったものを、ファイルごとに記録します。サーバーに保存するので、別のPCやブラウザーからも見られます。開発・改善のための記録で、商品や在庫のデータとはつながっていません。';
 
   @override
-  String get raEmpty => 'まだ記録はありません。ファイルを読み取って問題が見つかると、ここに表示されます。';
+  String get raEmpty => 'まだ記録はありません。ファイルを読み取って問題が見つかると、ここに並びます。';
 
   @override
   String get raSaveAll => '表示中をMDで保存';
@@ -17635,13 +17634,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get raClear => '記録をすべて消す';
-
-  @override
-  String get raClearConfirm => 'このブラウザーにある読み取り検査の記録をすべて消しますか？';
-
-  @override
-  String get raRemoveOne => 'この記録を消す';
+  String get raRemoveOne => '削除';
 
   @override
   String get raAllScreens => 'すべての画面';
@@ -17874,4 +17867,34 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get raMdExported => '出力日時';
+
+  @override
+  String get raRemoveShown => '表示中を削除';
+
+  @override
+  String get raRemoveTitle => '記録を削除';
+
+  @override
+  String raRemoveShownConfirm(int count) {
+    return '表示中の$count件の記録と、読み取ったファイルを一覧から削除しますか？';
+  }
+
+  @override
+  String get raRemoveConfirm => 'この記録と読み取ったファイルを一覧から削除しますか？';
+
+  @override
+  String raRemoved(int count) {
+    return '$count件を削除しました';
+  }
+
+  @override
+  String get raOpenFile => '元のファイル';
+
+  @override
+  String raBy(String name) {
+    return '読み取った人: $name';
+  }
+
+  @override
+  String get raSearchHint => 'ファイル名・仕入先で検索';
 }

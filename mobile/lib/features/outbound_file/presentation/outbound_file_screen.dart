@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -19,7 +20,7 @@ import '../../product/application/product_providers.dart';
 import '../../product/domain/product.dart';
 import '../../master_import/data/master_import_repository.dart';
 import '../../master_import/domain/master_import.dart' show MasterLine, MasterProblem;
-import '../../reading_audit/data/reading_audit_store.dart';
+import '../../reading_audit/data/reading_audit_repository.dart';
 import '../../reading_audit/domain/reading_audit.dart';
 import '../../reading_audit/presentation/reading_audit_builder.dart';
 import '../../master_import/presentation/master_import_labels.dart' show masterProblemText;
@@ -500,7 +501,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
               : masterProblemText(l10n, MasterProblem('ai_unavailable', value: data.aiFailure)));
           _snack(why);
           setState(() => _fileError = l10n.ofFileError(why));
-          _auditFailure(f.name, why);
+          _auditFailure(f, why);
           return null;
         }
         _aiLines = data.lines;
@@ -509,7 +510,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
         final why = l10n.rdAiFailed(humanizeApiErrorMessage(l10n, message));
         _snack(why);
         setState(() => _fileError = l10n.ofFileError(why));
-        _auditFailure(f.name, why);
+        _auditFailure(f, why);
         return null;
     }
   }
@@ -535,7 +536,7 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
       } on FormatException {
         _snack(l10n.ofReadFailed);
         setState(() => _fileError = l10n.ofFileError(l10n.ofFileErrorSheet));
-        _auditFailure(f.name, l10n.ofFileErrorSheet, byAi: false);
+        _auditFailure(f, l10n.ofFileErrorSheet, byAi: false);
         return;
       }
     }
@@ -574,7 +575,8 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
   void _keepAudit() {
     final f = _file, id = _auditId, parsed = _parsed;
     if (f == null || id == null || parsed == null) return;
-    ref.read(readingAuditProvider.notifier).put(auditOfOutbound(
+    unawaited(ref.read(readingAuditRecorderProvider).keep(
+        auditOfOutbound(
           AppLocalizations.of(context),
           id: id,
           fileName: f.name,
@@ -582,12 +584,15 @@ class _OutboundImportTabState extends ConsumerState<OutboundImportTab> with Auto
           sheet: parsed,
           aiLines: _aiLines,
           plan: _matches.isEmpty ? const [] : _plan,
-        ));
+        ),
+        bytes: f.bytes));
   }
 
-  void _auditFailure(String fileName, String why, {bool byAi = true}) {
-    ref.read(readingAuditProvider.notifier).put(auditOfFailure(AppLocalizations.of(context),
-        id: _auditId ?? newReadingAuditId(), source: AuditSource.outbound, fileName: fileName, byAi: byAi, reason: why));
+  void _auditFailure(({String name, Uint8List bytes}) f, String why, {bool byAi = true}) {
+    unawaited(ref.read(readingAuditRecorderProvider).keep(
+        auditOfFailure(AppLocalizations.of(context),
+            id: _auditId ?? newReadingAuditId(), source: AuditSource.outbound, fileName: f.name, byAi: byAi, reason: why),
+        bytes: f.bytes));
   }
 
   Future<void> _match() async {

@@ -19,7 +19,8 @@ import 'package:wms_mobile/features/unplanned_receipt/unplanned_receipt_screen.d
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
 
-import 'package:wms_mobile/features/reading_audit/data/reading_audit_store.dart';
+import 'package:wms_mobile/features/reading_audit/data/reading_audit_repository.dart';
+import '../../support/fake_reading_audit_repository.dart';
 import 'package:wms_mobile/features/reading_audit/domain/reading_audit.dart';
 
 import '../../support/harness.dart';
@@ -182,12 +183,12 @@ void main() {
   testWidgets('読み取り検査: a clean note leaves nothing; a quantity a person corrects is kept as misread', (tester) async {
     await _pump(tester, onCheck: () async {
       final c = ProviderScope.containerOf(tester.element(find.byType(UnplannedReceiptScreen, skipOffstage: false)));
-      expect(c.read(readingAuditProvider), isEmpty);
+      expect((c.read(readingAuditRepositoryProvider) as FakeReadingAuditRepository).kept, isEmpty);
       await tester.enterText(find.byKey(const ValueKey('rc-2-quantity')), '12');
       await tester.pump();
     });
     final c = ProviderScope.containerOf(tester.element(find.byType(UnplannedReceiptScreen)));
-    final a = c.read(readingAuditProvider).single;
+    final a = (c.read(readingAuditRepositoryProvider) as FakeReadingAuditRepository).kept.single;
     expect((a.source, a.fileName, a.supplier), (AuditSource.unplanned, '納品書_1102.pdf', 'テスト商事株式会社'));
     expect([for (final i in a.issues) (i.kind, i.lineNo, i.detail)], [
       (AuditKind.misread, 2, '読み取り「10」→ 人が「12」に修正'),

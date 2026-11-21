@@ -1,19 +1,20 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
 import 'package:wms_mobile/features/outbound/presentation/outbound_downloads.dart' show saveFileProvider;
 import 'package:wms_mobile/features/outbound_file/domain/outbound_sheet.dart';
-import 'package:wms_mobile/features/reading_audit/data/reading_audit_store.dart';
+import 'package:wms_mobile/features/reading_audit/data/reading_audit_repository.dart';
 import 'package:wms_mobile/features/reading_audit/domain/reading_audit.dart';
 import 'package:wms_mobile/features/reading_audit/presentation/reading_audit_builder.dart';
 import 'package:wms_mobile/features/reading_audit/presentation/reading_audit_screen.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart';
 import 'package:wms_mobile/l10n/app_localizations.dart';
 
+import '../../support/fake_reading_audit_repository.dart';
 import '../../support/harness.dart';
 
 const _jan1 = '4909999000014';
@@ -138,49 +139,66 @@ void main() {
     });
   });
 
-  group('store', () {
-    test('kept in this browser: replaced by id, gone when nothing to say, the newest first, at most $readingAuditMax', () {
-      final storage = memoryAuditStorage();
-      final c = ProviderContainer(overrides: [readingAuditStorageProvider.overrideWithValue(storage)]);
-      addTearDown(c.dispose);
-      final store = c.read(readingAuditProvider.notifier);
-      store.put(_sample('1'));
-      store.put(_sample('2'));
-      store.put(_sample('1', issues: const [AuditIssue(kind: AuditKind.doubt, field: 'JAN', detail: '要確認')]));
-      expect(c.read(readingAuditProvider).map((a) => a.id), ['1', '2']);
-      expect(c.read(readingAuditProvider).first.issues.single.kind, AuditKind.doubt);
-      store.put(_sample('2', issues: const []));
-      expect(c.read(readingAuditProvider).map((a) => a.id), ['1']);
-      // Read back as it was kept.
-      final again = ProviderContainer(overrides: [readingAuditStorageProvider.overrideWithValue(storage)]);
-      addTearDown(again.dispose);
-      expect(again.read(readingAuditProvider), c.read(readingAuditProvider));
-      for (var i = 0; i < readingAuditMax + 5; i++) {
-        store.put(_sample('n$i'));
-      }
-      expect(c.read(readingAuditProvider), hasLength(readingAuditMax));
-      expect(c.read(readingAuditProvider).first.id, 'n${readingAuditMax + 4}');
-      store.clear();
-      expect(storage.read(), isNull);
+  group('recorder', () {
+    test('kept on the server in order: read, then checked; the file uploaded once; nothing kept for a clean reading', () async {
+      final repo = FakeReadingAuditRepository();
+      final rec = ReadingAuditRecorder(repo);
+      final bytes = Uint8List.fromList([37, 80, 68, 70]);
+      // Two in a row, as a list is read and then matched.
+      unawaited(rec.keep(_sample('1'), bytes: bytes));
+      await rec.keep(_sample('1', issues: const [AuditIssue(kind: AuditKind.doubt, field: 'JAN', detail: '要確認')]),
+          bytes: bytes);
+      expect(repo.kept.single.issues.single.kind, AuditKind.doubt);
+      expect(repo.files.values.single.$1, '請求書_1.pdf');
+      await rec.keep(_sample('2', issues: const []), bytes: bytes);
+      expect(repo.kept.map((a) => a.id), ['1']);
+      // Taken out of the list, it stays out.
+      await repo.remove([repo.kept.single.serverId!]);
+      await rec.keep(_sample('1'));
+      expect(repo.kept, isEmpty);
+    });
+
+    test('as the server lists it', () {
+      final a = ReadingAudit.fromServer(const {
+        'id': 7, 'client_id': 'abc', 'read_at': '2026-11-21T05:03:00Z', 'source': 'outbound', 'file_name': '明細.pdf',
+        'by_ai': true, 'line_count': 4, 'storage_path': '7/1-x.pdf', 'byte_size': 2048, 'created_by_name': '倉庫 太郎',
+        'issues': [
+          {'kind': 'misread', 'field': '数量', 'line': 3, 'detail': 'x'},
+        ],
+      });
+      expect((a.id, a.serverId, a.source, a.filePath, a.fileSize, a.byName), ('abc', 7, AuditSource.outbound, '7/1-x.pdf', 2048, '倉庫 太郎'));
+      expect(a.issues.single.lineNo, 3);
+      expect(a.toSave()['client_id'], 'abc');
+      expect(auditToMarkdown(l10n, a), contains('- 読み取った人: 倉庫 太郎'));
     });
   });
 
-  testWidgets('the screen: filtered, opened as sentences, saved as Markdown one by one or all, cleared', (tester) async {
+  testWidgets('the screen: a list of files, filtered, opened as sentences, saved as Markdown, the file downloaded, removed',
+      (tester) async {
     await tester.binding.setSurfaceSize(const Size(1200, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final saved = <(String, Uint8List)>[];
-    final start = jsonEncode([
-      _sample('a').toJson(),
+    final repo = FakeReadingAuditRepository([
+      _sample('a'),
       _sample('b',
           source: AuditSource.outbound,
-          issues: const [AuditIssue(kind: AuditKind.ambiguous, field: '数量', lineNo: 4, detail: '候補「2」／「20」')]).toJson(),
+          issues: const [AuditIssue(kind: AuditKind.ambiguous, field: '数量', lineNo: 4, detail: '候補「2」／「20」')]),
     ]);
+    final bId = repo.kept.firstWhere((a) => a.id == 'b').serverId!;
+    await repo.attach(bId, '請求書_b.pdf', Uint8List.fromList([1, 2, 3]));
     await pumpApp(tester, const ReadingAuditScreen(), overrides: [
-      readingAuditStorageProvider.overrideWithValue(memoryAuditStorage(start)),
+      readingAuditRepositoryProvider.overrideWithValue(repo),
       saveFileProvider.overrideWithValue((n, b) async => saved.add((n, b))),
     ]);
     expect(find.text('2件 / 全2件'), findsOneWidget);
     expect(find.text('読み取れなかった 1件'), findsOneWidget);
+
+    // Found by name.
+    await tester.enterText(find.byKey(const ValueKey('ra-search')), '_b');
+    await tester.pump();
+    expect(find.byKey(const ValueKey('ra-a')), findsNothing);
+    await tester.enterText(find.byKey(const ValueKey('ra-search')), '');
+    await tester.pump();
 
     // Only what had several readings.
     await tester.tap(find.byKey(const ValueKey('ra-kind')));
@@ -195,8 +213,13 @@ void main() {
     expect(find.text('・4行目 数量: 候補「2」／「20」'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('ra-save-b')));
     await tester.pumpAndSettle();
-    expect(saved.single.$1, endsWith('_請求書_b.md'));
-    expect(utf8.decode(saved.single.$2), contains('## 候補が複数'));
+    expect(saved.last.$1, endsWith('_請求書_b.md'));
+    expect(utf8.decode(saved.last.$2), contains('## 候補が複数'));
+    // The file itself, as it was read.
+    await tester.tap(find.byKey(const ValueKey('ra-file-b')));
+    await tester.pumpAndSettle();
+    expect(saved.last.$1, '請求書_b.pdf');
+    expect(saved.last.$2, [1, 2, 3]);
 
     // All that is shown, in one file.
     await tester.tap(find.byKey(const ValueKey('ra-save-all')));
@@ -205,10 +228,26 @@ void main() {
     expect(all, startsWith('# 読み取り検査（1件）'));
     expect(all, isNot(contains('請求書\\_a.pdf')));
 
-    await tester.tap(find.byKey(const ValueKey('ra-clear')));
+    // Removed: the one shown, after asking.
+    await tester.tap(find.byKey(const ValueKey('ra-remove-shown')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('ra-clear-ok')));
+    await tester.tap(find.byKey(const ValueKey('ra-remove-ok')));
     await tester.pumpAndSettle();
+    expect(repo.removedIds, {bId});
+    expect(find.byKey(const ValueKey('ra-empty')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('ra-kind')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('すべての種類').last);
+    await tester.pumpAndSettle();
+    expect(find.text('1件 / 全1件'), findsOneWidget);
+    // One by one too.
+    await tester.tap(find.byKey(const ValueKey('ra-tile-a')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ra-remove-a')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ra-remove-ok')));
+    await tester.pumpAndSettle();
+    expect(repo.kept, isEmpty);
     expect(find.byKey(const ValueKey('ra-empty')), findsOneWidget);
   });
 

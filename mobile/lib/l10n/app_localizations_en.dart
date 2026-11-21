@@ -17968,16 +17968,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featReadingAuditDesc =>
-      'Records, for improving the system, what file readings in ordering, unplanned arrivals and shipping could not read, misread or found several readings for (saved as Markdown).';
+      'The files read in ordering, unplanned arrivals and shipping, with what could not be read, was misread or had several readings (save as Markdown, remove).';
 
   @override
-  String raIntro(int max) {
-    return 'Each time a file is read in ordering, unplanned arrivals or shipping, this records the items that could not be read, misreadings (what a person corrected), places with several possible readings, and what the system\'s own remedies covered (with the remedy) or could not. It is for development and improvement: it is not saved to the database, only in this browser, up to the latest $max.';
-  }
+  String get raIntro =>
+      'A list of the files read in ordering, unplanned arrivals and shipping. For each file it records the items that could not be read, misreadings (what a person corrected), places with several possible readings, and what the system\'s own remedies covered (with the remedy) or could not. Kept on the server, so other PCs and browsers see it too. It is for development and improvement, and is not connected to product or stock data.';
 
   @override
   String get raEmpty =>
-      'Nothing recorded yet. When a file reading runs into trouble, it shows here.';
+      'Nothing recorded yet. Files whose reading runs into trouble are listed here.';
 
   @override
   String get raSaveAll => 'Save shown as Markdown';
@@ -17997,14 +17996,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get raClear => 'Clear all records';
-
-  @override
-  String get raClearConfirm =>
-      'Clear all reading audit records kept in this browser?';
-
-  @override
-  String get raRemoveOne => 'Remove this record';
+  String get raRemoveOne => 'Remove';
 
   @override
   String get raAllScreens => 'All screens';
@@ -18237,4 +18229,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get raMdExported => 'Exported';
+
+  @override
+  String get raRemoveShown => 'Remove shown';
+
+  @override
+  String get raRemoveTitle => 'Remove records';
+
+  @override
+  String raRemoveShownConfirm(int count) {
+    return 'Remove the $count records shown, with the files read, from the list?';
+  }
+
+  @override
+  String get raRemoveConfirm =>
+      'Remove this record and the file read from the list?';
+
+  @override
+  String raRemoved(int count) {
+    return 'Removed $count';
+  }
+
+  @override
+  String get raOpenFile => 'Original file';
+
+  @override
+  String raBy(String name) {
+    return 'Read by $name';
+  }
+
+  @override
+  String get raSearchHint => 'Search by file name or supplier';
 }

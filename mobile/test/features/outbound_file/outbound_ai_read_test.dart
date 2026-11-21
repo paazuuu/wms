@@ -10,7 +10,8 @@ import 'package:wms_mobile/features/outbound_file/data/outbound_file_repository.
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_detail_screen.dart';
 import 'package:wms_mobile/features/outbound_file/presentation/outbound_file_screen.dart';
 import 'package:wms_mobile/features/stock_import/domain/ai_read_sheet.dart';
-import 'package:wms_mobile/features/reading_audit/data/reading_audit_store.dart';
+import 'package:wms_mobile/features/reading_audit/data/reading_audit_repository.dart';
+import '../../support/fake_reading_audit_repository.dart';
 import 'package:wms_mobile/features/reading_audit/domain/reading_audit.dart';
 import 'package:wms_mobile/features/warehouse_context/application/warehouse_providers.dart';
 import 'package:wms_mobile/features/warehouse_context/domain/warehouse.dart';
@@ -99,7 +100,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('of-pick')));
     await tester.pumpAndSettle();
     final container = ProviderScope.containerOf(tester.element(find.byType(OutboundFileScreen)));
-    final audit = container.read(readingAuditProvider).single;
+    final audit = (container.read(readingAuditRepositoryProvider) as FakeReadingAuditRepository).kept.single;
     expect((audit.fileName, audit.source, audit.byAi), ('明細.pdf', AuditSource.outbound, true));
     String of(AuditKind k) => [for (final i in audit.issues) if (i.kind == k) '${i.lineNo} ${i.detail}'].join('\n');
     // The AI's lines are rows 2 and 3 of the sheet made from them.

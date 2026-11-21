@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 /// 読み取り検査: what a file reading could not do, for improving the reader
-/// later. Kept in this browser only — not stock, not booked, not sent.
+/// later. Kept on the server apart from everything else (0224): not stock,
+/// not products, not booked.
 
 /// What kind of trouble an item was.
 enum AuditKind {
@@ -99,7 +100,23 @@ class ReadingAudit extends Equatable {
     this.supplier,
     this.lineCount = 0,
     this.issues = const [],
+    this.serverId,
+    this.filePath,
+    this.contentType,
+    this.fileSize,
+    this.byName,
   });
+
+  /// As kept on the server (0224); null before it is.
+  final int? serverId;
+
+  /// The file read, kept with it.
+  final String? filePath;
+  final String? contentType;
+  final int? fileSize;
+
+  /// Who read the file.
+  final String? byName;
 
   /// The same reading keeps its id while it is checked and corrected, so it
   /// is kept once, as it ended.
@@ -148,6 +165,36 @@ class ReadingAudit extends Equatable {
         ],
       );
 
+  /// What `reading_audit_save` takes.
+  Map<String, dynamic> toSave() => {
+        'client_id': id,
+        'source': source.wire,
+        'file_name': fileName,
+        'by_ai': byAi,
+        if (supplier != null) 'supplier': supplier,
+        'line_count': lineCount,
+        'issues': [for (final i in issues) i.toJson()],
+      };
+
+  /// A row of `reading_audits_list`.
+  factory ReadingAudit.fromServer(Map<String, dynamic> j) => ReadingAudit(
+        id: '${j['client_id'] ?? j['id'] ?? ''}',
+        serverId: (j['id'] as num?)?.toInt(),
+        at: (DateTime.tryParse('${j['read_at'] ?? ''}') ?? DateTime.fromMillisecondsSinceEpoch(0)).toLocal(),
+        source: AuditSource.fromWire(j['source']?.toString()),
+        fileName: '${j['file_name'] ?? ''}',
+        byAi: j['by_ai'] == true,
+        supplier: j['supplier']?.toString(),
+        lineCount: (j['line_count'] as num?)?.toInt() ?? 0,
+        issues: [
+          for (final i in (j['issues'] as List? ?? const []).whereType<Map>()) AuditIssue.fromJson(i.cast<String, dynamic>()),
+        ],
+        filePath: j['storage_path']?.toString(),
+        contentType: j['content_type']?.toString(),
+        fileSize: (j['byte_size'] as num?)?.toInt(),
+        byName: j['created_by_name']?.toString(),
+      );
+
   @override
-  List<Object?> get props => [id, at, source, fileName, byAi, supplier, lineCount, issues];
+  List<Object?> get props => [id, at, source, fileName, byAi, supplier, lineCount, issues, serverId, filePath, byName];
 }

@@ -47,7 +47,7 @@ import '../../product/data/product_category_repository.dart';
 import '../../product/domain/product.dart' show Product;
 import '../data/jan_by_code_repository.dart';
 import 'jan_source_badge.dart';
-import '../../reading_audit/data/reading_audit_store.dart';
+import '../../reading_audit/data/reading_audit_repository.dart';
 import '../../reading_audit/domain/reading_audit.dart';
 import '../../reading_audit/presentation/reading_audit_builder.dart';
 
@@ -367,7 +367,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
   void _keepAudit({List<ReadRow>? checked}) {
     final sheet = _sheet, name = _fileName, id = _auditId;
     if (sheet == null || name == null || id == null) return;
-    ref.read(readingAuditProvider.notifier).put(auditOfStockRead(
+    unawaited(ref.read(readingAuditRecorderProvider).keep(
+        auditOfStockRead(
           AppLocalizations.of(context),
           id: id,
           source: AuditSource.stockFile,
@@ -379,14 +380,17 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           alternatives: _alternatives,
           sheet: sheet.byAi ? null : sheet,
           supplier: _docSupplier,
-        ));
+        ),
+        bytes: _bytes));
   }
 
   void _auditFailure(String reason) {
     final name = _fileName, id = _auditId;
     if (name == null || id == null) return;
-    ref.read(readingAuditProvider.notifier).put(auditOfFailure(AppLocalizations.of(context),
-        id: id, source: AuditSource.stockFile, fileName: name, byAi: true, reason: reason));
+    unawaited(ref.read(readingAuditRecorderProvider).keep(
+        auditOfFailure(AppLocalizations.of(context),
+            id: id, source: AuditSource.stockFile, fileName: name, byAi: true, reason: reason),
+        bytes: _bytes));
   }
 
   /// The chosen warehouse, as the screen shows it.

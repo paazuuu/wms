@@ -32,7 +32,7 @@ import '../warehouse_context/domain/warehouse.dart';
 import 'unplanned_flow.dart';
 import 'unplanned_waiting_tab.dart';
 import '../stock_import/data/jan_by_code_repository.dart';
-import '../reading_audit/data/reading_audit_store.dart';
+import '../reading_audit/data/reading_audit_repository.dart';
 import '../reading_audit/domain/reading_audit.dart';
 import '../reading_audit/presentation/reading_audit_builder.dart';
 
@@ -145,8 +145,9 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
     final r = await ref.read(masterImportRepositoryProvider).read(f.name, f.bytes, keepRows: true, purpose: 'ocr');
     if (!mounted) return;
     final auditId = newReadingAuditId();
-    void failed(String why) => ref.read(readingAuditProvider.notifier).put(
-        auditOfFailure(l10n, id: auditId, source: AuditSource.unplanned, fileName: f.name, byAi: true, reason: why));
+    void failed(String why) => unawaited(ref.read(readingAuditRecorderProvider).keep(
+        auditOfFailure(l10n, id: auditId, source: AuditSource.unplanned, fileName: f.name, byAi: true, reason: why),
+        bytes: f.bytes));
     switch (r) {
       case ApiSuccess(:final data):
         if (data.lines.isEmpty) {
@@ -233,7 +234,8 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
   void _keepAudit({List<ReadRow>? checked, List<StockFileProblem> problems = const []}) {
     final read = _auditRead, id = _auditId, name = _fileName;
     if (read == null || id == null || name == null) return;
-    ref.read(readingAuditProvider.notifier).put(auditOfStockRead(
+    unawaited(ref.read(readingAuditRecorderProvider).keep(
+        auditOfStockRead(
           AppLocalizations.of(context),
           id: id,
           source: AuditSource.unplanned,
@@ -244,7 +246,8 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
           problems: problems,
           alternatives: _alternatives,
           supplier: _supplier.text,
-        ));
+        ),
+        bytes: _bytes));
   }
 
   Future<void> _lookup() async {

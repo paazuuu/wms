@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wms_mobile/features/reading_audit/data/reading_audit_store.dart';
+import 'package:wms_mobile/features/reading_audit/data/reading_audit_repository.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart' show pendingInspectionProvider;
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart' show PendingInspection;
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart' show HeadingMeaning;
@@ -144,6 +144,7 @@ import 'package:wms_mobile/features/supply_chain/data/supply_chain_repository.da
 import 'package:wms_mobile/features/supply_chain/domain/supply_chain.dart';
 import 'package:wms_mobile/l10n/app_localizations.dart';
 import 'package:wms_mobile/features/jan_catalog/data/jan_catalog_repository.dart';
+import 'fake_reading_audit_repository.dart';
 import 'fake_packing_repository.dart';
 import 'fake_jan_catalog_repository.dart';
 import 'package:wms_mobile/features/jan_catalog/data/reference_repository.dart';
@@ -221,16 +222,10 @@ SecureKeyValueStore fakeSecureStore() => _FakeSecureKeyValueStore();
 Override fakeDashboardViewOverride() => dashboardViewProvider
     .overrideWith((ref) => DashboardViewController(_FakeSecureKeyValueStore()));
 
-/// 読み取り検査's storage, in memory for one test.
-AuditStorage memoryAuditStorage([String? start]) {
-  String? kept = start;
-  return (read: () => kept, write: (v) => kept = v);
-}
-
 List<Override> _defaultOverrides() => [
       fakeScanModeOverride(),
-      // 読み取り検査: kept for the test only, not in a shared local store.
-      readingAuditStorageProvider.overrideWithValue(memoryAuditStorage()),
+      // 読み取り検査 (0224), in memory.
+      readingAuditRepositoryProvider.overrideWithValue(FakeReadingAuditRepository()),
       // 仕入先ファイル起点の入荷 (0134), in memory.
       inboundRepositoryProvider.overrideWithValue(FakeInboundRepository()),
       // ファイルから商品・在庫登録 (0138), in memory.

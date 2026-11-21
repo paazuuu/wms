@@ -17480,15 +17480,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get featReadingAuditDesc =>
-      '记录订货、计划外入库、出库读取文件时未能读取的项目、读错之处及出现多个候选的地方，用于改进系统（可保存为MD）。';
+      '订货、计划外入库、出库中读取的文件一览，及未能读取、读错、出现多个候选之处的记录（可保存为MD、可删除）。';
 
   @override
-  String raIntro(int max) {
-    return '每次在订货、计划外入库、出库中读取文件时，记录未能读取的项目、读错之处（人工修改的内容）、出现多个候选的地方，以及系统处理已补上（附处理方法）和未能补上的内容。仅用于开发改进，不保存到数据库，只保留在此浏览器中（最近$max条）。';
-  }
+  String get raIntro =>
+      '发注、计划外入库、出库中读取过的文件一览。按文件记录未能读取的项目、读错之处（人工修改的内容）、出现多个候选的地方，以及系统处理已补上（附处理方法）和未能补上的内容。保存在服务器上，其他电脑和浏览器也能查看。仅用于开发改进，与商品和库存数据无关。';
 
   @override
-  String get raEmpty => '暂无记录。读取文件发现问题时会显示在这里。';
+  String get raEmpty => '暂无记录。读取文件发现问题时会列在这里。';
 
   @override
   String get raSaveAll => '将显示内容保存为MD';
@@ -17508,13 +17507,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get raClear => '清除全部记录';
-
-  @override
-  String get raClearConfirm => '要清除此浏览器中的全部读取检查记录吗？';
-
-  @override
-  String get raRemoveOne => '删除此记录';
+  String get raRemoveOne => '删除';
 
   @override
   String get raAllScreens => '全部画面';
@@ -17747,4 +17740,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get raMdExported => '导出时间';
+
+  @override
+  String get raRemoveShown => '删除显示内容';
+
+  @override
+  String get raRemoveTitle => '删除记录';
+
+  @override
+  String raRemoveShownConfirm(int count) {
+    return '要从列表中删除显示中的$count条记录及读取的文件吗？';
+  }
+
+  @override
+  String get raRemoveConfirm => '要从列表中删除此记录及读取的文件吗？';
+
+  @override
+  String raRemoved(int count) {
+    return '已删除$count条';
+  }
+
+  @override
+  String get raOpenFile => '原文件';
+
+  @override
+  String raBy(String name) {
+    return '读取人：$name';
+  }
+
+  @override
+  String get raSearchHint => '按文件名、供应商搜索';
 }

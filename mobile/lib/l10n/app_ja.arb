@@ -15500,16 +15500,9 @@
   "jsbHistory": "過去",
   "jsbCatalog": "カタログ",
   "featReadingAudit": "読み取り検査",
-  "featReadingAuditDesc": "発注・予定外の入荷・出庫でファイルを読み取ったとき、読み取れなかった項目・読み間違い・候補が複数出た箇所を、システム改善のために文章で記録します（MDで保存）。",
-  "raIntro": "発注・予定外の入荷・出庫でファイルを読み取るたびに、読み取れなかった項目、読み間違い（人が直したもの）、候補が複数出た箇所、システムの対処で補えたもの（対処の内容つき）と補えなかったものを記録します。開発・改善のための記録で、データベースには保存せず、このブラウザーだけに最新{max}件まで残ります。",
-  "@raIntro": {
-    "placeholders": {
-      "max": {
-        "type": "int"
-      }
-    }
-  },
-  "raEmpty": "まだ記録はありません。ファイルを読み取って問題が見つかると、ここに表示されます。",
+  "featReadingAuditDesc": "発注・予定外の入荷・出庫で読み取ったファイルの一覧と、読み取れなかった項目・読み間違い・候補が複数出た箇所の記録です（MDで保存・削除できます）。",
+  "raIntro": "発注・予定外の入荷・出庫で読み取ったファイルの一覧です。読み取れなかった項目、読み間違い（人が直したもの）、候補が複数出た箇所、システムの対処で補えたもの（対処の内容つき）と補えなかったものを、ファイルごとに記録します。サーバーに保存するので、別のPCやブラウザーからも見られます。開発・改善のための記録で、商品や在庫のデータとはつながっていません。",
+  "raEmpty": "まだ記録はありません。ファイルを読み取って問題が見つかると、ここに並びます。",
   "raSaveAll": "表示中をMDで保存",
   "raSaveOne": "MDで保存",
   "raCopy": "文章をコピー",
@@ -15522,9 +15515,7 @@
       }
     }
   },
-  "raClear": "記録をすべて消す",
-  "raClearConfirm": "このブラウザーにある読み取り検査の記録をすべて消しますか？",
-  "raRemoveOne": "この記録を消す",
+  "raRemoveOne": "削除",
   "raAllScreens": "すべての画面",
   "raAllKinds": "すべての種類",
   "raShown": "{shown}件 / 全{total}件",
@@ -15800,5 +15791,34 @@
       }
     }
   },
-  "raMdExported": "出力日時"
+  "raMdExported": "出力日時",
+  "raRemoveShown": "表示中を削除",
+  "raRemoveTitle": "記録を削除",
+  "raRemoveShownConfirm": "表示中の{count}件の記録と、読み取ったファイルを一覧から削除しますか？",
+  "@raRemoveShownConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raRemoveConfirm": "この記録と読み取ったファイルを一覧から削除しますか？",
+  "raRemoved": "{count}件を削除しました",
+  "@raRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raOpenFile": "元のファイル",
+  "raBy": "読み取った人: {name}",
+  "@raBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "raSearchHint": "ファイル名・仕入先で検索"
 }
