@@ -594,6 +594,20 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             requiredAnyOf: ['report.view', 'report.manage', 'inventory.view', 'product.view', 'ship.complete'],
             inMenu: false,
           ),
+          // 読み取り検査 (0224/0225): the files read in 発注, 予定外の入荷 and
+          // 出庫 and what their reading could not read, misread or read more
+          // than one way — for the people in charge as well as the system
+          // administrator.
+          FeatureEntry(
+            id: 'reading_audit',
+            icon: Icons.plagiarism_outlined,
+            status: FeatureStatus.ready,
+            builder: _readingAudit,
+            requiredAnyOf: [
+              'user.manage', 'ai.review', 'audit.view', 'inventory.adjust', 'product.manage',
+              'purchase_order.manage', 'report.view', 'report.manage', 'ship.complete',
+            ],
+          ),
         ],
       ),
       // システム管理: the system administrator's only (FeatureGroup.adminOnly).
@@ -638,15 +652,6 @@ List<FeatureGroup> buildFeatureCatalog() => const [
             status: FeatureStatus.ready,
             builder: _requirements,
             requiredAnyOf: ['user.manage'],
-          ),
-          // 読み取り検査: what file readings could not read, misread or read
-          // more than one way, for improving the reader (kept in this browser).
-          FeatureEntry(
-            id: 'reading_audit',
-            icon: Icons.plagiarism_outlined,
-            status: FeatureStatus.ready,
-            builder: _readingAudit,
-            requiredAnyOf: ['user.manage', 'ai.review', 'audit.view'],
           ),
           FeatureEntry(
             id: 'connectors',

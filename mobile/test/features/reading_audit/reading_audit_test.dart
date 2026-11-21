@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/admin/domain/user_tier.dart';
 import 'package:wms_mobile/features/home/domain/feature_catalog.dart';
 import 'package:wms_mobile/features/outbound/presentation/outbound_downloads.dart' show saveFileProvider;
 import 'package:wms_mobile/features/outbound_file/domain/outbound_sheet.dart';
@@ -251,10 +252,18 @@ void main() {
     expect(find.byKey(const ValueKey('ra-empty')), findsOneWidget);
   });
 
-  test('in システム管理, for the system administrator', () {
-    final e = buildFeatureCatalog().firstWhere((g) => g.id == 'management').entries.firstWhere((e) => e.id == 'reading_audit');
+  test('in 管理, for the people in charge as well as the system administrator', () {
+    final groups = buildFeatureCatalog();
+    expect(groups.firstWhere((g) => g.id == 'management').entries.map((e) => e.id), isNot(contains('reading_audit')));
+    final e = groups.firstWhere((g) => g.id == 'administration').entries.firstWhere((e) => e.id == 'reading_audit');
     expect(e.label(l10n), '読み取り検査');
-    expect(e.visibleFor(const ['user.manage']), isTrue);
-    expect(e.visibleFor(const ['inventory.adjust']), isFalse);
+    // 倉庫責任者, 在庫管理, 購買, 営業 — and the system administrator.
+    for (final p in ['audit.view', 'inventory.adjust', 'product.manage', 'report.view', 'user.manage']) {
+      expect(e.visibleFor([p]), isTrue, reason: p);
+    }
+    expect(e.visibleFor(const ['pick.confirm', 'warehouse.view']), isFalse);
+    // A manager sees 管理 unless set otherwise; a floor user does not.
+    expect(defaultVisible('reading_audit', 'administration', UserTier.manager), isTrue);
+    expect(defaultVisible('reading_audit', 'administration', UserTier.user), isFalse);
   });
 }
