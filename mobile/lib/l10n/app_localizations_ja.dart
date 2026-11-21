@@ -17575,4 +17575,30 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ntJanFromCatalog => 'メーカーカタログ';
+
+  @override
+  String get ntJanFromHistory => '過去に確認した取込';
+
+  @override
+  String get ntJanFromWeb => 'AIのネット検索';
+
+  @override
+  String sfJanOnWeb(int done, int total) {
+    return 'JANが印字されていない品番を、AIがネットで探しています $done/$total';
+  }
+
+  @override
+  String get jsbWeb => 'AI';
+
+  @override
+  String get jsbLibrary => 'ライブラリ';
+
+  @override
+  String get jsbSupplier => '仕入先';
+
+  @override
+  String get jsbHistory => '過去';
+
+  @override
+  String get jsbCatalog => 'カタログ';
 }

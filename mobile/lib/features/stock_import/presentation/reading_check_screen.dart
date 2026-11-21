@@ -14,6 +14,7 @@ import '../../notation/presentation/notation_labels.dart';
 import '../domain/stock_file.dart';
 import 'import_view_screen.dart' show OriginalFileView;
 import 'class_code_dialog.dart';
+import 'jan_source_badge.dart';
 
 /// A column of the check table: its key ([ReadRow]'s own five, else a
 /// [LedgerFields] key) and how wide it is.
@@ -84,8 +85,8 @@ Set<String> doubtfulCells(ReadRow r) => {
           'jan_check' || 'no_jan' || 'jan_code_mismatch' || 'jan_restore_mismatch' || 'ai_disagree:raw_jan_code' => {
               'jan'
             },
-          // Found from the 品番 (0221): to be set beside the original.
-          'jan_by_code:library' || 'jan_by_code:supplier' || 'jan_by_code:catalog' => {'jan'},
+          // Not printed, found from the 品番 (0221/0223): to be set beside the original.
+          _ when f.startsWith('jan_by_code:') => {'jan'},
           'no_quantity' || 'qty_from_amount' || 'qty_from_cases' || 'ai_disagree:planned_quantity' => {'quantity'},
           'ai_disagree:product_name' => {'name'},
           'ai_disagree:product_code' => {'code'},
@@ -688,6 +689,7 @@ class _RowView extends StatelessWidget {
     ];
     // Once a person checked it, the reader's doubts are answered.
     final cells = readOnly && row.original.humanChecked ? const <String>{} : doubtfulCells(row.original);
+    final janSource = janSourceOf(row.original.flags);
     final mismatch = amountMismatch(row['quantity'], row['unit_price'], row['amount']);
     // A JAN its maker's catalog does not list: the JAN to look at.
     final notListed = hit?.missing ?? false;
@@ -781,10 +783,19 @@ class _RowView extends StatelessWidget {
                 style: style,
                 textAlign: _numeric.contains(col.key) ? TextAlign.end : TextAlign.start,
                 keyboardType: _numeric.contains(col.key) ? const TextInputType.numberWithOptions(decimal: true) : null,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                  // A JAN the document did not print, and where it came from
+                  // (0223) — until a person writes another.
+                  suffixIcon: col.key == 'jan' && janSource != null && !_changed('jan')
+                      ? Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Center(widthFactor: 1, child: JanSourceBadge(source: janSource)),
+                        )
+                      : null,
+                  suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                 ),
                 onChanged: (_) {
                   // 金額 follows 数量 × 単価, whichever of the two is changed.

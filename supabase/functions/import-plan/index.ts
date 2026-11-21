@@ -98,6 +98,7 @@ import {
   toNum,
 } from "../_shared/document_reader.ts";
 import { EVIDENCE_PURPOSES, keepEvidence, noteEvidence } from "../_shared/evidence.ts";
+import { type JanAsk, lookupJansByCode } from "../_shared/jan_by_code.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -775,6 +776,36 @@ Deno.serve(async (req) => {
         } catch (e) {
           return json({ message: String((e as Error)?.message ?? e), ai_failure: aiFailure() }, 502);
         }
+      }
+      // JANをネットで探す (0223): a maker's 品番 with no JAN on the invoice,
+      // looked up on the web. An answer is kept only when its check digit adds
+      // up and it starts with the maker's own company prefix; what was found
+      // (or not) is kept so the same 品番 is not searched for again.
+      if (str(b.mode) === "lookup_jans") {
+        if (!(await clientPermitted(supabase, "inventory.adjust")) && !(await clientPermitted(supabase, "product.manage"))) {
+          return json({ message: notPermittedMessage("inventory.adjust") }, 403);
+        }
+        const asks: JanAsk[] = (Array.isArray(b.items) ? b.items : [])
+          .filter((i: unknown): i is Record<string, unknown> => !!i && typeof i === "object")
+          .map((i: Record<string, unknown>, n: number) => ({
+            index: Number.isFinite(Number(i.index)) ? Number(i.index) : n,
+            code: str(i.code) ?? "", maker: str(i.maker), name: str(i.name),
+          }))
+          .filter((i: JanAsk) => i.code.replace(/[^0-9A-Za-z]/g, "").length >= 3)
+          .slice(0, 10);
+        if (asks.length === 0) return json({ message: "items are required" }, 400);
+        const prefixes = new Map<string, string[]>();
+        for (const m of new Set(asks.map((a) => a.maker ?? ""))) {
+          if (!m) continue;
+          const { data } = await supabase.rpc("maker_jan_prefixes", { p_maker: m });
+          prefixes.set(m, Array.isArray(data) ? data.map(String) : []);
+        }
+        resetAiFailures();
+        const out = await lookupJansByCode(asks.map((a) => ({ ...a, prefixes: prefixes.get(a.maker ?? "") ?? [] })));
+        // Kept: what was found, and what was looked for and not found.
+        const keep = out.results.filter((r) => r.error_kind === null);
+        if (keep.length) await supabase.rpc("code_jan_save", { p: keep });
+        return json({ data: { ...out, ai_failure: aiFailure() } });
       }
       if (str(b.mode) === "suggest_names") {
         // §43: English standard names for products we do not have yet,

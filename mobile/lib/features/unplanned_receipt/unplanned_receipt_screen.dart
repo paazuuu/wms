@@ -143,7 +143,7 @@ class _UnplannedReceiptScreenState extends ConsumerState<UnplannedReceiptScreen>
           return;
         }
         // A note with a 品番 but no JAN: the JAN found by the 品番 (0221).
-        final rows = await fillJansByCode(ref.read(janByCodeRepositoryProvider), [
+        final rows = await fillJansByCode(ref.read(janByCodeRepositoryProvider), web: true, [
           for (final l in data.lines)
             ReadRow(
               lineNo: l.lineNo,

@@ -33,7 +33,12 @@ class StockFileLine extends Equatable {
     this.code,
     this.unitPrice,
     this.classCode,
+    this.janSource,
   });
+
+  /// Where its JAN came from when the file did not print it (0221/0223):
+  /// library, supplier, history, catalog, web; null when it was printed.
+  final String? janSource;
 
   final int lineNo;
   final String janCode;
@@ -70,6 +75,7 @@ class StockFileLine extends Equatable {
         code: code,
         unitPrice: unitPrice,
         classCode: classCode,
+        janSource: janSource,
       );
 
   /// What a product made from this line is called: the file's name for it,
@@ -685,6 +691,7 @@ StockSheet stockSheetFromRead(List<ReadRow> rows, {bool byAi = true}) {
       code: prev?.code ?? (row.code.isEmpty ? null : row.code),
       unitPrice: prev?.unitPrice ?? row.ledger.pricePer(q),
       classCode: prev?.classCode ?? classCodeOf(row.ledger.classCode),
+      janSource: prev?.janSource ?? janSourceOf(row.flags),
     );
   }
   return StockSheet(lines: byJan.values.toList(), problems: problems, byAi: byAi, read: rows);
@@ -924,4 +931,13 @@ int classCodeColumn(List<List<String>> rows, List<int> candidates) {
     if (hits.length >= 2 && hits.length >= values.length * 0.6 && kinds >= 2 && kinds <= 30) return c;
   }
   return -1;
+}
+
+/// Where a JAN the document did not print came from, from a row's flags
+/// ("jan_by_code:catalog" → catalog); null when the document printed it.
+String? janSourceOf(List<String> flags) {
+  for (final f in flags) {
+    if (f.startsWith('jan_by_code:')) return f.substring('jan_by_code:'.length);
+  }
+  return null;
 }

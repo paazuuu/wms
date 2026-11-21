@@ -5481,5 +5481,13 @@
   "ntFlagJanByCode": "JAN found from the 品番 ({source}); check it against the original",
   "ntJanFromLibrary": "product library",
   "ntJanFromSupplier": "the supplier's code",
-  "ntJanFromCatalog": "maker catalog"
+  "ntJanFromCatalog": "maker catalog",
+  "ntJanFromHistory": "an earlier file a person checked",
+  "ntJanFromWeb": "the AI's web search",
+  "sfJanOnWeb": "The AI is looking up JANs the invoice does not print {done}/{total}",
+  "jsbWeb": "AI",
+  "jsbLibrary": "Library",
+  "jsbSupplier": "Supplier",
+  "jsbHistory": "Earlier",
+  "jsbCatalog": "Catalog"
 }

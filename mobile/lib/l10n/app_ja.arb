@@ -15480,5 +15480,23 @@
   },
   "ntJanFromLibrary": "商品ライブラリー",
   "ntJanFromSupplier": "仕入先の品番",
-  "ntJanFromCatalog": "メーカーカタログ"
+  "ntJanFromCatalog": "メーカーカタログ",
+  "ntJanFromHistory": "過去に確認した取込",
+  "ntJanFromWeb": "AIのネット検索",
+  "sfJanOnWeb": "JANが印字されていない品番を、AIがネットで探しています {done}/{total}",
+  "@sfJanOnWeb": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "jsbWeb": "AI",
+  "jsbLibrary": "ライブラリ",
+  "jsbSupplier": "仕入先",
+  "jsbHistory": "過去",
+  "jsbCatalog": "カタログ"
 }

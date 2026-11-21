@@ -1028,29 +1028,40 @@ void main() {
     expect(find.byKey(const ValueKey('sf-left-out')), findsNothing);
   });
 
-  testWidgets('an invoice with 品番 and no JAN: the JAN found by the 品番, marked to check; the rest still asked for (0221)',
+  testWidgets('an invoice with 品番 and no JAN: found in the catalog, then by the AI on the web, each marked; the rest left out (0221/0223)',
       (tester) async {
     final reader = FakeMasterImportRepository(
       readResult: const MasterRead(lines: [
         MasterLine(lineNo: 1, maker: '三菱鉛筆', productCode: 'UB150.15', supplierName: '水性BP UB-150 赤', quantity: '200'),
         MasterLine(lineNo: 2, maker: '三菱鉛筆', productCode: 'UMNS05.14', supplierName: 'ユニボールワン', quantity: '600'),
+        MasterLine(lineNo: 3, maker: 'パイロット', productCode: 'HRG-10R-B5', supplierName: 'シャープレックスグリップ', quantity: '1300'),
       ]),
     );
-    final byCode = FakeJanByCodeRepository({'UB150.15': (jan: _jan1, source: 'catalog')});
-    await _pumpCsv(tester, '%PDF', products: {_jan1: 'テスト水性BP 赤'}, reader: reader, name: '請求書.pdf',
-        extra: [janByCodeRepositoryProvider.overrideWithValue(byCode)]);
-    // Asked about by their 品番 and maker.
-    expect(byCode.asked.single.map((r) => (r.code, r.maker)), [('UB150.15', '三菱鉛筆'), ('UMNS05.14', '三菱鉛筆')]);
-    // In the check: the JAN filled in for the first, yellow to look at.
-    final jan1 = tester.widget<TextField>(find.byKey(const ValueKey('rc-1-jan')));
-    expect(jan1.controller!.text, _jan1);
-    final jan2 = tester.widget<TextField>(find.byKey(const ValueKey('rc-2-jan')));
-    expect(jan2.controller!.text, '');
+    final byCode = FakeJanByCodeRepository(const {'UB150.15': (jan: _jan1, source: 'catalog')}, const {'UMNS05.14': _jan2});
+    await _pumpCsv(tester, '%PDF', products: {_jan1: 'テスト水性BP 赤', _jan2: 'テストユニボールワン'}, reader: reader,
+        name: '請求書.pdf', extra: [janByCodeRepositoryProvider.overrideWithValue(byCode)]);
+    // What we hold first, by 品番 and maker; then the web for the two still without one.
+    expect(byCode.asked.single.map((r) => (r.code, r.maker)),
+        [('UB150.15', '三菱鉛筆'), ('UMNS05.14', '三菱鉛筆'), ('HRG-10R-B5', 'パイロット')]);
+    expect(byCode.askedOnWeb.single.map((r) => r.code), ['UMNS05.14', 'HRG-10R-B5']);
+    // In the check: each JAN filled in, marked where it came from.
+    String jan(int no) => tester.widget<TextField>(find.byKey(ValueKey('rc-$no-jan'))).controller!.text;
+    expect([jan(1), jan(2), jan(3)], [_jan1, _jan2, '']);
+    expect(find.byKey(const ValueKey('jan-source-catalog')), findsOneWidget);
+    expect(find.byKey(const ValueKey('jan-source-web')), findsOneWidget);
+    // Written over by a person, the mark goes.
+    await tester.enterText(find.byKey(const ValueKey('rc-2-jan')), _jan3);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('jan-source-web')), findsNothing);
+    await tester.enterText(find.byKey(const ValueKey('rc-2-jan')), _jan2);
+    await tester.pump();
     await tester.tap(find.byKey(const ValueKey('rc-ok')));
     await tester.pumpAndSettle();
-    // The first goes in; the second is still left out for want of a JAN.
+    // Two go in, still marked; the third is left out for want of a JAN.
     expect(find.byKey(const ValueKey('sf-left-out')), findsOneWidget);
     expect(find.byKey(const ValueKey('sf-name-$_jan1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('jan-source-catalog')), findsOneWidget);
+    expect(find.byKey(const ValueKey('jan-source-web')), findsOneWidget);
   });
 
   testWidgets('the 確認用Excel has every row; corrected and chosen again, the corrections are known', (tester) async {

@@ -17936,4 +17936,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ntJanFromCatalog => 'maker catalog';
+
+  @override
+  String get ntJanFromHistory => 'an earlier file a person checked';
+
+  @override
+  String get ntJanFromWeb => 'the AI\'s web search';
+
+  @override
+  String sfJanOnWeb(int done, int total) {
+    return 'The AI is looking up JANs the invoice does not print $done/$total';
+  }
+
+  @override
+  String get jsbWeb => 'AI';
+
+  @override
+  String get jsbLibrary => 'Library';
+
+  @override
+  String get jsbSupplier => 'Supplier';
+
+  @override
+  String get jsbHistory => 'Earlier';
+
+  @override
+  String get jsbCatalog => 'Catalog';
 }

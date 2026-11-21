@@ -30835,6 +30835,54 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'メーカーカタログ'**
   String get ntJanFromCatalog;
+
+  /// No description provided for @ntJanFromHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'過去に確認した取込'**
+  String get ntJanFromHistory;
+
+  /// No description provided for @ntJanFromWeb.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIのネット検索'**
+  String get ntJanFromWeb;
+
+  /// No description provided for @sfJanOnWeb.
+  ///
+  /// In ja, this message translates to:
+  /// **'JANが印字されていない品番を、AIがネットで探しています {done}/{total}'**
+  String sfJanOnWeb(int done, int total);
+
+  /// No description provided for @jsbWeb.
+  ///
+  /// In ja, this message translates to:
+  /// **'AI'**
+  String get jsbWeb;
+
+  /// No description provided for @jsbLibrary.
+  ///
+  /// In ja, this message translates to:
+  /// **'ライブラリ'**
+  String get jsbLibrary;
+
+  /// No description provided for @jsbSupplier.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先'**
+  String get jsbSupplier;
+
+  /// No description provided for @jsbHistory.
+  ///
+  /// In ja, this message translates to:
+  /// **'過去'**
+  String get jsbHistory;
+
+  /// No description provided for @jsbCatalog.
+  ///
+  /// In ja, this message translates to:
+  /// **'カタログ'**
+  String get jsbCatalog;
 }
 
 class _AppLocalizationsDelegate

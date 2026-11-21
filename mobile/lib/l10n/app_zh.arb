@@ -5481,5 +5481,13 @@
   "ntFlagJanByCode": "JAN 由品番补全（{source}），请与原件核对",
   "ntJanFromLibrary": "商品库",
   "ntJanFromSupplier": "供应商品番",
-  "ntJanFromCatalog": "厂商目录"
+  "ntJanFromCatalog": "厂商目录",
+  "ntJanFromHistory": "以前确认过的导入",
+  "ntJanFromWeb": "AI 网络搜索",
+  "sfJanOnWeb": "AI 正在网上查找未印 JAN 的品番 {done}/{total}",
+  "jsbWeb": "AI",
+  "jsbLibrary": "商品库",
+  "jsbSupplier": "供应商",
+  "jsbHistory": "以往",
+  "jsbCatalog": "目录"
 }

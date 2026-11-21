@@ -17448,4 +17448,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ntJanFromCatalog => '厂商目录';
+
+  @override
+  String get ntJanFromHistory => '以前确认过的导入';
+
+  @override
+  String get ntJanFromWeb => 'AI 网络搜索';
+
+  @override
+  String sfJanOnWeb(int done, int total) {
+    return 'AI 正在网上查找未印 JAN 的品番 $done/$total';
+  }
+
+  @override
+  String get jsbWeb => 'AI';
+
+  @override
+  String get jsbLibrary => '商品库';
+
+  @override
+  String get jsbSupplier => '供应商';
+
+  @override
+  String get jsbHistory => '以往';
+
+  @override
+  String get jsbCatalog => '目录';
 }

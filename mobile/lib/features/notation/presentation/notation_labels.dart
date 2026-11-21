@@ -71,11 +71,7 @@ String flagLabel(AppLocalizations l10n, String flag) {
     'jan_code_mismatch' => l10n.ntFlagJanCodeMismatch,
     'total_mismatch' => l10n.ntFlagTotalMismatch,
     'no_jan' => l10n.ntFlagNoJan,
-    'jan_by_code' => l10n.ntFlagJanByCode(switch (parts.length > 1 ? parts[1] : '') {
-        'library' => l10n.ntJanFromLibrary,
-        'supplier' => l10n.ntJanFromSupplier,
-        _ => l10n.ntJanFromCatalog,
-      }),
+    'jan_by_code' => l10n.ntFlagJanByCode(janSourceLabel(l10n, parts.length > 1 ? parts[1] : '')),
     'no_maker' => l10n.ntFlagNoMaker,
     'no_quantity' => l10n.ntFlagNoQuantity,
     'amount_mismatch' => l10n.ntFlagAmount,
@@ -146,4 +142,13 @@ String separatorLabel(AppLocalizations l10n, String? sep) => switch (sep) {
       null => l10n.ntSepAuto,
       'space' => l10n.ntSepSpace,
       _ => l10n.ntSepChar(sep),
+    };
+
+/// Where a JAN the document did not print came from (0221/0223), in words.
+String janSourceLabel(AppLocalizations l10n, String source) => switch (source) {
+      'library' => l10n.ntJanFromLibrary,
+      'supplier' => l10n.ntJanFromSupplier,
+      'history' => l10n.ntJanFromHistory,
+      'web' => l10n.ntJanFromWeb,
+      _ => l10n.ntJanFromCatalog,
     };

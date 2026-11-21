@@ -46,6 +46,7 @@ import '../../requirements/requirements_repository.dart';
 import '../../product/data/product_category_repository.dart';
 import '../../product/domain/product.dart' show Product;
 import '../data/jan_by_code_repository.dart';
+import 'jan_source_badge.dart';
 
 /// A chosen file: its name and bytes, or null when nothing was chosen.
 typedef PickStockFile = Future<({String name, Uint8List bytes})?> Function();
@@ -104,6 +105,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
 
   /// The AI is reading the file (it can take a minute for a long PDF).
   bool _aiReading = false;
+
+  /// JANs the AI is looking for on the web (0223): done, of how many.
+  (int, int)? _webJans;
 
   /// Asking the server what unknown headings mean (0163).
   bool _judgingHeadings = false;
@@ -252,7 +256,9 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
           readDate = data.docDate;
           // An invoice with a maker and a 品番 but no JAN: the JAN found by
           // the 品番 (0221), to be checked beside the original.
-          final read = await fillJansByCode(ref.read(janByCodeRepositoryProvider), [
+          final read = await fillJansByCode(ref.read(janByCodeRepositoryProvider), web: true, onWebProgress: (d, t) {
+            if (mounted) setState(() => _webJans = (d, t));
+          }, [
             for (final l in data.lines)
               ReadRow(
                 lineNo: l.lineNo,
@@ -281,6 +287,7 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
       }
     }
     _aiReading = false;
+    _webJans = null;
     final date = findDocumentDate(fileName: f.name, bytes: f.bytes, rows: rows, readDate: readDate);
     setState(() {
       _sheet = sheet;
@@ -1081,6 +1088,8 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   const ReadingSwarm(),
                   const SizedBox(height: AppSpacing.xs),
                   Text(l10n.sfAiReading, key: const ValueKey('sf-ai-reading'), style: muted),
+                  if (_webJans case (final done, final total) when total > 0)
+                    Text(l10n.sfJanOnWeb(done, total), key: const ValueKey('sf-jan-web'), style: muted),
                 ] else
                   const LinearProgressIndicator(),
                 if (_judgingHeadings) ...[
@@ -1279,7 +1288,10 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                         : null,
                     // The product's own name: the file may write it otherwise,
                     // and the JAN alone decides whose stock it is.
-                    title: Text(_nameFor(l) ?? '', key: ValueKey('sf-name-${l.janCode}')),
+                    title: Row(children: [
+                      Flexible(child: Text(_nameFor(l) ?? '', key: ValueKey('sf-name-${l.janCode}'))),
+                      if (l.janSource case final src?) ...[const SizedBox(width: 6), JanSourceBadge(source: src)],
+                    ]),
                     subtitle: Text([
                       l.janCode,
                       if ((l.code ?? '').isNotEmpty) l.code!,
@@ -1792,7 +1804,16 @@ class _GoingInTableState extends State<_GoingInTable> {
                                   overflow: TextOverflow.ellipsis),
                             ),
                         ])),
-                    cell(2, Text(l.janCode, style: theme.textTheme.bodySmall)),
+                    cell(
+                        2,
+                        Row(children: [
+                          Flexible(child: Text(l.janCode, style: theme.textTheme.bodySmall)),
+                          // Not printed on the file: where it came from (0223).
+                          if (l.janSource case final src?) ...[
+                            const SizedBox(width: 4),
+                            JanSourceBadge(source: src),
+                          ],
+                        ])),
                     cell(3, Text(l.maker ?? '', maxLines: 1, overflow: TextOverflow.ellipsis)),
                     cell(4, Text(l.code ?? '', maxLines: 1, overflow: TextOverflow.ellipsis)),
                     cell(5, Text(n.format(before), key: ValueKey('sf-before-${l.janCode}')), end: true),
