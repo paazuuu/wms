@@ -87,7 +87,15 @@ Deno.serve(async (req) => {
       files[name] = { error: String((e as Error)?.message ?? e) };
     }
   };
-  for (const bucket of ["import-documents", "master-import-files", "payment-proofs"]) await empty(bucket, bucket);
+  // The files of what was done: stock files and evidence, payment proofs, and
+  // since 0226 the shipping lists, freight cost evidence, overseas stock
+  // files, wish lists and supplier answers.
+  for (
+    const bucket of [
+      "import-documents", "master-import-files", "payment-proofs",
+      "outbound-files", "cost-evidence", "overseas-files", "wish-files", "supplier-answers",
+    ]
+  ) await empty(bucket, bucket);
   if (options.products) await empty("product-images", "product-images", "", (p) => p.startsWith("jan/"));
   if (options.lookups) {
     await empty("jan-photos", "product-images", "jan");

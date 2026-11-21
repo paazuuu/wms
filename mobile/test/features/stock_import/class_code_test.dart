@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wms_mobile/features/reports/application/report_providers.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart';
 import 'package:wms_mobile/features/stock_import/presentation/reading_check_screen.dart';
 
@@ -80,6 +81,8 @@ void main() {
           ),
         ),
       ),
+      // Codes registered with earlier imports.
+      overrides: [reportRepositoryProvider.overrideWithValue(FakeReportRepository(codes: const ['HL', 'KX', 'ZQ']))],
     );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
@@ -88,6 +91,14 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('rc-class-code')));
     await tester.pumpAndSettle();
+    // This file's codes, then those registered before — not a fixed list.
+    expect(find.byKey(const ValueKey('cc-use-HL')), findsOneWidget);
+    expect(find.byKey(const ValueKey('cc-past-KX')), findsOneWidget);
+    expect(find.byKey(const ValueKey('cc-past-ZQ')), findsOneWidget);
+    expect(find.byKey(const ValueKey('cc-past-HL')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('cc-past-KX')));
+    await tester.pump();
+    expect(tester.widget<TextField>(find.byKey(const ValueKey('cc-code'))).controller!.text, 'KX');
     // The lines with no code are ticked at first.
     expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('cc-row-1'))).value, isFalse);
     expect(tester.widget<CheckboxListTile>(find.byKey(const ValueKey('cc-row-2'))).value, isTrue);

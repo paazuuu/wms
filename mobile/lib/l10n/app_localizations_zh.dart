@@ -17698,11 +17698,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String raJanUnknown(String jan) {
-    return 'JAN $jan 不在商品库中（可能读错）';
-  }
-
-  @override
   String raNoJanNoCode(String code) {
     return '没有JAN，也没有与品号「$code」相符的商品';
   }
@@ -17770,4 +17765,50 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get raSearchHint => '按文件名、供应商搜索';
+
+  @override
+  String get ccInFile => '此文件中的代码';
+
+  @override
+  String get ccUsedBefore => '以前登记过的代码';
+
+  @override
+  String raNotVerified(int count) {
+    return 'AI的核对读取（第二次）未能完成，$count行只读取了一次（文件过长超时，或达到AI每日上限）';
+  }
+
+  @override
+  String get raPickAll => '全选显示内容';
+
+  @override
+  String get raPickNone => '取消选择';
+
+  @override
+  String raPicked(int count) {
+    return '已选择$count条';
+  }
+
+  @override
+  String get raSavePicked => '将所选保存为MD';
+
+  @override
+  String get raRemovePicked => '删除所选';
+
+  @override
+  String raRemovePickedConfirm(int count) {
+    return '要彻底删除所选的$count条记录及读取的文件吗？无法恢复。';
+  }
+
+  @override
+  String get raRemoveOld => '删除旧记录';
+
+  @override
+  String raOlderThan(int days, int count) {
+    return '$days天以前（$count条）';
+  }
+
+  @override
+  String raRemoveOldConfirm(int days, int count) {
+    return '要彻底删除$days天以前的$count条记录及读取的文件吗？无法恢复。';
+  }
 }

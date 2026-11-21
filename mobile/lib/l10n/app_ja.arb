@@ -15752,14 +15752,6 @@
       }
     }
   },
-  "raJanUnknown": "JAN {jan} が商品ライブラリーに無い（読み間違いの可能性）",
-  "@raJanUnknown": {
-    "placeholders": {
-      "jan": {
-        "type": "String"
-      }
-    }
-  },
   "raNoJanNoCode": "JANが無く、品番「{code}」に合う商品も無い",
   "@raNoJanNoCode": {
     "placeholders": {
@@ -15820,5 +15812,58 @@
       }
     }
   },
-  "raSearchHint": "ファイル名・仕入先で検索"
+  "raSearchHint": "ファイル名・仕入先で検索",
+  "ccInFile": "このファイルのコード",
+  "ccUsedBefore": "これまでに登録したコード",
+  "raNotVerified": "AIの照合の読み取り（2回目）ができず、{count}行が1回だけの読み取りのままです（長いファイルの時間切れ、またはAIの1日の上限）",
+  "@raNotVerified": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raPickAll": "表示中をすべて選ぶ",
+  "raPickNone": "選択を外す",
+  "raPicked": "{count}件を選択中",
+  "@raPicked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raSavePicked": "選択をMDで保存",
+  "raRemovePicked": "選択を削除",
+  "raRemovePickedConfirm": "選択した{count}件の記録と、読み取ったファイルを完全に削除しますか？元には戻せません。",
+  "@raRemovePickedConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raRemoveOld": "古い記録を削除",
+  "raOlderThan": "{days}日より前（{count}件）",
+  "@raOlderThan": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "raRemoveOldConfirm": "{days}日より前の{count}件の記録と、読み取ったファイルを完全に削除しますか？元には戻せません。",
+  "@raRemoveOldConfirm": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -17825,11 +17825,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String raJanUnknown(String jan) {
-    return 'JAN $jan が商品ライブラリーに無い（読み間違いの可能性）';
-  }
-
-  @override
   String raNoJanNoCode(String code) {
     return 'JANが無く、品番「$code」に合う商品も無い';
   }
@@ -17897,4 +17892,50 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get raSearchHint => 'ファイル名・仕入先で検索';
+
+  @override
+  String get ccInFile => 'このファイルのコード';
+
+  @override
+  String get ccUsedBefore => 'これまでに登録したコード';
+
+  @override
+  String raNotVerified(int count) {
+    return 'AIの照合の読み取り（2回目）ができず、$count行が1回だけの読み取りのままです（長いファイルの時間切れ、またはAIの1日の上限）';
+  }
+
+  @override
+  String get raPickAll => '表示中をすべて選ぶ';
+
+  @override
+  String get raPickNone => '選択を外す';
+
+  @override
+  String raPicked(int count) {
+    return '$count件を選択中';
+  }
+
+  @override
+  String get raSavePicked => '選択をMDで保存';
+
+  @override
+  String get raRemovePicked => '選択を削除';
+
+  @override
+  String raRemovePickedConfirm(int count) {
+    return '選択した$count件の記録と、読み取ったファイルを完全に削除しますか？元には戻せません。';
+  }
+
+  @override
+  String get raRemoveOld => '古い記録を削除';
+
+  @override
+  String raOlderThan(int days, int count) {
+    return '$days日より前（$count件）';
+  }
+
+  @override
+  String raRemoveOldConfirm(int days, int count) {
+    return '$days日より前の$count件の記録と、読み取ったファイルを完全に削除しますか？元には戻せません。';
+  }
 }

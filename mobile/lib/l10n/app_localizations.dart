@@ -31220,12 +31220,6 @@ abstract class AppLocalizations {
   /// **'品番「{code}」で商品を特定'**
   String raFoundByCode(String code);
 
-  /// No description provided for @raJanUnknown.
-  ///
-  /// In ja, this message translates to:
-  /// **'JAN {jan} が商品ライブラリーに無い（読み間違いの可能性）'**
-  String raJanUnknown(String jan);
-
   /// No description provided for @raNoJanNoCode.
   ///
   /// In ja, this message translates to:
@@ -31339,6 +31333,78 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'ファイル名・仕入先で検索'**
   String get raSearchHint;
+
+  /// No description provided for @ccInFile.
+  ///
+  /// In ja, this message translates to:
+  /// **'このファイルのコード'**
+  String get ccInFile;
+
+  /// No description provided for @ccUsedBefore.
+  ///
+  /// In ja, this message translates to:
+  /// **'これまでに登録したコード'**
+  String get ccUsedBefore;
+
+  /// No description provided for @raNotVerified.
+  ///
+  /// In ja, this message translates to:
+  /// **'AIの照合の読み取り（2回目）ができず、{count}行が1回だけの読み取りのままです（長いファイルの時間切れ、またはAIの1日の上限）'**
+  String raNotVerified(int count);
+
+  /// No description provided for @raPickAll.
+  ///
+  /// In ja, this message translates to:
+  /// **'表示中をすべて選ぶ'**
+  String get raPickAll;
+
+  /// No description provided for @raPickNone.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択を外す'**
+  String get raPickNone;
+
+  /// No description provided for @raPicked.
+  ///
+  /// In ja, this message translates to:
+  /// **'{count}件を選択中'**
+  String raPicked(int count);
+
+  /// No description provided for @raSavePicked.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択をMDで保存'**
+  String get raSavePicked;
+
+  /// No description provided for @raRemovePicked.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択を削除'**
+  String get raRemovePicked;
+
+  /// No description provided for @raRemovePickedConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'選択した{count}件の記録と、読み取ったファイルを完全に削除しますか？元には戻せません。'**
+  String raRemovePickedConfirm(int count);
+
+  /// No description provided for @raRemoveOld.
+  ///
+  /// In ja, this message translates to:
+  /// **'古い記録を削除'**
+  String get raRemoveOld;
+
+  /// No description provided for @raOlderThan.
+  ///
+  /// In ja, this message translates to:
+  /// **'{days}日より前（{count}件）'**
+  String raOlderThan(int days, int count);
+
+  /// No description provided for @raRemoveOldConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'{days}日より前の{count}件の記録と、読み取ったファイルを完全に削除しますか？元には戻せません。'**
+  String raRemoveOldConfirm(int days, int count);
 }
 
 class _AppLocalizationsDelegate

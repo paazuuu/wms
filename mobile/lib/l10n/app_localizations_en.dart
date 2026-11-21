@@ -18187,11 +18187,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String raJanUnknown(String jan) {
-    return 'JAN $jan is not in the product library (possibly misread)';
-  }
-
-  @override
   String raNoJanNoCode(String code) {
     return 'No JAN, and no product has the code \"$code\"';
   }
@@ -18260,4 +18255,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get raSearchHint => 'Search by file name or supplier';
+
+  @override
+  String get ccInFile => 'Codes in this file';
+
+  @override
+  String get ccUsedBefore => 'Codes registered before';
+
+  @override
+  String raNotVerified(int count) {
+    return 'The AI\'s check reading (the second) could not be done: $count rows were read only once (a long file ran out of time, or the AI\'s daily limit)';
+  }
+
+  @override
+  String get raPickAll => 'Select all shown';
+
+  @override
+  String get raPickNone => 'Clear selection';
+
+  @override
+  String raPicked(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get raSavePicked => 'Save selected as Markdown';
+
+  @override
+  String get raRemovePicked => 'Remove selected';
+
+  @override
+  String raRemovePickedConfirm(int count) {
+    return 'Erase the $count selected records and the files read for good? This cannot be undone.';
+  }
+
+  @override
+  String get raRemoveOld => 'Remove old records';
+
+  @override
+  String raOlderThan(int days, int count) {
+    return 'Older than $days days ($count)';
+  }
+
+  @override
+  String raRemoveOldConfirm(int days, int count) {
+    return 'Erase the $count records older than $days days and the files read for good? This cannot be undone.';
+  }
 }

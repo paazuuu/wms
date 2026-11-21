@@ -75,7 +75,7 @@ void main() {
     expect(repo.readPaths.values.single, '1/1-明細_読み取り結果.xlsx');
   });
 
-  testWidgets('読み取り検査: a PDF list\'s doubts and the rows no product was found for are kept', (tester) async {
+  testWidgets('読み取り検査: a PDF list\'s doubts and readings two ways are kept; a JAN only new to the library is not', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final ai = FakeMasterImportRepository(
@@ -104,7 +104,7 @@ void main() {
     expect((audit.fileName, audit.source, audit.byAi), ('明細.pdf', AuditSource.outbound, true));
     String of(AuditKind k) => [for (final i in audit.issues) if (i.kind == k) '${i.lineNo} ${i.detail}'].join('\n');
     // The AI's lines are rows 2 and 3 of the sheet made from them.
-    expect(of(AuditKind.doubt), allOf(contains('2 '), contains('3 JAN 4909999000021')));
+    expect(of(AuditKind.doubt), allOf(contains('2 '), isNot(contains('4909999000021'))));
     expect(of(AuditKind.ambiguous), allOf(contains('3 '), contains('「2」'), contains('「20」')));
   });
 

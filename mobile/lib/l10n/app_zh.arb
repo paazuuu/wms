@@ -5546,7 +5546,6 @@
   "raSkippedRow": "因无数量、JAN、品号而未读取的行：{text}",
   "raJanInvalid": "JAN栏「{raw}」无法作为JAN读取",
   "raFoundByCode": "根据品号「{code}」确定了商品",
-  "raJanUnknown": "JAN {jan} 不在商品库中（可能读错）",
   "raNoJanNoCode": "没有JAN，也没有与品号「{code}」相符的商品",
   "raSeveralProducts": "与品号「{code}」相符的商品有多个",
   "raMdDate": "日期时间",
@@ -5565,5 +5564,17 @@
   "raRemoved": "已删除{count}条",
   "raOpenFile": "原文件",
   "raBy": "读取人：{name}",
-  "raSearchHint": "按文件名、供应商搜索"
+  "raSearchHint": "按文件名、供应商搜索",
+  "ccInFile": "此文件中的代码",
+  "ccUsedBefore": "以前登记过的代码",
+  "raNotVerified": "AI的核对读取（第二次）未能完成，{count}行只读取了一次（文件过长超时，或达到AI每日上限）",
+  "raPickAll": "全选显示内容",
+  "raPickNone": "取消选择",
+  "raPicked": "已选择{count}条",
+  "raSavePicked": "将所选保存为MD",
+  "raRemovePicked": "删除所选",
+  "raRemovePickedConfirm": "要彻底删除所选的{count}条记录及读取的文件吗？无法恢复。",
+  "raRemoveOld": "删除旧记录",
+  "raOlderThan": "{days}天以前（{count}条）",
+  "raRemoveOldConfirm": "要彻底删除{days}天以前的{count}条记录及读取的文件吗？无法恢复。"
 }

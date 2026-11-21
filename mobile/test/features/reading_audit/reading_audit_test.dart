@@ -90,6 +90,24 @@ void main() {
       expect(byKind[AuditKind.missing]!.first, contains('対処: 人が「$_jan2」を入力'));
     });
 
+    test('a check reading that did not run is one item for the file; 自社商品なし is not about the reading', () {
+      const read = [
+        ReadRow(lineNo: 1, jan: _jan1, name: 'ペン', quantity: '1', flags: ['not_verified', 'unresolved']),
+        ReadRow(lineNo: 2, jan: _jan2, name: 'ノート', quantity: '2', flags: ['not_verified', 'unresolved']),
+        ReadRow(lineNo: 3, jan: '4909999000038', name: '消しゴム', quantity: '3', flags: ['not_verified']),
+      ];
+      final a = auditOfStockRead(l10n,
+          id: 'v', source: AuditSource.stockFile, fileName: '請求書.pdf', byAi: true, read: read, at: _at);
+      expect(a.issues.single.kind, AuditKind.doubt);
+      expect(a.issues.single.lineNo, isNull);
+      expect(auditIssueText(l10n, a.issues.single), startsWith('ファイル全体: AIの照合の読み取り（2回目）ができず、3行が'));
+      // Without either, nothing to keep.
+      final clean = auditOfStockRead(l10n,
+          id: 'w', source: AuditSource.stockFile, fileName: '請求書.pdf', byAi: true,
+          read: const [ReadRow(lineNo: 1, jan: _jan1, name: 'ペン', quantity: '1', flags: ['unresolved'])], at: _at);
+      expect(clean.issues, isEmpty);
+    });
+
     test('a failure is one item for the whole file', () {
       final a = auditOfFailure(l10n,
           id: 'c', source: AuditSource.outbound, fileName: '明細.pdf', byAi: true, reason: 'AIの上限', at: _at);
@@ -250,6 +268,56 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.kept, isEmpty);
     expect(find.byKey(const ValueKey('ra-empty')), findsOneWidget);
+  });
+
+  testWidgets('the screen: readings ticked one by one, saved or removed together; old ones removed by age', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final saved = <(String, Uint8List)>[];
+    ReadingAudit aged(String id, int days) => ReadingAudit(
+          id: id,
+          at: DateTime.now().subtract(Duration(days: days, hours: 1)),
+          source: AuditSource.stockFile,
+          fileName: '$id.pdf',
+          byAi: true,
+          issues: const [AuditIssue(kind: AuditKind.missing, field: 'JAN', lineNo: 1, detail: 'x')],
+        );
+    final repo = FakeReadingAuditRepository([aged('new', 1), aged('month', 40), aged('old', 100)]);
+    await pumpApp(tester, const ReadingAuditScreen(), overrides: [
+      readingAuditRepositoryProvider.overrideWithValue(repo),
+      saveFileProvider.overrideWithValue((n, b) async => saved.add((n, b))),
+    ]);
+    expect(find.text('0件を選択中'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('ra-pick-new')));
+    await tester.tap(find.byKey(const ValueKey('ra-pick-old')));
+    await tester.pump();
+    expect(find.text('2件を選択中'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('ra-save-picked')));
+    await tester.pumpAndSettle();
+    final md = utf8.decode(saved.single.$2);
+    expect(md, startsWith('# 読み取り検査（2件）'));
+    expect(md, allOf(contains('## new.pdf'), contains('## old.pdf'), isNot(contains('month.pdf'))));
+    // Only one of them removed: untick the other first.
+    await tester.tap(find.byKey(const ValueKey('ra-pick-old')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('ra-remove-picked')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('選択した1件の記録'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('ra-remove-ok')));
+    await tester.pumpAndSettle();
+    expect(repo.kept.map((a) => a.id), unorderedEquals(['month', 'old']));
+    expect(find.text('0件を選択中'), findsOneWidget);
+
+    // By age: older than 90 days takes only the oldest.
+    await tester.tap(find.byKey(const ValueKey('ra-remove-old')));
+    await tester.pumpAndSettle();
+    expect(find.text('90日より前（1件）'), findsOneWidget);
+    expect(find.text('30日より前（2件）'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('ra-old-90')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ra-remove-ok')));
+    await tester.pumpAndSettle();
+    expect(repo.kept.map((a) => a.id), ['month']);
   });
 
   test('in 管理, for the people in charge as well as the system administrator', () {

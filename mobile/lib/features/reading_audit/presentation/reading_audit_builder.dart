@@ -18,8 +18,23 @@ const _missingFlags = {'no_jan', 'no_quantity'};
 const _ambiguousFlags = {'ai_disagree', 'split_disagree', 'jan_restore_mismatch', 'jan_code_mismatch'};
 const _remedyFlags = {'jan_by_code', 'jan_restored', 'qty_from_amount', 'qty_from_cases'};
 
-/// Said on every row, or a person's own marks: nothing to learn from.
-const _quietFlags = {'no_maker', humanCheckedFlag, humanCorrectedFlag, humanRemovedFlag};
+/// Said on every row, or a person's own marks: nothing to learn from. Not
+/// about the reading either: `unresolved` (自社商品なし) says only that the
+/// product library does not have it yet — the usual case while it is young.
+/// `not_verified` is said of the whole file, once (see [_notVerified]).
+const _quietFlags = {
+  'no_maker', 'unresolved', 'not_verified', humanCheckedFlag, humanCorrectedFlag, humanRemovedFlag,
+};
+
+/// The AI reads a file twice and sets the two readings side by side; when
+/// the second (照合) could not be done — a long file out of time, the AI's
+/// daily limit — every line says `not_verified`. One item for the file.
+AuditIssue? _notVerified(AppLocalizations l10n, Iterable<List<String>> flags) {
+  final n = flags.where((f) => f.contains('not_verified')).length;
+  return n == 0
+      ? null
+      : AuditIssue(kind: AuditKind.doubt, field: auditFieldLabel(l10n, 'file'), detail: l10n.raNotVerified(n));
+}
 
 /// A row's fields as read, by key.
 typedef _Values = Map<String, String>;
@@ -235,7 +250,9 @@ ReadingAudit auditOfStockRead(
   String? supplier,
   DateTime? at,
 }) {
-  final issues = <AuditIssue>[];
+  final issues = <AuditIssue>[
+    if (_notVerified(l10n, read.map((r) => r.flags)) case final i?) i,
+  ];
   if (sheet != null) issues.addAll(_headingIssues(l10n, sheet));
   final after = {for (final r in checked ?? const <ReadRow>[]) r.lineNo: r};
   final readNos = {for (final r in read) r.lineNo};
@@ -330,7 +347,9 @@ ReadingAudit auditOfOutbound(
   List<OutboundPlanLine> plan = const [],
   DateTime? at,
 }) {
-  final issues = <AuditIssue>[];
+  final issues = <AuditIssue>[
+    if (_notVerified(l10n, aiLines.map((l) => l.flags)) case final i?) i,
+  ];
   // The AI's lines are the sheet's rows from row 2 (row 1 is the headings).
   for (final l in aiLines) {
     issues.addAll(_rowIssues(l10n,
@@ -391,13 +410,6 @@ ReadingAudit auditOfOutbound(
       ));
     }
     switch (p?.status) {
-      case OutboundStatus.unknownJan:
-        issues.add(AuditIssue(
-          kind: AuditKind.doubt,
-          field: auditFieldLabel(l10n, 'jan'),
-          lineNo: row.rowNo,
-          detail: l10n.raJanUnknown(row.jan),
-        ));
       case OutboundStatus.noJan when !row.janInvalid:
         issues.add(AuditIssue(
           kind: AuditKind.unresolved,

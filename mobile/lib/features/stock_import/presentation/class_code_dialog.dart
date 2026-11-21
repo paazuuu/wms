@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../reports/application/report_providers.dart';
 import '../domain/stock_file.dart' show classCodeOf;
+
+/// The 識別コード kept with the imports registered so far (class_codes_in_use,
+/// 0218): every code read or typed in, once its import went in. Empty when
+/// it cannot be had.
+final pastClassCodesProvider = FutureProvider.autoDispose<List<String>>((ref) async {
+  final r = await ref.watch(reportRepositoryProvider).classCodes();
+  return r is ApiSuccess<List<String>> ? r.data : const <String>[];
+});
 
 /// One line offered for a 識別コード (0218): its number, what it is, and the
 /// code it has now (empty when none).
@@ -20,16 +31,16 @@ class ClassCodeRow {
 Future<({String code, Set<int> lineNos})?> showClassCodeBulkDialog(BuildContext context, List<ClassCodeRow> rows) =>
     showDialog<({String code, Set<int> lineNos})>(context: context, builder: (_) => _ClassCodeDialog(rows: rows));
 
-class _ClassCodeDialog extends StatefulWidget {
+class _ClassCodeDialog extends ConsumerStatefulWidget {
   const _ClassCodeDialog({required this.rows});
 
   final List<ClassCodeRow> rows;
 
   @override
-  State<_ClassCodeDialog> createState() => _ClassCodeDialogState();
+  ConsumerState<_ClassCodeDialog> createState() => _ClassCodeDialogState();
 }
 
-class _ClassCodeDialogState extends State<_ClassCodeDialog> {
+class _ClassCodeDialogState extends ConsumerState<_ClassCodeDialog> {
   final _code = TextEditingController();
   final _q = TextEditingController();
   late final Set<int> _chosen = {for (final r in widget.rows) if (r.code.isEmpty) r.lineNo};
@@ -46,7 +57,29 @@ class _ClassCodeDialogState extends State<_ClassCodeDialog> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    // This file's codes first, then the ones registered before.
     final inUse = ({for (final r in widget.rows) if (r.code.isNotEmpty) r.code}.toList()..sort());
+    final before = [
+      for (final c in ref.watch(pastClassCodesProvider).valueOrNull ?? const <String>[])
+        if (!inUse.contains(c)) c,
+    ];
+    Widget chips(String title, List<String> codes, String keyPrefix) => Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.xs),
+          child: Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(title, style: muted),
+                for (final c in codes)
+                  ActionChip(
+                    key: ValueKey('$keyPrefix-$c'),
+                    label: Text(c),
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => setState(() => _code.text = c),
+                  ),
+              ]),
+        );
     final q = _q.text.trim().toLowerCase();
     final listed = [
       for (final r in widget.rows)
@@ -75,18 +108,12 @@ class _ClassCodeDialogState extends State<_ClassCodeDialog> {
               errorText: valid ? null : l10n.ccInvalid,
             ),
           ),
-          if (inUse.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Wrap(spacing: AppSpacing.xs, runSpacing: AppSpacing.xs, children: [
-              for (final c in inUse)
-                ActionChip(
-                  key: ValueKey('cc-use-$c'),
-                  label: Text(c),
-                  visualDensity: VisualDensity.compact,
-                  onPressed: () => setState(() => _code.text = c),
-                ),
-            ]),
-          ],
+          if (inUse.isNotEmpty) chips(l10n.ccInFile, inUse, 'cc-use'),
+          if (before.isNotEmpty)
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 96),
+              child: SingleChildScrollView(child: chips(l10n.ccUsedBefore, before, 'cc-past')),
+            ),
           const SizedBox(height: AppSpacing.sm),
           TextField(
             key: const ValueKey('cc-search'),

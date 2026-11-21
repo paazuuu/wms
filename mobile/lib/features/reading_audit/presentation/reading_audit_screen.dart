@@ -35,6 +35,9 @@ class ReadingAuditScreen extends ConsumerStatefulWidget {
 class _ReadingAuditScreenState extends ConsumerState<ReadingAuditScreen> {
   AuditSource? _source;
   AuditKind? _kind;
+
+  /// The readings ticked, by id: saved or removed together.
+  final _picked = <String>{};
   final _search = TextEditingController();
   bool _busy = false;
 
@@ -116,14 +119,15 @@ class _ReadingAuditScreenState extends ConsumerState<ReadingAuditScreen> {
     }
   }
 
-  Future<void> _remove(List<ReadingAudit> list, {required bool many}) async {
+  /// Erases [list] for good, after asking with [message].
+  Future<void> _remove(List<ReadingAudit> list, String message) async {
     final ids = [for (final a in list) if (a.serverId != null) a.serverId!];
     if (ids.isEmpty) return;
     final l10n = AppLocalizations.of(context);
     final ok = await showPopconfirm(
       context,
       title: l10n.raRemoveTitle,
-      message: many ? l10n.raRemoveShownConfirm(ids.length) : l10n.raRemoveConfirm,
+      message: message,
       okLabel: l10n.raRemoveOne,
       okKey: const ValueKey('ra-remove-ok'),
       danger: true,
@@ -136,6 +140,7 @@ class _ReadingAuditScreenState extends ConsumerState<ReadingAuditScreen> {
     switch (r) {
       case ApiSuccess(:final data):
         _snack(l10n.raRemoved(data));
+        setState(() => _picked.removeAll(list.map((a) => a.id)));
         ref.invalidate(readingAuditsProvider);
       case ApiFailure(:final message):
         _snack(humanizeApiErrorMessage(l10n, message));
@@ -162,6 +167,10 @@ class _ReadingAuditScreenState extends ConsumerState<ReadingAuditScreen> {
         error: (e, _) => ErrorStateView(message: '$e', onRetry: () => ref.invalidate(readingAuditsProvider)),
         data: (all) {
           final shown = _shown(all);
+          final picked = [for (final a in all) if (_picked.contains(a.id)) a];
+          final now = DateTime.now();
+          List<ReadingAudit> olderThan(int days) =>
+              [for (final a in all) if (a.at.isBefore(now.subtract(Duration(days: days)))) a];
           return ListView(
             key: const ValueKey('ra-list'),
             padding: const EdgeInsets.all(AppSpacing.lg),
@@ -209,22 +218,93 @@ class _ReadingAuditScreenState extends ConsumerState<ReadingAuditScreen> {
                 ],
               ),
               const SizedBox(height: AppSpacing.sm),
-              Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
-                FilledButton.tonalIcon(
-                  key: const ValueKey('ra-save-all'),
-                  onPressed: shown.isEmpty
-                      ? null
-                      : () => _save(auditFileName(l10n, DateTime.now()), auditsToMarkdown(l10n, shown)),
-                  icon: const Icon(Icons.download_outlined, size: 18),
-                  label: Text(l10n.raSaveAll),
-                ),
-                TextButton.icon(
-                  key: const ValueKey('ra-remove-shown'),
-                  onPressed: shown.isEmpty || _busy ? null : () => _remove(shown, many: true),
-                  icon: const Icon(Icons.delete_sweep_outlined, size: 18),
-                  label: Text(l10n.raRemoveShown),
-                ),
-              ]),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  FilledButton.tonalIcon(
+                    key: const ValueKey('ra-save-all'),
+                    onPressed: shown.isEmpty
+                        ? null
+                        : () => _save(auditFileName(l10n, DateTime.now()), auditsToMarkdown(l10n, shown)),
+                    icon: const Icon(Icons.download_outlined, size: 18),
+                    label: Text(l10n.raSaveAll),
+                  ),
+                  TextButton.icon(
+                    key: const ValueKey('ra-remove-shown'),
+                    onPressed:
+                        shown.isEmpty || _busy ? null : () => _remove(shown, l10n.raRemoveShownConfirm(shown.length)),
+                    icon: const Icon(Icons.delete_sweep_outlined, size: 18),
+                    label: Text(l10n.raRemoveShown),
+                  ),
+                  // Older than a week, a month, three months: all of them,
+                  // whatever is shown.
+                  PopupMenuButton<int>(
+                    key: const ValueKey('ra-remove-old'),
+                    enabled: all.isNotEmpty && !_busy,
+                    tooltip: l10n.raRemoveOld,
+                    onSelected: (days) {
+                      final old = olderThan(days);
+                      if (old.isNotEmpty) _remove(old, l10n.raRemoveOldConfirm(days, old.length));
+                    },
+                    itemBuilder: (_) => [
+                      for (final d in const [7, 30, 90])
+                        PopupMenuItem(
+                          key: ValueKey('ra-old-$d'),
+                          value: d,
+                          enabled: olderThan(d).isNotEmpty,
+                          child: Text(l10n.raOlderThan(d, olderThan(d).length)),
+                        ),
+                    ],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        const Icon(Icons.auto_delete_outlined, size: 18),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(l10n.raRemoveOld),
+                        const Icon(Icons.arrow_drop_down),
+                      ]),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              // Ticked one by one, or all that is shown.
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  TextButton(
+                    key: const ValueKey('ra-pick-all'),
+                    onPressed: shown.isEmpty ? null : () => setState(() => _picked.addAll(shown.map((a) => a.id))),
+                    child: Text(l10n.raPickAll),
+                  ),
+                  TextButton(
+                    key: const ValueKey('ra-pick-none'),
+                    onPressed: _picked.isEmpty ? null : () => setState(_picked.clear),
+                    child: Text(l10n.raPickNone),
+                  ),
+                  Text(l10n.raPicked(picked.length), key: const ValueKey('ra-picked'), style: muted),
+                  OutlinedButton.icon(
+                    key: const ValueKey('ra-save-picked'),
+                    onPressed: picked.isEmpty
+                        ? null
+                        : () => _save(auditFileName(l10n, DateTime.now()), auditsToMarkdown(l10n, picked)),
+                    icon: const Icon(Icons.download_outlined, size: 18),
+                    label: Text(l10n.raSavePicked),
+                  ),
+                  OutlinedButton.icon(
+                    key: const ValueKey('ra-remove-picked'),
+                    onPressed: picked.isEmpty || _busy
+                        ? null
+                        : () => _remove(picked, l10n.raRemovePickedConfirm(picked.length)),
+                    icon: const Icon(Icons.delete_outline, size: 18),
+                    label: Text(l10n.raRemovePicked),
+                  ),
+                ],
+              ),
               const SizedBox(height: AppSpacing.md),
               if (shown.isEmpty)
                 Padding(
@@ -236,10 +316,12 @@ class _ReadingAuditScreenState extends ConsumerState<ReadingAuditScreen> {
                   key: ValueKey('ra-${a.id}'),
                   audit: a,
                   busy: _busy,
+                  picked: _picked.contains(a.id),
+                  onPick: (v) => setState(() => v ? _picked.add(a.id) : _picked.remove(a.id)),
                   onCopy: () => _copy(auditToMarkdown(l10n, a)),
                   onSave: () => _save(auditFileName(l10n, a.at, a.fileName), auditToMarkdown(l10n, a)),
                   onFile: a.filePath == null ? null : () => _download(a),
-                  onRemove: () => _remove([a], many: false),
+                  onRemove: () => _remove([a], l10n.raRemoveConfirm),
                 ),
             ],
           );
@@ -260,6 +342,8 @@ class _AuditCard extends StatelessWidget {
     super.key,
     required this.audit,
     required this.busy,
+    required this.picked,
+    required this.onPick,
     required this.onCopy,
     required this.onSave,
     required this.onFile,
@@ -268,6 +352,8 @@ class _AuditCard extends StatelessWidget {
 
   final ReadingAudit audit;
   final bool busy;
+  final bool picked;
+  final ValueChanged<bool> onPick;
   final VoidCallback onCopy;
   final VoidCallback onSave;
   final VoidCallback? onFile;
@@ -299,7 +385,10 @@ class _AuditCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
         key: ValueKey('ra-tile-${a.id}'),
-        leading: Icon(a.filePath == null ? Icons.description_outlined : Icons.attach_file),
+        leading: Row(mainAxisSize: MainAxisSize.min, children: [
+          Checkbox(key: ValueKey('ra-pick-${a.id}'), value: picked, onChanged: (v) => onPick(v ?? false)),
+          Icon(a.filePath == null ? Icons.description_outlined : Icons.attach_file, size: 20),
+        ]),
         title: Text(a.fileName, maxLines: 2, overflow: TextOverflow.ellipsis),
         subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(meta, style: muted),

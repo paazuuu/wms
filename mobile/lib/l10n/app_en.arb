@@ -5546,7 +5546,6 @@
   "raSkippedRow": "Row not read (no quantity, JAN or product code): {text}",
   "raJanInvalid": "The JAN cell \"{raw}\" does not read as a JAN",
   "raFoundByCode": "Product found by its code \"{code}\"",
-  "raJanUnknown": "JAN {jan} is not in the product library (possibly misread)",
   "raNoJanNoCode": "No JAN, and no product has the code \"{code}\"",
   "raSeveralProducts": "Several products have the code \"{code}\"",
   "raMdDate": "Date",
@@ -5565,5 +5564,17 @@
   "raRemoved": "Removed {count}",
   "raOpenFile": "Original file",
   "raBy": "Read by {name}",
-  "raSearchHint": "Search by file name or supplier"
+  "raSearchHint": "Search by file name or supplier",
+  "ccInFile": "Codes in this file",
+  "ccUsedBefore": "Codes registered before",
+  "raNotVerified": "The AI's check reading (the second) could not be done: {count} rows were read only once (a long file ran out of time, or the AI's daily limit)",
+  "raPickAll": "Select all shown",
+  "raPickNone": "Clear selection",
+  "raPicked": "{count} selected",
+  "raSavePicked": "Save selected as Markdown",
+  "raRemovePicked": "Remove selected",
+  "raRemovePickedConfirm": "Erase the {count} selected records and the files read for good? This cannot be undone.",
+  "raRemoveOld": "Remove old records",
+  "raOlderThan": "Older than {days} days ({count})",
+  "raRemoveOldConfirm": "Erase the {count} records older than {days} days and the files read for good? This cannot be undone."
 }
