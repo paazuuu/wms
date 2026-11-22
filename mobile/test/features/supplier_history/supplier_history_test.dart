@@ -254,6 +254,32 @@ void main() {
     expect([for (final p in (all as ApiSuccess<List<TradingPartner>>).data) p.name], contains('テスト新商事'));
   });
 
+  Future<void> pumpWithUnknown(WidgetTester tester, Map<String, Object> unknown) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const SupplierProductNamesScreen(), overrides: [
+      supplierCardsProvider.overrideWith((ref) async => [
+            SupplierCard.fromJson({'id': 41, 'name': 'アケボノ商事', 'code': 'S00002'}),
+            SupplierCard.fromJson({'id': 9, 'name': '未確認（要手動確認）', 'code': 'UNKNOWN', ...unknown}),
+          ]),
+      canManagePartnersProvider.overrideWithValue(true),
+    ]);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('未確認（要手動確認）, the system\'s own, is not shown while nothing is filed under it', (tester) async {
+    await pumpWithUnknown(tester, const {});
+    expect(find.byKey(const ValueKey('sup-card-9')), findsNothing);
+    expect(find.byKey(const ValueKey('sup-card-41')), findsOneWidget);
+  });
+
+  testWidgets('未確認（要手動確認） shows while purchases are filed under it, and is not edited', (tester) async {
+    await pumpWithUnknown(tester, const {'products': 2, 'purchases': 1, 'units': 10});
+    expect(find.byKey(const ValueKey('sup-card-9')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sup-menu-9')), findsNothing);
+    expect(find.byKey(const ValueKey('sup-menu-41')), findsOneWidget);
+  });
+
   testWidgets('others see the supplier cards without adding, editing or erasing', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1200, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));

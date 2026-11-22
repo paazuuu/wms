@@ -150,7 +150,9 @@ class TradingPartnerListScreen extends ConsumerWidget {
                 message: '$e',
                 onRetry: () => ref.invalidate(tradingPartnerListProvider),
               ),
-              data: (partners) {
+              data: (all) {
+                // 未確認（要手動確認）is the system's own: not listed here.
+                final partners = [for (final p in all) if (!isPlaceholderPartner(p.code)) p];
                 if (partners.isEmpty) {
                   return EmptyStateView(
                     icon: Icons.handshake_outlined,

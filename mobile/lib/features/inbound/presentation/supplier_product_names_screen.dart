@@ -152,7 +152,12 @@ class _SupplierProductNamesViewState extends ConsumerState<SupplierProductNamesV
             onRetry: () => ref.invalidate(supplierCardsProvider),
           ),
           data: (all) {
-            final cards = all.where(_cardMatches).toList();
+            // 未確認（要手動確認）only while purchases are filed under it — those
+            // are to be checked; otherwise it is the system's own, not shown.
+            final cards = [
+              for (final c in all.where(_cardMatches))
+                if (!isPlaceholderPartner(c.code) || c.products > 0 || c.purchases > 0) c,
+            ];
             if (cards.isEmpty) return EmptyStateView(icon: Icons.storefront_outlined, title: l10n.supEmpty);
             return RefreshIndicator(
               onRefresh: () async => ref.invalidate(supplierCardsProvider),
@@ -189,7 +194,7 @@ class _SupplierProductNamesViewState extends ConsumerState<SupplierProductNamesV
                                   overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
                             ),
-                            if (canManage)
+                            if (canManage && !isPlaceholderPartner(c.code))
                               PopupMenuButton<String>(
                                 key: ValueKey('sup-menu-${c.id}'),
                                 padding: EdgeInsets.zero,
@@ -198,13 +203,7 @@ class _SupplierProductNamesViewState extends ConsumerState<SupplierProductNamesV
                                 itemBuilder: (_) => [
                                   PopupMenuItem(
                                       key: ValueKey('sup-edit-${c.id}'), value: 'edit', child: Text(l10n.caEdit)),
-                                  if (isPlaceholderPartner(c.code))
-                                    PopupMenuItem(
-                                        key: ValueKey('sup-system-owned-${c.id}'),
-                                        enabled: false,
-                                        child: Text(l10n.caSystemOwned))
-                                  else
-                                    PopupMenuItem(
+                                  PopupMenuItem(
                                       key: ValueKey('sup-erase-${c.id}'),
                                       value: 'erase',
                                       child: Text(l10n.caErase, style: TextStyle(color: theme.colorScheme.error)),

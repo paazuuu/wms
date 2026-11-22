@@ -252,17 +252,15 @@ void main() {
     expect(find.byKey(const ValueKey('partner-erase')), findsNothing);
   });
 
-  testWidgets('未確認（要手動確認） is the system\'s own: said so, no erasing offered', (tester) async {
+  testWidgets('未確認（要手動確認） is the system\'s own: not listed', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final repo = FakeTradingPartnerRepository(partners: const [
       TradingPartner(id: 9, name: '未確認（要手動確認）', code: 'UNKNOWN'),
+      TradingPartner(id: 1, name: 'テスト商事株式会社', code: 'S00001'),
     ]);
     await _pump(tester, repo);
-    expect(find.byKey(const ValueKey('partner-system-owned-9')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('partner-card-9')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('partner-system-owned')), findsOneWidget);
-    expect(find.byKey(const ValueKey('partner-erase')), findsNothing);
+    expect(find.byKey(const ValueKey('partner-card-9')), findsNothing);
+    expect(find.byKey(const ValueKey('partner-card-1')), findsOneWidget);
   });
 }
