@@ -9,12 +9,16 @@ import '../../../l10n/app_localizations.dart';
 import '../application/audit_providers.dart';
 import '../domain/audit_entry.dart';
 import 'audit_event_labels.dart';
+import '../../error_log/presentation/error_log_screen.dart';
 
 /// The audit trail (spec §33): every approval, rejection, cancellation and
 /// completion any mutating RPC has logged, newest first. Filterable by event
-/// type and exportable as CSV.
+/// type and exportable as CSV. Its second tab is the エラーログ (0227).
 class AuditLogScreen extends ConsumerWidget {
-  const AuditLogScreen({super.key});
+  const AuditLogScreen({super.key, this.initialTab = 0});
+
+  /// 0: 操作の記録, 1: エラーログ.
+  final int initialTab;
 
   Future<void> _export(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
@@ -75,19 +79,36 @@ class AuditLogScreen extends ConsumerWidget {
     final types = ref.watch(auditEventTypesProvider).valueOrNull ?? const [];
     final active = ref.watch(auditEventTypeFilterProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.auditTitle),
-        actions: [
-          IconButton(
-            tooltip: l10n.auditExport,
-            icon: const Icon(Icons.file_download_outlined),
-            onPressed: () => _export(context, ref),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-        ],
+    return DefaultTabController(
+      length: 2,
+      initialIndex: initialTab.clamp(0, 1),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.auditTitle),
+          actions: [
+            IconButton(
+              tooltip: l10n.auditExport,
+              icon: const Icon(Icons.file_download_outlined),
+              onPressed: () => _export(context, ref),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+          ],
+          bottom: TabBar(isScrollable: true, tabAlignment: TabAlignment.start, tabs: [
+            Tab(key: const ValueKey('audit-tab-log'), text: l10n.auditTabLog),
+            Tab(key: const ValueKey('audit-tab-errors'), text: l10n.featErrorLog),
+          ]),
+        ),
+        body: TabBarView(children: [
+          _log(context, ref, l10n, async, types, active),
+          const ErrorLogScreen(embedded: true),
+        ]),
       ),
-      body: Column(
+    );
+  }
+
+  Widget _log(BuildContext context, WidgetRef ref, AppLocalizations l10n, AsyncValue<List<AuditEntry>> async,
+      List<String> types, String? active) {
+    return Column(
         children: [
           if (types.isNotEmpty)
             SizedBox(
@@ -144,7 +165,6 @@ class AuditLogScreen extends ConsumerWidget {
             ),
           ),
         ],
-      ),
     );
   }
 }
@@ -199,7 +219,9 @@ class _AuditCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 '${l10n.auditEntity}: ${entry.entityType}'
-                '${entry.entityId != null ? ' #${entry.entityId}' : ''}',
+                '${entry.entityId != null ? ' #${entry.entityId}' : ''}'
+                // What it was called, when the entry says (an erased card).
+                '${entry.details['name'] is String ? '（${entry.details['name']}）' : ''}',
                 style: theme.textTheme.bodySmall
                     ?.copyWith(color: scheme.onSurfaceVariant),
               ),

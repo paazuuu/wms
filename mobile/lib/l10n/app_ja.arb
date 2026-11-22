@@ -765,7 +765,7 @@
   "auditActorSystem": "システム",
   "csvExportTitle": "CSVエクスポート",
   "featAuditLog": "監査ログ",
-  "featAuditLogDesc": "操作履歴をCSVで確認",
+  "featAuditLogDesc": "操作の記録（CSVで出力）と、システムで起きたエラーのログを確認",
   "featUserManagement": "ユーザー管理",
   "featUserManagementDesc": "サインイン済みのメンバーに権限ロールを割り当て",
   "featConnectors": "コネクタ",
@@ -16076,5 +16076,11 @@
       }
     }
   },
-  "caOsManagersOnly": "出荷先カードの追加・編集・削除・デフォルトの設定は、システム管理者と責任者ができます。"
+  "caOsManagersOnly": "出荷先カードの追加・編集・削除・デフォルトの設定は、システム管理者と責任者ができます。",
+  "auditEventPartnerErased": "取引先を完全に削除",
+  "auditEventOverseasSiteErased": "国外の仮想在庫のカードを完全に削除",
+  "auditEventSystemReset": "システムの初期化",
+  "auditTabLog": "操作の記録",
+  "elKindRefused": "操作できず",
+  "caSystemOwned": "システム用（削除できません）"
 }

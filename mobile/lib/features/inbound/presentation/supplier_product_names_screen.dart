@@ -198,11 +198,17 @@ class _SupplierProductNamesViewState extends ConsumerState<SupplierProductNamesV
                                 itemBuilder: (_) => [
                                   PopupMenuItem(
                                       key: ValueKey('sup-edit-${c.id}'), value: 'edit', child: Text(l10n.caEdit)),
-                                  PopupMenuItem(
-                                    key: ValueKey('sup-erase-${c.id}'),
-                                    value: 'erase',
-                                    child: Text(l10n.caErase, style: TextStyle(color: theme.colorScheme.error)),
-                                  ),
+                                  if (isPlaceholderPartner(c.code))
+                                    PopupMenuItem(
+                                        key: ValueKey('sup-system-owned-${c.id}'),
+                                        enabled: false,
+                                        child: Text(l10n.caSystemOwned))
+                                  else
+                                    PopupMenuItem(
+                                      key: ValueKey('sup-erase-${c.id}'),
+                                      value: 'erase',
+                                      child: Text(l10n.caErase, style: TextStyle(color: theme.colorScheme.error)),
+                                    ),
                                 ],
                               )
                             else

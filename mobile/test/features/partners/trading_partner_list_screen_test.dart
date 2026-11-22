@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/partners/application/trading_partner_providers.dart';
 import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
 import 'package:wms_mobile/features/partners/presentation/trading_partner_list_screen.dart';
+import 'package:wms_mobile/core/errors/error_reporter.dart';
 import 'package:wms_mobile/features/admin/data/card_erase_repository.dart';
 import 'package:wms_mobile/features/partners/presentation/partner_admin.dart';
 
@@ -206,6 +207,8 @@ void main() {
 
   testWidgets('erased for good by the system administrator; not while work records still name it (0228)',
       (tester) async {
+    ErrorReporter.instance.reset();
+    addTearDown(ErrorReporter.instance.reset);
     await tester.binding.setSurfaceSize(const Size(1000, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final repo = FakeTradingPartnerRepository(partners: const [
@@ -229,6 +232,10 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(erase.erased, isEmpty);
+    // Refused for a rule: on the エラーログ as 操作できず (409).
+    final refused = ErrorReporter.instance.made.last;
+    expect((refused['kind'], refused['status'], refused['request']), ('api', 409, 'POST /rpc/partner_erase_check'));
+    expect(refused['message'], contains('発注書 2件'));
     Navigator.of(tester.element(find.byKey(const ValueKey('partner-erase')))).pop();
     await tester.pumpAndSettle();
 
@@ -242,6 +249,20 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('pa-erase-ok')));
     await tester.pumpAndSettle();
     expect(erase.erased, [('partner', 2)]);
+    expect(find.byKey(const ValueKey('partner-erase')), findsNothing);
+  });
+
+  testWidgets('未確認（要手動確認） is the system\'s own: said so, no erasing offered', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeTradingPartnerRepository(partners: const [
+      TradingPartner(id: 9, name: '未確認（要手動確認）', code: 'UNKNOWN'),
+    ]);
+    await _pump(tester, repo);
+    expect(find.byKey(const ValueKey('partner-system-owned-9')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('partner-card-9')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('partner-system-owned')), findsOneWidget);
     expect(find.byKey(const ValueKey('partner-erase')), findsNothing);
   });
 }

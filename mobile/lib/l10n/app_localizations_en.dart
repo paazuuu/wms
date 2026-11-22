@@ -1600,7 +1600,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featAuditLog => 'Audit log';
 
   @override
-  String get featAuditLogDesc => 'Review operation history, export as CSV';
+  String get featAuditLogDesc =>
+      'Actions taken (export as CSV) and the errors the system ran into';
 
   @override
   String get featUserManagement => 'User management';
@@ -18562,4 +18563,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get caOsManagersOnly =>
       'Administrators and managers add, change, erase and set the default of these cards.';
+
+  @override
+  String get auditEventPartnerErased => 'Partner erased';
+
+  @override
+  String get auditEventOverseasSiteErased => 'Overseas card erased';
+
+  @override
+  String get auditEventSystemReset => 'System reset';
+
+  @override
+  String get auditTabLog => 'Actions';
+
+  @override
+  String get elKindRefused => 'Refused';
+
+  @override
+  String get caSystemOwned => 'The system\'s own (cannot be erased)';
 }

@@ -1556,7 +1556,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featAuditLog => '監査ログ';
 
   @override
-  String get featAuditLogDesc => '操作履歴をCSVで確認';
+  String get featAuditLogDesc => '操作の記録（CSVで出力）と、システムで起きたエラーのログを確認';
 
   @override
   String get featUserManagement => 'ユーザー管理';
@@ -18196,4 +18196,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get caOsManagersOnly => '出荷先カードの追加・編集・削除・デフォルトの設定は、システム管理者と責任者ができます。';
+
+  @override
+  String get auditEventPartnerErased => '取引先を完全に削除';
+
+  @override
+  String get auditEventOverseasSiteErased => '国外の仮想在庫のカードを完全に削除';
+
+  @override
+  String get auditEventSystemReset => 'システムの初期化';
+
+  @override
+  String get auditTabLog => '操作の記録';
+
+  @override
+  String get elKindRefused => '操作できず';
+
+  @override
+  String get caSystemOwned => 'システム用（削除できません）';
 }

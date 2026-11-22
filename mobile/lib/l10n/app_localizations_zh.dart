@@ -1553,7 +1553,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featAuditLog => '审计日志';
 
   @override
-  String get featAuditLogDesc => '查看操作历史并导出CSV';
+  String get featAuditLogDesc => '查看操作记录（可导出CSV）及系统发生的错误日志';
 
   @override
   String get featUserManagement => '用户管理';
@@ -18069,4 +18069,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get caOsManagersOnly => '系统管理员和负责人可以添加、编辑、删除卡片及设置默认。';
+
+  @override
+  String get auditEventPartnerErased => '彻底删除往来单位';
+
+  @override
+  String get auditEventOverseasSiteErased => '彻底删除海外虚拟库存卡片';
+
+  @override
+  String get auditEventSystemReset => '系统初始化';
+
+  @override
+  String get auditTabLog => '操作记录';
+
+  @override
+  String get elKindRefused => '操作被拒绝';
+
+  @override
+  String get caSystemOwned => '系统专用（无法删除）';
 }

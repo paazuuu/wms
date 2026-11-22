@@ -748,7 +748,7 @@
   "auditActorSystem": "System",
   "csvExportTitle": "Export CSV",
   "featAuditLog": "Audit log",
-  "featAuditLogDesc": "Review operation history, export as CSV",
+  "featAuditLogDesc": "Actions taken (export as CSV) and the errors the system ran into",
   "featUserManagement": "User management",
   "featUserManagementDesc": "Assign roles to teammates who have signed in",
   "featConnectors": "Connectors",
@@ -5649,5 +5649,11 @@
   "caOsSetDefault": "Make default",
   "caOsUnsetDefault": "Clear default",
   "caOsDefaultSet": "{name} is now the default",
-  "caOsManagersOnly": "Administrators and managers add, change, erase and set the default of these cards."
+  "caOsManagersOnly": "Administrators and managers add, change, erase and set the default of these cards.",
+  "auditEventPartnerErased": "Partner erased",
+  "auditEventOverseasSiteErased": "Overseas card erased",
+  "auditEventSystemReset": "System reset",
+  "auditTabLog": "Actions",
+  "elKindRefused": "Refused",
+  "caSystemOwned": "The system's own (cannot be erased)"
 }

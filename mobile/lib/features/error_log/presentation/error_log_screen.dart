@@ -17,7 +17,10 @@ import '../data/error_log_repository.dart';
 /// what, where, who, how often — to read, copy, save as Markdown for the
 /// developers, and remove (picked, shown, or older than a time).
 class ErrorLogScreen extends ConsumerStatefulWidget {
-  const ErrorLogScreen({super.key});
+  const ErrorLogScreen({super.key, this.embedded = false});
+
+  /// Shown as a tab of 監査ログ: no bar of its own.
+  final bool embedded;
 
   @override
   ConsumerState<ErrorLogScreen> createState() => _ErrorLogScreenState();
@@ -25,9 +28,14 @@ class ErrorLogScreen extends ConsumerStatefulWidget {
 
 String errorKindLabel(AppLocalizations l10n, String kind) => switch (kind) {
       'api' => l10n.elKindApi,
+      'refused' => l10n.elKindRefused,
       'flutter' => l10n.elKindFlutter,
       _ => l10n.elKindUncaught,
     };
+
+/// How an error is shown and filtered: a request the server (or the app,
+/// asking it first) refused for a rule — 409 — is 操作できず, not 通信.
+String errorShownKind(AppErrorEntry e) => e.kind == 'api' && e.status == 409 ? 'refused' : e.kind;
 
 String _two(int n) => n.toString().padLeft(2, '0');
 String _time(DateTime t) => '${t.year}-${_two(t.month)}-${_two(t.day)} ${_two(t.hour)}:${_two(t.minute)}';
@@ -35,7 +43,7 @@ String _time(DateTime t) => '${t.year}-${_two(t.month)}-${_two(t.day)} ${_two(t.
 /// One error as Markdown.
 String errorToMarkdown(AppLocalizations l10n, AppErrorEntry e) {
   final b = StringBuffer()
-    ..writeln('## ${_time(e.lastAt)} ${errorKindLabel(l10n, e.kind)}${e.times > 1 ? '（${l10n.elTimes(e.times)}）' : ''}')
+    ..writeln('## ${_time(e.lastAt)} ${errorKindLabel(l10n, errorShownKind(e))}${e.times > 1 ? '（${l10n.elTimes(e.times)}）' : ''}')
     ..writeln()
     ..writeln('- ${e.message.replaceAll('\n', ' ')}');
   if (e.request != null) b.writeln('- ${l10n.elRequest}: `${e.request}`${e.status != null ? ' (${e.status})' : ''}');
@@ -84,7 +92,7 @@ class _ErrorLogScreenState extends ConsumerState<ErrorLogScreen> {
     bool hit(String? s) => s != null && s.toLowerCase().contains(q);
     return [
       for (final e in all)
-        if ((_kind == null || e.kind == _kind) &&
+        if ((_kind == null || errorShownKind(e) == _kind) &&
             (q.isEmpty || hit(e.message) || hit(e.request) || hit(e.place) || hit(e.userName)))
           e,
     ];
@@ -131,16 +139,13 @@ class _ErrorLogScreenState extends ConsumerState<ErrorLogScreen> {
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
     final async = ref.watch(errorLogProvider(_days));
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.featErrorLog), actions: [
-        IconButton(
-          key: const ValueKey('el-refresh'),
-          tooltip: MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
-          onPressed: () => ref.invalidate(errorLogProvider),
-          icon: const Icon(Icons.refresh),
-        ),
-      ]),
-      body: async.when(
+    final refresh = IconButton(
+      key: const ValueKey('el-refresh'),
+      tooltip: MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
+      onPressed: () => ref.invalidate(errorLogProvider),
+      icon: const Icon(Icons.refresh),
+    );
+    final body = async.when(
         loading: () => LoadingView(message: l10n.loading),
         error: (e, _) => ErrorStateView(message: '$e', onRetry: () => ref.invalidate(errorLogProvider)),
         data: (all) {
@@ -186,12 +191,13 @@ class _ErrorLogScreenState extends ConsumerState<ErrorLogScreen> {
                     isDense: true,
                     items: [
                       DropdownMenuItem(value: null, child: Text(l10n.elAllKinds)),
-                      for (final k in const ['api', 'flutter', 'uncaught'])
+                      for (final k in const ['api', 'refused', 'flutter', 'uncaught'])
                         DropdownMenuItem(value: k, child: Text(errorKindLabel(l10n, k))),
                     ],
                     onChanged: (v) => setState(() => _kind = v),
                   ),
                   Text(l10n.elShown(shown.length, all.length), key: const ValueKey('el-count'), style: muted),
+                  if (widget.embedded) refresh,
                 ],
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -284,8 +290,9 @@ class _ErrorLogScreenState extends ConsumerState<ErrorLogScreen> {
             ],
           );
         },
-      ),
     );
+    if (widget.embedded) return body;
+    return Scaffold(appBar: AppBar(title: Text(l10n.featErrorLog), actions: [refresh]), body: body);
   }
 }
 
@@ -303,7 +310,8 @@ class _ErrorCard extends StatelessWidget {
     final theme = Theme.of(context);
     final e = entry;
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
-    final color = switch (e.kind) {
+    final color = switch (errorShownKind(e)) {
+      'refused' => theme.colorScheme.secondary,
       'api' => theme.colorScheme.tertiary,
       'flutter' => theme.colorScheme.secondary,
       _ => theme.colorScheme.error,
@@ -325,7 +333,7 @@ class _ErrorCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
             decoration: BoxDecoration(border: Border.all(color: color), borderRadius: BorderRadius.circular(4)),
-            child: Text(errorKindLabel(l10n, e.kind), style: theme.textTheme.labelSmall?.copyWith(color: color)),
+            child: Text(errorKindLabel(l10n, errorShownKind(e)), style: theme.textTheme.labelSmall?.copyWith(color: color)),
           ),
           if (e.times > 1)
             Text(l10n.elTimes(e.times),

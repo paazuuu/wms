@@ -3,9 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_error_text.dart';
 import '../../../core/api/api_result.dart';
+import '../../../core/errors/error_reporter.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../admin/data/card_erase_repository.dart';
 import '../../admin/data/menu_visibility_repository.dart' show isSystemAdminProvider;
+
+/// The system's own partner (未確認（要手動確認）, 0005): what a document whose
+/// company could not be read is filed under. Never erased.
+bool isPlaceholderPartner(String? code) => code == 'UNKNOWN';
 
 /// 取引先・価格台帳の仕入先カード: made, changed, switched on and off and
 /// erased by the system administrator only (0228).
@@ -55,6 +60,14 @@ Future<bool> erasePartnerFlow(BuildContext context, WidgetRef ref, int id) async
       return false;
   }
   if (!c.canErase) {
+    // Refused for a rule: on the エラーログ as 操作できず (0227).
+    ErrorReporter.instance.report(
+      'api',
+      c.placeholder ? l10n.caPlaceholder : l10n.caInUse(_counts(l10n, c.blockers)),
+      detail: 'partner #${c.id} ${c.name}${c.blockers.isEmpty ? '' : ' ${c.blockers}'}',
+      request: 'POST /rpc/partner_erase_check',
+      status: 409,
+    );
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(

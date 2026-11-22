@@ -247,6 +247,12 @@ class _PartnerCard extends StatelessWidget {
                             fontFamily: AppFonts.mono, color: scheme.onSurfaceVariant),
                       ),
                     ],
+                    if (isPlaceholderPartner(partner.code)) ...[
+                      const SizedBox(height: 2),
+                      Text(l10n.caSystemOwned,
+                          key: ValueKey('partner-system-owned-${partner.id}'),
+                          style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                    ],
                     if (partner.contactName != null &&
                         partner.contactName!.isNotEmpty) ...[
                       const SizedBox(height: 2),
@@ -538,8 +544,18 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
                     : Text(l10n.partnerSave),
               ),
             ),
+            if (widget.partner != null && isPlaceholderPartner(widget.partner!.code)) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Center(
+                child: Text(l10n.caSystemOwned,
+                    key: const ValueKey('partner-system-owned'),
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              ),
+            ],
             // Erased for good, when nothing done still names it (0228).
-            if (widget.partner != null && ref.watch(canManagePartnersProvider)) ...[
+            if (widget.partner != null &&
+                !isPlaceholderPartner(widget.partner!.code) &&
+                ref.watch(canManagePartnersProvider)) ...[
               const SizedBox(height: AppSpacing.sm),
               Center(
                 child: TextButton.icon(

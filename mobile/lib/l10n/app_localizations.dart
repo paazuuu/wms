@@ -3031,7 +3031,7 @@ abstract class AppLocalizations {
   /// No description provided for @featAuditLogDesc.
   ///
   /// In ja, this message translates to:
-  /// **'操作履歴をCSVで確認'**
+  /// **'操作の記録（CSVで出力）と、システムで起きたエラーのログを確認'**
   String get featAuditLogDesc;
 
   /// No description provided for @featUserManagement.
@@ -31843,6 +31843,42 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'出荷先カードの追加・編集・削除・デフォルトの設定は、システム管理者と責任者ができます。'**
   String get caOsManagersOnly;
+
+  /// No description provided for @auditEventPartnerErased.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先を完全に削除'**
+  String get auditEventPartnerErased;
+
+  /// No description provided for @auditEventOverseasSiteErased.
+  ///
+  /// In ja, this message translates to:
+  /// **'国外の仮想在庫のカードを完全に削除'**
+  String get auditEventOverseasSiteErased;
+
+  /// No description provided for @auditEventSystemReset.
+  ///
+  /// In ja, this message translates to:
+  /// **'システムの初期化'**
+  String get auditEventSystemReset;
+
+  /// No description provided for @auditTabLog.
+  ///
+  /// In ja, this message translates to:
+  /// **'操作の記録'**
+  String get auditTabLog;
+
+  /// No description provided for @elKindRefused.
+  ///
+  /// In ja, this message translates to:
+  /// **'操作できず'**
+  String get elKindRefused;
+
+  /// No description provided for @caSystemOwned.
+  ///
+  /// In ja, this message translates to:
+  /// **'システム用（削除できません）'**
+  String get caSystemOwned;
 }
 
 class _AppLocalizationsDelegate

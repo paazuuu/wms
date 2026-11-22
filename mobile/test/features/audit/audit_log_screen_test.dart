@@ -4,6 +4,9 @@ import 'package:wms_mobile/features/audit/application/audit_providers.dart';
 import 'package:wms_mobile/features/audit/domain/audit_entry.dart';
 import 'package:wms_mobile/features/audit/presentation/audit_log_screen.dart';
 
+import 'package:wms_mobile/features/error_log/data/error_log_repository.dart';
+
+import '../../support/fake_error_log_repository.dart';
 import '../../support/harness.dart';
 
 void main() {
@@ -88,5 +91,47 @@ void main() {
     expect(
         find.descendant(of: cards, matching: find.text('transfer.created')),
         findsNothing);
+  });
+
+  testWidgets('an erased card says its name; エラーログ is the second tab (0227/0228)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeAuditRepository(
+      [
+        const AuditEntry(
+            id: 3, eventType: 'partner.erase', entityType: 'partner', entityId: '40', details: {'name': 'テスト商事'}),
+      ],
+      types: const ['partner.erase'],
+    );
+    final errors = FakeErrorLogRepository([
+      AppErrorEntry(
+        id: 1,
+        firstAt: DateTime.now(),
+        lastAt: DateTime.now(),
+        kind: 'api',
+        status: 409,
+        request: 'POST /rpc/partner_erase_check',
+        message: '次の記録で使われているため削除できません: 発注書 2件',
+      ),
+      AppErrorEntry(id: 2, firstAt: DateTime.now(), lastAt: DateTime.now(), kind: 'api', status: 500, message: 'boom'),
+    ]);
+    await pumpApp(tester, const AuditLogScreen(), overrides: [
+      auditRepositoryProvider.overrideWithValue(repo),
+      errorLogRepositoryProvider.overrideWithValue(errors),
+    ]);
+    expect(find.text('取引先を完全に削除'), findsWidgets);
+    expect(find.text('対象: partner #40（テスト商事）'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('audit-tab-errors')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('el-list')), findsOneWidget);
+    // A refusal is 操作できず, not a failed request.
+    expect(find.text('操作できず'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('el-kind')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('操作できず').last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('el-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('el-2')), findsNothing);
   });
 }
