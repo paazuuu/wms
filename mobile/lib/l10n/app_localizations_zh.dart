@@ -17944,4 +17944,128 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get elMdExported => '导出时间';
+
+  @override
+  String get caErase => '彻底删除';
+
+  @override
+  String caEraseTitle(String name) {
+    return '彻底删除 $name';
+  }
+
+  @override
+  String get caEraseConfirm => '将彻底删除此往来单位，无法恢复。';
+
+  @override
+  String caEraseDetached(String list) {
+    return '将不再关联此单位的记录：$list';
+  }
+
+  @override
+  String caEraseWith(String list) {
+    return '一并删除：$list';
+  }
+
+  @override
+  String caInUse(String list) {
+    return '以下记录仍在使用，无法删除：$list。不再使用时请设为“无效”。';
+  }
+
+  @override
+  String get caPlaceholder => '“未确认（需手动确认）”为系统使用，无法删除。';
+
+  @override
+  String caErased(String name) {
+    return '已删除 $name';
+  }
+
+  @override
+  String caCount(String label, int count) {
+    return '$label $count条';
+  }
+
+  @override
+  String get caAdminOnly => '只有系统管理员可以添加、编辑、删除往来单位。';
+
+  @override
+  String get caSupplierAdd => '添加供应商';
+
+  @override
+  String get caEdit => '编辑';
+
+  @override
+  String get caTDeliveryPlans => '到货计划';
+
+  @override
+  String get caTDeliveryReconciliations => '到货核对';
+
+  @override
+  String get caTShipmentPlans => '出货';
+
+  @override
+  String get caTPurchaseOrders => '采购单';
+
+  @override
+  String get caTSalesOrders => '订单';
+
+  @override
+  String get caTLots => '批次';
+
+  @override
+  String get caTSupplierInvoices => '发票';
+
+  @override
+  String get caTMasterImports => '导入';
+
+  @override
+  String get caTImportDocuments => '单据';
+
+  @override
+  String get caTPurchaseRequests => '到货希望清单';
+
+  @override
+  String get caTShipDestinations => '出货目的地';
+
+  @override
+  String get caTOutboundFileLines => '出库明细行';
+
+  @override
+  String get caTWarehouseProducts => '商品的优先供应商';
+
+  @override
+  String get caTSupplierProductNames => '供应商商品名';
+
+  @override
+  String get caTPriceBookTerms => '价格台账条件';
+
+  @override
+  String get caTPurchasePriceEntries => '进货价格记录';
+
+  @override
+  String get caTColumnAliases => '已记住的表头';
+
+  @override
+  String get caTNotationDialects => '已记住的写法';
+
+  @override
+  String get caTPartnerVendorCodes => '对方的供应商代码';
+
+  @override
+  String caOsEraseConfirm(int imports, int shipments, int notes) {
+    return '将彻底删除此海外虚拟库存卡片，及其$imports次库存报告、$shipments条出货记录、$notes条备忘和文件，无法恢复。出货目的地卡片本身保留，再次出货时会重新生成。';
+  }
+
+  @override
+  String get caOsSetDefault => '设为默认';
+
+  @override
+  String get caOsUnsetDefault => '取消默认';
+
+  @override
+  String caOsDefaultSet(String name) {
+    return '已将 $name 设为默认';
+  }
+
+  @override
+  String get caOsManagersOnly => '系统管理员和管理者可以添加、编辑、删除卡片及设置默认。';
 }

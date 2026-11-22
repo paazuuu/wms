@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/core/api/api_result.dart';
 import 'package:wms_mobile/features/inbound/presentation/supplier_product_names_screen.dart';
+import 'package:wms_mobile/features/admin/data/card_erase_repository.dart';
+import 'package:wms_mobile/features/partners/application/trading_partner_providers.dart';
 import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
+import 'package:wms_mobile/features/partners/presentation/partner_admin.dart';
 import 'package:wms_mobile/features/price_book/presentation/price_book_screen.dart';
 import 'package:wms_mobile/features/product/presentation/product_list_screen.dart';
 import 'package:wms_mobile/features/purchase_request/data/purchase_request_repository.dart';
@@ -16,6 +19,7 @@ import 'package:wms_mobile/features/supplier_history/data/supplier_history_repos
 import 'package:wms_mobile/features/supplier_history/domain/supplier_history.dart';
 import 'package:wms_mobile/features/supplier_history/presentation/supplier_detail_screen.dart';
 
+import '../../support/fake_card_erase_repository.dart';
 import '../../support/harness.dart';
 
 final _historyJson = {
@@ -207,6 +211,59 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('sup-event-po-4')), findsOneWidget);
     expect(find.textContaining('ファイル取込 · 2026/10/01 · 1品目 · 500個 · ¥20,000'), findsOneWidget);
+  });
+
+  testWidgets('the system administrator adds, edits and erases supplier cards here (0228)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final partners = FakeTradingPartnerRepository(partners: const [
+      TradingPartner(id: 41, name: 'アケボノ商事', code: 'S00002'),
+      TradingPartner(id: 42, name: 'ウエダ商事', code: 'S00003'),
+    ]);
+    final erase = FakeCardEraseRepository();
+    await pumpApp(tester, const SupplierProductNamesScreen(), overrides: [
+      supplierHistoryRepositoryProvider.overrideWithValue(_FakeHistory()),
+      purchaseRequestRepositoryProvider.overrideWithValue(_FakeRequests()),
+      tradingPartnerRepositoryProvider.overrideWithValue(partners),
+      cardEraseRepositoryProvider.overrideWithValue(erase),
+      canManagePartnersProvider.overrideWithValue(true),
+    ]);
+    // Changed: the partner's own form.
+    await tester.tap(find.byKey(const ValueKey('sup-menu-41')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sup-edit-41')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextField>(find.widgetWithText(TextField, '取引先名')).controller!.text, 'アケボノ商事');
+    Navigator.of(tester.element(find.widgetWithText(TextField, '取引先名'))).pop();
+    await tester.pumpAndSettle();
+    // Erased.
+    await tester.tap(find.byKey(const ValueKey('sup-menu-42')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sup-erase-42')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pa-erase-ok')));
+    await tester.pumpAndSettle();
+    expect(erase.erased, [('partner', 42)]);
+    // A new one.
+    await tester.tap(find.byKey(const ValueKey('sup-add')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, '取引先名'), 'テスト新商事');
+    await tester.tap(find.text('保存'));
+    await tester.pumpAndSettle();
+    final all = await partners.list(status: null);
+    expect([for (final p in (all as ApiSuccess<List<TradingPartner>>).data) p.name], contains('テスト新商事'));
+  });
+
+  testWidgets('others see the supplier cards without adding, editing or erasing', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpApp(tester, const SupplierProductNamesScreen(), overrides: [
+      supplierHistoryRepositoryProvider.overrideWithValue(_FakeHistory()),
+      canManagePartnersProvider.overrideWithValue(false),
+    ]);
+    expect(find.byKey(const ValueKey('sup-card-41')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sup-add')), findsNothing);
+    expect(find.byKey(const ValueKey('sup-menu-41')), findsNothing);
   });
 
   testWidgets('the next order: bought ones ticked with last quantities, adjusted, made into a request', (tester) async {

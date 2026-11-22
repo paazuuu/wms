@@ -96,6 +96,14 @@ class FakeOverseasStockRepository implements OverseasStockRepository {
     return const ApiSuccess(true);
   }
 
+  final defaults = <(int, bool)>[];
+
+  @override
+  Future<ApiResult<bool>> setDefault(int id, bool isDefault) async {
+    defaults.add((id, isDefault));
+    return const ApiSuccess(true);
+  }
+
   @override
   Future<ApiResult<int>> import({
     required int siteId,

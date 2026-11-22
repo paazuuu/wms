@@ -18071,4 +18071,128 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get elMdExported => '出力日時';
+
+  @override
+  String get caErase => '完全に削除';
+
+  @override
+  String caEraseTitle(String name) {
+    return '$name を完全に削除';
+  }
+
+  @override
+  String get caEraseConfirm => 'この取引先を完全に削除します。元には戻せません。';
+
+  @override
+  String caEraseDetached(String list) {
+    return '取引先の記載がなくなるもの: $list';
+  }
+
+  @override
+  String caEraseWith(String list) {
+    return '一緒に消えるもの: $list';
+  }
+
+  @override
+  String caInUse(String list) {
+    return '次の記録で使われているため削除できません: $list。使わなくなった取引先は「無効」にしてください。';
+  }
+
+  @override
+  String get caPlaceholder => '「未確認（要手動確認）」はシステムが使うため削除できません。';
+
+  @override
+  String caErased(String name) {
+    return '$name を削除しました';
+  }
+
+  @override
+  String caCount(String label, int count) {
+    return '$label $count件';
+  }
+
+  @override
+  String get caAdminOnly => '取引先の追加・編集・削除は、システム管理者だけができます。';
+
+  @override
+  String get caSupplierAdd => '仕入先を追加';
+
+  @override
+  String get caEdit => '編集';
+
+  @override
+  String get caTDeliveryPlans => '納品予定';
+
+  @override
+  String get caTDeliveryReconciliations => '納品照合';
+
+  @override
+  String get caTShipmentPlans => '出荷';
+
+  @override
+  String get caTPurchaseOrders => '発注書';
+
+  @override
+  String get caTSalesOrders => '受注';
+
+  @override
+  String get caTLots => 'ロット';
+
+  @override
+  String get caTSupplierInvoices => '請求書';
+
+  @override
+  String get caTMasterImports => '取込';
+
+  @override
+  String get caTImportDocuments => '書類';
+
+  @override
+  String get caTPurchaseRequests => '入荷希望リスト';
+
+  @override
+  String get caTShipDestinations => '出荷先';
+
+  @override
+  String get caTOutboundFileLines => '出庫明細の行';
+
+  @override
+  String get caTWarehouseProducts => '商品の優先仕入先';
+
+  @override
+  String get caTSupplierProductNames => '仕入先の商品名';
+
+  @override
+  String get caTPriceBookTerms => '価格台帳の条件';
+
+  @override
+  String get caTPurchasePriceEntries => '仕入価格の履歴';
+
+  @override
+  String get caTColumnAliases => '覚えた見出し';
+
+  @override
+  String get caTNotationDialects => '覚えた表記';
+
+  @override
+  String get caTPartnerVendorCodes => '先方の仕入先コード';
+
+  @override
+  String caOsEraseConfirm(int imports, int shipments, int notes) {
+    return 'この国外の仮想在庫のカードを完全に削除します。在庫の報告$imports件・出荷の記録$shipments件・メモ$notes件と、そのファイルも消えます。元には戻せません。出荷先カード自体は残り、また出荷すると新しく作られます。';
+  }
+
+  @override
+  String get caOsSetDefault => 'デフォルトにする';
+
+  @override
+  String get caOsUnsetDefault => 'デフォルトを外す';
+
+  @override
+  String caOsDefaultSet(String name) {
+    return '$name をデフォルトにしました';
+  }
+
+  @override
+  String get caOsManagersOnly => '出荷先カードの追加・編集・削除・デフォルトの設定は、システム管理者と管理者ができます。';
 }

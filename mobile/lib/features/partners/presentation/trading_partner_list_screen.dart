@@ -1,3 +1,4 @@
+import 'partner_admin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,12 +30,7 @@ class TradingPartnerListScreen extends ConsumerWidget {
 
   Future<void> _openForm(BuildContext context, WidgetRef ref,
       {TradingPartner? partner}) async {
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => _PartnerFormSheet(partner: partner),
-    );
-    if (saved == true) {
+    if (await openPartnerForm(context, partner: partner)) {
       ref.invalidate(tradingPartnerListProvider);
     }
   }
@@ -66,6 +62,8 @@ class TradingPartnerListScreen extends ConsumerWidget {
     final async = ref.watch(tradingPartnerListProvider);
     final showInactive = ref.watch(showInactivePartnersProvider);
     final kindFilter = ref.watch(partnerKindFilterProvider);
+    // Made, changed, switched and erased by the system administrator (0228).
+    final canManage = ref.watch(canManagePartnersProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -92,10 +90,13 @@ class TradingPartnerListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openForm(context, ref),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: canManage
+          ? FloatingActionButton(
+              key: const ValueKey('partner-add'),
+              onPressed: () => _openForm(context, ref),
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: Column(
         children: [
           Padding(
@@ -134,6 +135,13 @@ class TradingPartnerListScreen extends ConsumerWidget {
               ),
             ),
           ),
+          if (!canManage)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+              child: Text(l10n.caAdminOnly,
+                  key: const ValueKey('partner-admin-only'),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            ),
           const SizedBox(height: AppSpacing.sm),
           Expanded(
             child: async.when(
@@ -160,10 +168,8 @@ class TradingPartnerListScreen extends ConsumerWidget {
                         const SizedBox(height: AppSpacing.sm),
                     itemBuilder: (context, i) => _PartnerCard(
                       partner: partners[i],
-                      onTap: () =>
-                          _openForm(context, ref, partner: partners[i]),
-                      onToggleStatus: () =>
-                          _toggleStatus(context, ref, partners[i]),
+                      onTap: canManage ? () => _openForm(context, ref, partner: partners[i]) : null,
+                      onToggleStatus: canManage ? () => _toggleStatus(context, ref, partners[i]) : null,
                     ),
                   ),
                 );
@@ -184,8 +190,8 @@ class _PartnerCard extends StatelessWidget {
   });
 
   final TradingPartner partner;
-  final VoidCallback onTap;
-  final VoidCallback onToggleStatus;
+  final VoidCallback? onTap;
+  final VoidCallback? onToggleStatus;
 
   String _kindLabel(AppLocalizations l10n) => switch (partner.kind) {
         PartnerKind.supplier => l10n.partnerKindSupplier,
@@ -202,6 +208,7 @@ class _PartnerCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
+        key: ValueKey('partner-card-${partner.id}'),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
@@ -274,11 +281,22 @@ class _PartnerCard extends StatelessWidget {
   }
 }
 
+/// Creating or editing one trading partner (the system administrator's,
+/// 0228); [kind] for a new one. True when saved or erased.
+Future<bool> openPartnerForm(BuildContext context, {TradingPartner? partner, PartnerKind? kind}) async =>
+    await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _PartnerFormSheet(partner: partner, kind: kind),
+    ) ==
+    true;
+
 /// Bottom sheet for creating or editing one trading partner.
 class _PartnerFormSheet extends ConsumerStatefulWidget {
-  const _PartnerFormSheet({this.partner});
+  const _PartnerFormSheet({this.partner, this.kind});
 
   final TradingPartner? partner;
+  final PartnerKind? kind;
 
   @override
   ConsumerState<_PartnerFormSheet> createState() => _PartnerFormSheetState();
@@ -303,7 +321,7 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
       TextEditingController(text: widget.partner?.paymentTerms ?? '');
   late final TextEditingController _notes =
       TextEditingController(text: widget.partner?.notes ?? '');
-  late PartnerKind _kind = widget.partner?.kind ?? PartnerKind.supplier;
+  late PartnerKind _kind = widget.partner?.kind ?? widget.kind ?? PartnerKind.supplier;
   late String _country = widget.partner?.countryCode ?? 'JP';
   bool _busy = false;
   String? _error;
@@ -520,6 +538,24 @@ class _PartnerFormSheetState extends ConsumerState<_PartnerFormSheet> {
                     : Text(l10n.partnerSave),
               ),
             ),
+            // Erased for good, when nothing done still names it (0228).
+            if (widget.partner != null && ref.watch(canManagePartnersProvider)) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Center(
+                child: TextButton.icon(
+                  key: const ValueKey('partner-erase'),
+                  style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
+                  onPressed: _busy
+                      ? null
+                      : () async {
+                          final nav = Navigator.of(context);
+                          if (await erasePartnerFlow(context, ref, widget.partner!.id)) nav.pop(true);
+                        },
+                  icon: const Icon(Icons.delete_forever_outlined),
+                  label: Text(l10n.caErase),
+                ),
+              ),
+            ],
           ],
         ),
       ),

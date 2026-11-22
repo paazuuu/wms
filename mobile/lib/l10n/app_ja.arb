@@ -15975,5 +15975,106 @@
       }
     }
   },
-  "elMdExported": "出力日時"
+  "elMdExported": "出力日時",
+  "caErase": "完全に削除",
+  "caEraseTitle": "{name} を完全に削除",
+  "@caEraseTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "caEraseConfirm": "この取引先を完全に削除します。元には戻せません。",
+  "caEraseDetached": "取引先の記載がなくなるもの: {list}",
+  "@caEraseDetached": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "caEraseWith": "一緒に消えるもの: {list}",
+  "@caEraseWith": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "caInUse": "次の記録で使われているため削除できません: {list}。使わなくなった取引先は「無効」にしてください。",
+  "@caInUse": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "caPlaceholder": "「未確認（要手動確認）」はシステムが使うため削除できません。",
+  "caErased": "{name} を削除しました",
+  "@caErased": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "caCount": "{label} {count}件",
+  "@caCount": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "caAdminOnly": "取引先の追加・編集・削除は、システム管理者だけができます。",
+  "caSupplierAdd": "仕入先を追加",
+  "caEdit": "編集",
+  "caTDeliveryPlans": "納品予定",
+  "caTDeliveryReconciliations": "納品照合",
+  "caTShipmentPlans": "出荷",
+  "caTPurchaseOrders": "発注書",
+  "caTSalesOrders": "受注",
+  "caTLots": "ロット",
+  "caTSupplierInvoices": "請求書",
+  "caTMasterImports": "取込",
+  "caTImportDocuments": "書類",
+  "caTPurchaseRequests": "入荷希望リスト",
+  "caTShipDestinations": "出荷先",
+  "caTOutboundFileLines": "出庫明細の行",
+  "caTWarehouseProducts": "商品の優先仕入先",
+  "caTSupplierProductNames": "仕入先の商品名",
+  "caTPriceBookTerms": "価格台帳の条件",
+  "caTPurchasePriceEntries": "仕入価格の履歴",
+  "caTColumnAliases": "覚えた見出し",
+  "caTNotationDialects": "覚えた表記",
+  "caTPartnerVendorCodes": "先方の仕入先コード",
+  "caOsEraseConfirm": "この国外の仮想在庫のカードを完全に削除します。在庫の報告{imports}件・出荷の記録{shipments}件・メモ{notes}件と、そのファイルも消えます。元には戻せません。出荷先カード自体は残り、また出荷すると新しく作られます。",
+  "@caOsEraseConfirm": {
+    "placeholders": {
+      "imports": {
+        "type": "int"
+      },
+      "shipments": {
+        "type": "int"
+      },
+      "notes": {
+        "type": "int"
+      }
+    }
+  },
+  "caOsSetDefault": "デフォルトにする",
+  "caOsUnsetDefault": "デフォルトを外す",
+  "caOsDefaultSet": "{name} をデフォルトにしました",
+  "@caOsDefaultSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "caOsManagersOnly": "出荷先カードの追加・編集・削除・デフォルトの設定は、システム管理者と管理者ができます。"
 }

@@ -5,13 +5,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/partners/application/trading_partner_providers.dart';
 import 'package:wms_mobile/features/partners/domain/trading_partner.dart';
 import 'package:wms_mobile/features/partners/presentation/trading_partner_list_screen.dart';
+import 'package:wms_mobile/features/admin/data/card_erase_repository.dart';
+import 'package:wms_mobile/features/partners/presentation/partner_admin.dart';
+
+import '../../support/fake_card_erase_repository.dart';
 
 import '../../support/harness.dart';
 
-Future<ProviderContainer> _pump(
-    WidgetTester tester, FakeTradingPartnerRepository repo) async {
+/// Signed in as the system administrator unless [admin] is false: only they
+/// make, change and erase partners (0228).
+Future<ProviderContainer> _pump(WidgetTester tester, FakeTradingPartnerRepository repo,
+    {bool admin = true, FakeCardEraseRepository? erase}) async {
   final container = ProviderContainer(overrides: [
     tradingPartnerRepositoryProvider.overrideWithValue(repo),
+    canManagePartnersProvider.overrideWithValue(admin),
+    cardEraseRepositoryProvider.overrideWithValue(erase ?? FakeCardEraseRepository()),
   ]);
   addTearDown(container.dispose);
   await pumpAppWith(tester, container, const TradingPartnerListScreen());
@@ -178,5 +186,62 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('pc-issue')));
     await tester.pumpAndSettle();
     expect(find.text('3社にコードを振りました'), findsOneWidget);
+  });
+
+  testWidgets('without being the system administrator, partners are only looked at (0228)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeTradingPartnerRepository(partners: const [TradingPartner(id: 1, name: 'テスト商事株式会社')]);
+    await _pump(tester, repo, admin: false);
+    expect(find.byKey(const ValueKey('partner-add')), findsNothing);
+    expect(find.byKey(const ValueKey('partner-admin-only')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('partner-card-1')));
+    await tester.pumpAndSettle();
+    expect(find.text('保存'), findsNothing);
+    // The status cannot be switched either.
+    await tester.tap(find.text('有効'));
+    await tester.pumpAndSettle();
+    expect(find.text('有効'), findsOneWidget);
+  });
+
+  testWidgets('erased for good by the system administrator; not while work records still name it (0228)',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeTradingPartnerRepository(partners: const [
+      TradingPartner(id: 1, name: 'テスト商事株式会社'),
+      TradingPartner(id: 2, name: 'テスト物産株式会社'),
+    ]);
+    final erase = FakeCardEraseRepository(partners: {
+      1: const PartnerEraseCheck(id: 1, name: 'テスト商事株式会社', blockers: {'purchase_orders': 2}),
+      2: const PartnerEraseCheck(
+          id: 2, name: 'テスト物産株式会社', detached: {'master_imports': 3}, erased: {'column_aliases': 5}),
+    });
+    await _pump(tester, repo, erase: erase);
+
+    // Still used: said why, nothing erased.
+    await tester.tap(find.byKey(const ValueKey('partner-card-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('partner-erase')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pa-cannot-erase')), findsOneWidget);
+    expect(find.textContaining('発注書 2件'), findsOneWidget);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(erase.erased, isEmpty);
+    Navigator.of(tester.element(find.byKey(const ValueKey('partner-erase')))).pop();
+    await tester.pumpAndSettle();
+
+    // Free: what loses it and what goes, then erased.
+    await tester.tap(find.byKey(const ValueKey('partner-card-2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('partner-erase')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('取込 3件'), findsOneWidget);
+    expect(find.textContaining('覚えた見出し 5件'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pa-erase-ok')));
+    await tester.pumpAndSettle();
+    expect(erase.erased, [('partner', 2)]);
+    expect(find.byKey(const ValueKey('partner-erase')), findsNothing);
   });
 }

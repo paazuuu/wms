@@ -1,3 +1,8 @@
+import '../../../core/api/api_result.dart';
+import '../../partners/application/trading_partner_providers.dart' show tradingPartnerRepositoryProvider;
+import '../../partners/domain/trading_partner.dart' show PartnerKind;
+import '../../partners/presentation/partner_admin.dart';
+import '../../partners/presentation/trading_partner_list_screen.dart' show openPartnerForm;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -95,6 +100,16 @@ class _SupplierProductNamesViewState extends ConsumerState<SupplierProductNamesV
               selected: {_bySupplier},
               onSelectionChanged: (v) => setState(() => _bySupplier = v.first),
             ),
+            // A supplier card added by the system administrator (0228).
+            if (_bySupplier && ref.watch(canManagePartnersProvider))
+              FilledButton.tonalIcon(
+                key: const ValueKey('sup-add'),
+                onPressed: () async {
+                  if (await openPartnerForm(context, kind: PartnerKind.supplier)) ref.invalidate(supplierCardsProvider);
+                },
+                icon: const Icon(Icons.add_business_outlined, size: 18),
+                label: Text(l10n.caSupplierAdd),
+              ),
           ],
         ),
       ),
@@ -102,11 +117,34 @@ class _SupplierProductNamesViewState extends ConsumerState<SupplierProductNamesV
     ]);
   }
 
+  /// The card's partner, as 取引先 has it, to change.
+  Future<void> _editCard(int id) async {
+    final l10n = AppLocalizations.of(context);
+    final r = await ref.read(tradingPartnerRepositoryProvider).list(status: null);
+    if (!mounted) return;
+    final partner = switch (r) {
+      ApiSuccess(:final data) => data.where((p) => p.id == id).firstOrNull,
+      ApiFailure() => null,
+    };
+    if (partner == null) {
+      if (r case ApiFailure(:final message)) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+      }
+      return;
+    }
+    if (await openPartnerForm(context, partner: partner)) ref.invalidate(supplierCardsProvider);
+  }
+
+  Future<void> _eraseCard(int id) async {
+    if (await erasePartnerFlow(context, ref, id)) ref.invalidate(supplierCardsProvider);
+  }
+
   /// The suppliers, a card each, most recently bought from first.
   Widget _cards(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    final canManage = ref.watch(canManagePartnersProvider);
     return ref.watch(supplierCardsProvider).when(
           loading: () => LoadingView(message: l10n.loading),
           error: (e, _) => ErrorStateView(
@@ -151,7 +189,24 @@ class _SupplierProductNamesViewState extends ConsumerState<SupplierProductNamesV
                                   overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
                             ),
-                            const Icon(Icons.chevron_right),
+                            if (canManage)
+                              PopupMenuButton<String>(
+                                key: ValueKey('sup-menu-${c.id}'),
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(Icons.more_vert, size: 20),
+                                onSelected: (v) => v == 'edit' ? _editCard(c.id) : _eraseCard(c.id),
+                                itemBuilder: (_) => [
+                                  PopupMenuItem(
+                                      key: ValueKey('sup-edit-${c.id}'), value: 'edit', child: Text(l10n.caEdit)),
+                                  PopupMenuItem(
+                                    key: ValueKey('sup-erase-${c.id}'),
+                                    value: 'erase',
+                                    child: Text(l10n.caErase, style: TextStyle(color: theme.colorScheme.error)),
+                                  ),
+                                ],
+                              )
+                            else
+                              const Icon(Icons.chevron_right),
                           ]),
                           if (c.code != null || c.phone != null)
                             Text([if (c.code != null) c.code!, if (c.phone != null) c.phone!].join(' · '), style: muted),

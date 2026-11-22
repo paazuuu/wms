@@ -18434,4 +18434,132 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get elMdExported => 'Exported';
+
+  @override
+  String get caErase => 'Erase for good';
+
+  @override
+  String caEraseTitle(String name) {
+    return 'Erase $name for good';
+  }
+
+  @override
+  String get caEraseConfirm =>
+      'This partner will be erased for good. This cannot be undone.';
+
+  @override
+  String caEraseDetached(String list) {
+    return 'These keep themselves without it: $list';
+  }
+
+  @override
+  String caEraseWith(String list) {
+    return 'Erased with it: $list';
+  }
+
+  @override
+  String caInUse(String list) {
+    return 'It cannot be erased while these use it: $list. Switch it off instead when it is no longer used.';
+  }
+
+  @override
+  String get caPlaceholder =>
+      '「未確認（要手動確認）」 is the system\'s own and cannot be erased.';
+
+  @override
+  String caErased(String name) {
+    return '$name was erased';
+  }
+
+  @override
+  String caCount(String label, int count) {
+    return '$label $count';
+  }
+
+  @override
+  String get caAdminOnly =>
+      'Only the system administrator adds, changes and erases partners.';
+
+  @override
+  String get caSupplierAdd => 'Add supplier';
+
+  @override
+  String get caEdit => 'Edit';
+
+  @override
+  String get caTDeliveryPlans => 'Delivery plans';
+
+  @override
+  String get caTDeliveryReconciliations => 'Delivery checks';
+
+  @override
+  String get caTShipmentPlans => 'Shipments';
+
+  @override
+  String get caTPurchaseOrders => 'Purchase orders';
+
+  @override
+  String get caTSalesOrders => 'Sales orders';
+
+  @override
+  String get caTLots => 'Lots';
+
+  @override
+  String get caTSupplierInvoices => 'Invoices';
+
+  @override
+  String get caTMasterImports => 'Imports';
+
+  @override
+  String get caTImportDocuments => 'Documents';
+
+  @override
+  String get caTPurchaseRequests => 'Wish lists';
+
+  @override
+  String get caTShipDestinations => 'Destinations';
+
+  @override
+  String get caTOutboundFileLines => 'Shipping list rows';
+
+  @override
+  String get caTWarehouseProducts => 'Preferred supplier of products';
+
+  @override
+  String get caTSupplierProductNames => 'Supplier product names';
+
+  @override
+  String get caTPriceBookTerms => 'Price book terms';
+
+  @override
+  String get caTPurchasePriceEntries => 'Purchase price history';
+
+  @override
+  String get caTColumnAliases => 'Learned headings';
+
+  @override
+  String get caTNotationDialects => 'Learned writings';
+
+  @override
+  String get caTPartnerVendorCodes => 'Their supplier codes';
+
+  @override
+  String caOsEraseConfirm(int imports, int shipments, int notes) {
+    return 'This overseas card will be erased for good, with its $imports stock reports, $shipments shipment records, $notes notes and their files. This cannot be undone. The destination card itself stays; shipping to it again makes a new one.';
+  }
+
+  @override
+  String get caOsSetDefault => 'Make default';
+
+  @override
+  String get caOsUnsetDefault => 'Clear default';
+
+  @override
+  String caOsDefaultSet(String name) {
+    return '$name is now the default';
+  }
+
+  @override
+  String get caOsManagersOnly =>
+      'System administrators and managers add, change, erase and set the default of these cards.';
 }

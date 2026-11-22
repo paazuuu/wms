@@ -19,6 +19,9 @@ abstract class OverseasStockRepository {
   Future<ApiResult<int>> saveSite(Map<String, dynamic> site);
   Future<ApiResult<bool>> archiveSite(int id, bool archived);
 
+  /// The default card (one at most), or none (0228).
+  Future<ApiResult<bool>> setDefault(int id, bool isDefault);
+
   /// A file read for [siteId] as of [asOf]; its rows.
   Future<ApiResult<int>> import({
     required int siteId,
@@ -89,6 +92,10 @@ class OverseasStockRepositoryImpl implements OverseasStockRepository {
   @override
   Future<ApiResult<bool>> archiveSite(int id, bool archived) =>
       _rpc('overseas_site_archive', {'p_id': id, 'p_archived': archived}, (d) => d == true);
+
+  @override
+  Future<ApiResult<bool>> setDefault(int id, bool isDefault) =>
+      _rpc('overseas_site_set_default', {'p_id': id, 'p_default': isDefault}, (d) => d == true);
 
   @override
   Future<ApiResult<int>> import({

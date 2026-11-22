@@ -31627,6 +31627,222 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'出力日時'**
   String get elMdExported;
+
+  /// No description provided for @caErase.
+  ///
+  /// In ja, this message translates to:
+  /// **'完全に削除'**
+  String get caErase;
+
+  /// No description provided for @caEraseTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を完全に削除'**
+  String caEraseTitle(String name);
+
+  /// No description provided for @caEraseConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'この取引先を完全に削除します。元には戻せません。'**
+  String get caEraseConfirm;
+
+  /// No description provided for @caEraseDetached.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先の記載がなくなるもの: {list}'**
+  String caEraseDetached(String list);
+
+  /// No description provided for @caEraseWith.
+  ///
+  /// In ja, this message translates to:
+  /// **'一緒に消えるもの: {list}'**
+  String caEraseWith(String list);
+
+  /// No description provided for @caInUse.
+  ///
+  /// In ja, this message translates to:
+  /// **'次の記録で使われているため削除できません: {list}。使わなくなった取引先は「無効」にしてください。'**
+  String caInUse(String list);
+
+  /// No description provided for @caPlaceholder.
+  ///
+  /// In ja, this message translates to:
+  /// **'「未確認（要手動確認）」はシステムが使うため削除できません。'**
+  String get caPlaceholder;
+
+  /// No description provided for @caErased.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} を削除しました'**
+  String caErased(String name);
+
+  /// No description provided for @caCount.
+  ///
+  /// In ja, this message translates to:
+  /// **'{label} {count}件'**
+  String caCount(String label, int count);
+
+  /// No description provided for @caAdminOnly.
+  ///
+  /// In ja, this message translates to:
+  /// **'取引先の追加・編集・削除は、システム管理者だけができます。'**
+  String get caAdminOnly;
+
+  /// No description provided for @caSupplierAdd.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先を追加'**
+  String get caSupplierAdd;
+
+  /// No description provided for @caEdit.
+  ///
+  /// In ja, this message translates to:
+  /// **'編集'**
+  String get caEdit;
+
+  /// No description provided for @caTDeliveryPlans.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品予定'**
+  String get caTDeliveryPlans;
+
+  /// No description provided for @caTDeliveryReconciliations.
+  ///
+  /// In ja, this message translates to:
+  /// **'納品照合'**
+  String get caTDeliveryReconciliations;
+
+  /// No description provided for @caTShipmentPlans.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷'**
+  String get caTShipmentPlans;
+
+  /// No description provided for @caTPurchaseOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'発注書'**
+  String get caTPurchaseOrders;
+
+  /// No description provided for @caTSalesOrders.
+  ///
+  /// In ja, this message translates to:
+  /// **'受注'**
+  String get caTSalesOrders;
+
+  /// No description provided for @caTLots.
+  ///
+  /// In ja, this message translates to:
+  /// **'ロット'**
+  String get caTLots;
+
+  /// No description provided for @caTSupplierInvoices.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書'**
+  String get caTSupplierInvoices;
+
+  /// No description provided for @caTMasterImports.
+  ///
+  /// In ja, this message translates to:
+  /// **'取込'**
+  String get caTMasterImports;
+
+  /// No description provided for @caTImportDocuments.
+  ///
+  /// In ja, this message translates to:
+  /// **'書類'**
+  String get caTImportDocuments;
+
+  /// No description provided for @caTPurchaseRequests.
+  ///
+  /// In ja, this message translates to:
+  /// **'入荷希望リスト'**
+  String get caTPurchaseRequests;
+
+  /// No description provided for @caTShipDestinations.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先'**
+  String get caTShipDestinations;
+
+  /// No description provided for @caTOutboundFileLines.
+  ///
+  /// In ja, this message translates to:
+  /// **'出庫明細の行'**
+  String get caTOutboundFileLines;
+
+  /// No description provided for @caTWarehouseProducts.
+  ///
+  /// In ja, this message translates to:
+  /// **'商品の優先仕入先'**
+  String get caTWarehouseProducts;
+
+  /// No description provided for @caTSupplierProductNames.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入先の商品名'**
+  String get caTSupplierProductNames;
+
+  /// No description provided for @caTPriceBookTerms.
+  ///
+  /// In ja, this message translates to:
+  /// **'価格台帳の条件'**
+  String get caTPriceBookTerms;
+
+  /// No description provided for @caTPurchasePriceEntries.
+  ///
+  /// In ja, this message translates to:
+  /// **'仕入価格の履歴'**
+  String get caTPurchasePriceEntries;
+
+  /// No description provided for @caTColumnAliases.
+  ///
+  /// In ja, this message translates to:
+  /// **'覚えた見出し'**
+  String get caTColumnAliases;
+
+  /// No description provided for @caTNotationDialects.
+  ///
+  /// In ja, this message translates to:
+  /// **'覚えた表記'**
+  String get caTNotationDialects;
+
+  /// No description provided for @caTPartnerVendorCodes.
+  ///
+  /// In ja, this message translates to:
+  /// **'先方の仕入先コード'**
+  String get caTPartnerVendorCodes;
+
+  /// No description provided for @caOsEraseConfirm.
+  ///
+  /// In ja, this message translates to:
+  /// **'この国外の仮想在庫のカードを完全に削除します。在庫の報告{imports}件・出荷の記録{shipments}件・メモ{notes}件と、そのファイルも消えます。元には戻せません。出荷先カード自体は残り、また出荷すると新しく作られます。'**
+  String caOsEraseConfirm(int imports, int shipments, int notes);
+
+  /// No description provided for @caOsSetDefault.
+  ///
+  /// In ja, this message translates to:
+  /// **'デフォルトにする'**
+  String get caOsSetDefault;
+
+  /// No description provided for @caOsUnsetDefault.
+  ///
+  /// In ja, this message translates to:
+  /// **'デフォルトを外す'**
+  String get caOsUnsetDefault;
+
+  /// No description provided for @caOsDefaultSet.
+  ///
+  /// In ja, this message translates to:
+  /// **'{name} をデフォルトにしました'**
+  String caOsDefaultSet(String name);
+
+  /// No description provided for @caOsManagersOnly.
+  ///
+  /// In ja, this message translates to:
+  /// **'出荷先カードの追加・編集・削除・デフォルトの設定は、システム管理者と管理者ができます。'**
+  String get caOsManagersOnly;
 }
 
 class _AppLocalizationsDelegate

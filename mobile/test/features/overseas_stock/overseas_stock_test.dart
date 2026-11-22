@@ -8,6 +8,7 @@ import 'package:wms_mobile/features/master_import/data/master_import_repository.
 import 'package:wms_mobile/features/master_import/domain/master_import.dart';
 import 'package:wms_mobile/features/outbound/presentation/outbound_downloads.dart';
 import 'package:wms_mobile/features/outbound_file/domain/outbound_sheet.dart';
+import 'package:wms_mobile/features/admin/data/card_erase_repository.dart';
 import 'package:wms_mobile/features/overseas_stock/data/overseas_stock_repository.dart';
 import 'package:wms_mobile/features/outbound/domain/outbound.dart' show ShipDestination;
 import 'package:wms_mobile/features/outbound/data/outbound_repository.dart' show shipDestinationsProvider;
@@ -20,6 +21,7 @@ import 'package:wms_mobile/features/record_notes/data/record_notes_repository.da
 import 'package:wms_mobile/features/record_notes/presentation/record_notes_panel.dart';
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart' show HeadingMeaning;
 
+import '../../support/fake_card_erase_repository.dart';
 import '../../support/fake_overseas_and_notes.dart';
 import '../../support/harness.dart';
 
@@ -96,6 +98,8 @@ void main() {
       recordNotesRepositoryProvider.overrideWithValue(FakeRecordNotesRepository()),
       masterImportRepositoryProvider.overrideWithValue(FakeMasterImportRepository()),
       shipDestinationsProvider.overrideWith((ref) async => const [ShipDestination(id: 31, name: 'テスト貿易')]),
+      // A 管理者 or the system administrator (0228).
+      canManageOverseasProvider.overrideWithValue(true),
     ]);
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('os-default-4')), findsOneWidget);
@@ -116,6 +120,52 @@ void main() {
     expect(repo.cards, [31]);
     expect(find.byType(OverseasSiteScreen), findsOneWidget);
     expect(find.text('出荷先カード: テスト貿易'), findsOneWidget);
+  });
+
+  testWidgets('a card made the default and erased for good by a manager; others only look (0228)', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeOverseasStockRepository(sites: [
+      const OverseasSite(id: 4, name: '国外の仮想在庫（中国・広東）', isDefault: true, destinationId: 4),
+      const OverseasSite(id: 5, name: 'テスト香港支店', destinationId: 5),
+    ]);
+    final erase = FakeCardEraseRepository(overseas: {
+      5: const OverseasEraseCheck(id: 5, name: 'テスト香港支店', imports: 2, shipments: 3, notes: 1),
+    });
+    await pumpApp(tester, const OverseasStockScreen(), overrides: [
+      overseasStockRepositoryProvider.overrideWithValue(repo),
+      cardEraseRepositoryProvider.overrideWithValue(erase),
+      canManageOverseasProvider.overrideWithValue(true),
+    ]);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('os-site-default-5')));
+    await tester.pumpAndSettle();
+    expect(repo.defaults, [(5, true)]);
+    expect(find.textContaining('テスト香港支店 をデフォルトにしました'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('os-site-erase-5')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('在庫の報告2件・出荷の記録3件・メモ1件'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('os-erase-ok')));
+    await tester.pumpAndSettle();
+    expect(erase.erased, [('overseas_site', 5)]);
+  });
+
+  testWidgets('without being a manager: no adding, default, putting away or erasing', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repo = FakeOverseasStockRepository(sites: [const OverseasSite(id: 5, name: 'テスト香港支店', destinationId: 5)]);
+    await pumpApp(tester, const OverseasStockScreen(), overrides: [
+      overseasStockRepositoryProvider.overrideWithValue(repo),
+      canManageOverseasProvider.overrideWithValue(false),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('os-managers-only')), findsOneWidget);
+    for (final k in ['os-add-site', 'os-site-default-5', 'os-site-archive-5', 'os-site-erase-5']) {
+      expect(find.byKey(ValueKey(k)), findsNothing, reason: k);
+    }
+    // Reading counts in stays open to them.
+    expect(find.byKey(const ValueKey('os-site-import-5')), findsOneWidget);
   });
 
   test('the trend: a shipment adds, a count sets; what was used between counts, by month', () {

@@ -11,6 +11,7 @@ import '../../outbound/presentation/outbound_downloads.dart' show saveFileProvid
 import '../../record_notes/data/record_notes_repository.dart';
 import '../../record_notes/presentation/record_notes_panel.dart';
 import '../../stock_import/presentation/import_view_screen.dart' show OriginalFileView;
+import 'overseas_stock_screen.dart' show canManageOverseasProvider;
 import '../data/overseas_stock_repository.dart';
 import '../domain/overseas_stock.dart';
 import '../../outbound_file/presentation/outbound_file_detail_screen.dart';
@@ -145,7 +146,8 @@ class _OverseasSiteScreenState extends ConsumerState<OverseasSiteScreen> with Si
       appBar: AppBar(
         title: Text(_site.name),
         actions: [
-          IconButton(key: const ValueKey('os-site-edit'), tooltip: l10n.osEditSite, icon: const Icon(Icons.edit_outlined), onPressed: _edit),
+          if (ref.watch(canManageOverseasProvider))
+            IconButton(key: const ValueKey('os-site-edit'), tooltip: l10n.osEditSite, icon: const Icon(Icons.edit_outlined), onPressed: _edit),
         ],
         bottom: TabBar(controller: _tabs, isScrollable: true, tabAlignment: TabAlignment.start, tabs: [
           Tab(key: const ValueKey('os-tab-estimate'), text: l10n.osTabEstimate),

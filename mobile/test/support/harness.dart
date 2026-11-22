@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wms_mobile/features/reading_audit/data/reading_audit_repository.dart';
 import 'package:wms_mobile/features/error_log/data/error_log_repository.dart';
+import 'package:wms_mobile/features/admin/data/card_erase_repository.dart';
 import 'package:wms_mobile/features/stock_import/data/stock_import_repository.dart' show pendingInspectionProvider;
 import 'package:wms_mobile/features/stock_import/domain/stock_ledger.dart' show PendingInspection;
 import 'package:wms_mobile/features/stock_import/domain/stock_file.dart' show HeadingMeaning;
@@ -147,6 +148,7 @@ import 'package:wms_mobile/l10n/app_localizations.dart';
 import 'package:wms_mobile/features/jan_catalog/data/jan_catalog_repository.dart';
 import 'fake_reading_audit_repository.dart';
 import 'fake_error_log_repository.dart';
+import 'fake_card_erase_repository.dart';
 import 'fake_packing_repository.dart';
 import 'fake_jan_catalog_repository.dart';
 import 'package:wms_mobile/features/jan_catalog/data/reference_repository.dart';
@@ -230,6 +232,8 @@ List<Override> _defaultOverrides() => [
       readingAuditRepositoryProvider.overrideWithValue(FakeReadingAuditRepository()),
       // エラーログ (0227), in memory.
       errorLogRepositoryProvider.overrideWithValue(FakeErrorLogRepository()),
+      // Cards erased (0228), in memory.
+      cardEraseRepositoryProvider.overrideWithValue(FakeCardEraseRepository()),
       // 仕入先ファイル起点の入荷 (0134), in memory.
       inboundRepositoryProvider.overrideWithValue(FakeInboundRepository()),
       // ファイルから商品・在庫登録 (0138), in memory.

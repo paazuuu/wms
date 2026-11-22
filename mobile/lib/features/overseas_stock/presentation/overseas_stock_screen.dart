@@ -8,6 +8,9 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../outbound/presentation/ship_destinations_screen.dart' show pickDestinationCard;
+import '../../admin/data/card_erase_repository.dart';
+import '../../admin/data/menu_visibility_repository.dart' show currentUserTierProvider;
+import '../../admin/domain/user_tier.dart';
 import '../data/overseas_stock_repository.dart';
 import '../domain/overseas_stock.dart';
 import 'overseas_site_screen.dart';
@@ -20,6 +23,13 @@ final _day = DateFormat('y/MM/dd');
 /// every product across them. Kept apart from our own stock. (The
 /// warehouses abroad goods were moved to by 倉庫間移動 (0088) are no longer
 /// shown: what is shipped to a partner abroad is counted here, by its card.)
+/// 国外の仮想在庫の出荷先カード: managed by the system administrator and the
+/// 管理者 tier (0228); counts are read in by whoever may adjust stock.
+final canManageOverseasProvider = Provider<bool>((ref) {
+  final tier = ref.watch(currentUserTierProvider);
+  return tier == UserTier.admin || tier == UserTier.manager;
+});
+
 class OverseasStockScreen extends ConsumerStatefulWidget {
   const OverseasStockScreen({super.key});
 
@@ -60,6 +70,71 @@ class _OverseasStockScreenState extends ConsumerState<OverseasStockScreen> {
     ref.invalidate(overseasOverviewProvider);
   }
 
+  Future<void> _setDefault(OverseasSite s) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final r = await ref.read(overseasStockRepositoryProvider).setDefault(s.id, !s.isDefault);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        if (!s.isDefault) messenger.showSnackBar(SnackBar(content: Text(l10n.caOsDefaultSet(s.name))));
+        ref.invalidate(overseasSitesProvider);
+      case ApiFailure(:final message):
+        messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+    }
+  }
+
+  /// 完全に削除: the card and its counts, shipments and notes, after saying
+  /// what goes (0228).
+  Future<void> _erase(OverseasSite s) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final repo = ref.read(cardEraseRepositoryProvider);
+    final checked = await repo.overseasCheck(s.id);
+    if (!mounted) return;
+    final OverseasEraseCheck c;
+    switch (checked) {
+      case ApiSuccess(:final data):
+        c = data;
+      case ApiFailure(:final message):
+        messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+        return;
+    }
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final scheme = Theme.of(ctx).colorScheme;
+        return AlertDialog(
+          key: const ValueKey('os-erase-dialog'),
+          title: Text(l10n.caEraseTitle(c.name)),
+          content: Text(l10n.caOsEraseConfirm(c.imports, c.shipments, c.notes)),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel)),
+            FilledButton(
+              key: const ValueKey('os-erase-ok'),
+              style: FilledButton.styleFrom(backgroundColor: scheme.error, foregroundColor: scheme.onError),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l10n.caErase),
+            ),
+          ],
+        );
+      },
+    );
+    if (ok != true || !mounted) return;
+    final r = await repo.erase('overseas_site', s.id);
+    if (!mounted) return;
+    switch (r) {
+      case ApiSuccess():
+        messenger.showSnackBar(SnackBar(content: Text(l10n.caErased(c.name))));
+        ref.invalidate(overseasSitesProvider);
+        ref.invalidate(overseasOverviewProvider);
+      case ApiFailure(:final message):
+        messenger.showSnackBar(SnackBar(content: Text(humanizeApiErrorMessage(l10n, message))));
+    }
+  }
+
   Future<void> _archive(OverseasSite s) async {
     await ref.read(overseasStockRepositoryProvider).archiveSite(s.id, !s.archived);
     ref.invalidate(overseasSitesProvider);
@@ -93,13 +168,18 @@ class _OverseasStockScreenState extends ConsumerState<OverseasStockScreen> {
     final scheme = theme.colorScheme;
     final muted = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
     final async = ref.watch(overseasSitesProvider(_archived));
+    // Added, changed, put away, made the default and erased by the system
+    // administrator and the 管理者 tier (0228).
+    final canManage = ref.watch(canManageOverseasProvider);
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        key: const ValueKey('os-add-site'),
-        onPressed: _addSite,
-        icon: const Icon(Icons.add_business_outlined),
-        label: Text(l10n.osAddSite),
-      ),
+      floatingActionButton: canManage
+          ? FloatingActionButton.extended(
+              key: const ValueKey('os-add-site'),
+              onPressed: _addSite,
+              icon: const Icon(Icons.add_business_outlined),
+              label: Text(l10n.osAddSite),
+            )
+          : null,
       body: async.when(
         loading: () => LoadingView(message: l10n.loading),
         error: (e, _) => ErrorStateView(
@@ -108,6 +188,7 @@ class _OverseasStockScreenState extends ConsumerState<OverseasStockScreen> {
           padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 96),
           children: [
             Text(l10n.osIntro, style: muted),
+            if (!canManage) Text(l10n.caOsManagersOnly, key: const ValueKey('os-managers-only'), style: muted),
             const SizedBox(height: AppSpacing.sm),
             FilterChip(
               key: const ValueKey('os-show-archived'),
@@ -158,12 +239,27 @@ class _OverseasStockScreenState extends ConsumerState<OverseasStockScreen> {
                       icon: const Icon(Icons.upload_file_outlined),
                       onPressed: s.archived ? null : () => _open(s, tab: 3),
                     ),
-                    IconButton(
-                      key: ValueKey('os-site-archive-${s.id}'),
-                      tooltip: s.archived ? l10n.osUnarchive : l10n.osArchive,
-                      icon: Icon(s.archived ? Icons.unarchive_outlined : Icons.archive_outlined),
-                      onPressed: () => _archive(s),
-                    ),
+                    if (canManage) ...[
+                      IconButton(
+                        key: ValueKey('os-site-default-${s.id}'),
+                        tooltip: s.isDefault ? l10n.caOsUnsetDefault : l10n.caOsSetDefault,
+                        icon: Icon(s.isDefault ? Icons.star : Icons.star_border),
+                        onPressed: s.archived ? null : () => _setDefault(s),
+                      ),
+                      IconButton(
+                        key: ValueKey('os-site-archive-${s.id}'),
+                        tooltip: s.archived ? l10n.osUnarchive : l10n.osArchive,
+                        icon: Icon(s.archived ? Icons.unarchive_outlined : Icons.archive_outlined),
+                        onPressed: () => _archive(s),
+                      ),
+                      IconButton(
+                        key: ValueKey('os-site-erase-${s.id}'),
+                        tooltip: l10n.caErase,
+                        color: scheme.error,
+                        icon: const Icon(Icons.delete_forever_outlined),
+                        onPressed: () => _erase(s),
+                      ),
+                    ],
                   ]),
                 ),
               ),
