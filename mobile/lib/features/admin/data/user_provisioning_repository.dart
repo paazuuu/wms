@@ -40,13 +40,17 @@ class ProvisionResult {
       );
 }
 
-/// Kinds of user written in a sheet: 普通 / 通常 / 現場 → user, 管理 →
-/// manager, ADMIN / システム → admin; null when the words do not say.
+/// Kinds of user written in a sheet: 一般ユーザー / 普通 / 通常 / 現場 → user,
+/// 責任者 / 管理 → manager, システム管理者 / ADMIN → admin; null when the
+/// words do not say. The old names (通常・管理者・ADMIN) are still read.
 UserTier? tierFromWords(String s) {
   final t = s.trim().toLowerCase();
   if (t.isEmpty) return null;
   if (t.contains('admin') || t.contains('システム') || t.contains('系统')) return UserTier.admin;
-  if (t.contains('管理') || t.contains('manager')) return UserTier.manager;
+  if (t.contains('責任') || t.contains('管理') || t.contains('manager') || t.contains('supervisor') ||
+      t.contains('マネージャー') || t.contains('负责')) {
+    return UserTier.manager;
+  }
   if (t.contains('普通') || t.contains('通常') || t.contains('現場') || t.contains('user') || t.contains('一般')) return UserTier.user;
   return null;
 }

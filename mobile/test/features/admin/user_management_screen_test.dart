@@ -37,7 +37,7 @@ void main() {
 
     expect(find.text('Yamada'), findsOneWidget);
     expect(find.text('yamada@example.com'), findsOneWidget);
-    expect(find.text('通常'), findsOneWidget);
+    expect(find.text('一般ユーザー'), findsOneWidget);
     expect(find.textContaining('現場スタッフ'), findsOneWidget);
     // No role is taken off by a cross any more.
     expect(find.byIcon(Icons.add_moderator_outlined), findsNothing);
@@ -96,7 +96,7 @@ void main() {
     expect(find.textContaining('user.manage'), findsNothing);
   });
 
-  testWidgets('区分: 通常 to 管理者 after a confirm; cancelled, nothing changes', (tester) async {
+  testWidgets('区分: 一般ユーザー to 責任者 after a confirm; cancelled, nothing changes', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1200, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final repo = FakeAdminRepository(
@@ -114,16 +114,16 @@ void main() {
     );
     await pumpApp(tester, const UserManagementScreen(), overrides: [adminRepositoryProvider.overrideWithValue(repo)]);
 
-    // Cancelled: still 通常.
+    // Cancelled: still 一般ユーザー.
     await tester.tap(find.byKey(const ValueKey('um-tier-u1')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('um-tier-u1-manager')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('「通常」から「管理者」'), findsOneWidget);
+    expect(find.textContaining('「一般ユーザー」から「責任者」'), findsOneWidget);
     await tester.tap(find.text('キャンセル'));
     await tester.pumpAndSettle();
     expect(repo.tiers, isEmpty);
-    expect(find.text('通常'), findsOneWidget);
+    expect(find.text('一般ユーザー'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('um-tier-u1')));
     await tester.pumpAndSettle();
@@ -132,7 +132,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('um-tier-ok-u1')));
     await tester.pumpAndSettle();
     expect(repo.tiers, [('u1', 'manager')]);
-    expect(find.text('管理者'), findsOneWidget);
+    expect(find.text('責任者'), findsOneWidget);
     expect(find.textContaining('倉庫責任者'), findsOneWidget);
   });
 

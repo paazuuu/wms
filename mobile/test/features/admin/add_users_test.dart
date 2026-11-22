@@ -48,18 +48,25 @@ void main() {
         'Ganki.Rin@Example.com\tシステムADMIN\n'
         'jeff@example.com\n'
         'jeff@example.com\t管理\n'
-        'yamada@example.com, 山田, 管理者\n');
+        'yamada@example.com, 山田, 管理者\n'
+        // The names shown now.
+        'kato@example.com\t責任者\n'
+        'sato@example.com\t一般ユーザー\n'
+        'boss@example.com\tシステム管理者\n');
     expect(users.map((u) => (u.email, u.tier)), [
       ('info@example.com', UserTier.user),
       ('adam@example.com', UserTier.manager),
       ('ganki.rin@example.com', UserTier.admin),
       ('jeff@example.com', UserTier.user),
       ('yamada@example.com', UserTier.manager),
+      ('kato@example.com', UserTier.manager),
+      ('sato@example.com', UserTier.user),
+      ('boss@example.com', UserTier.admin),
     ]);
-    expect(users.last.name, '山田');
+    expect(users.firstWhere((u) => u.email == 'yamada@example.com').name, '山田');
   });
 
-  testWidgets('ADMIN adds users by pasting, sees the temporary passwords once and copies them', (tester) async {
+  testWidgets('the administrator adds users by pasting, sees the temporary passwords once and copies them', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1400, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     String? clip;
@@ -76,7 +83,7 @@ void main() {
       ])),
       userProvisioningRepositoryProvider.overrideWithValue(p),
     ]);
-    expect(find.text('ADMIN'), findsOneWidget);
+    expect(find.text('システム管理者'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('um-add')));
     await tester.pumpAndSettle();
@@ -86,7 +93,7 @@ void main() {
     // The second made a manager by hand.
     await tester.tap(find.byKey(const ValueKey('um-add-tier-1')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('管理者').last);
+    await tester.tap(find.text('責任者').last);
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('um-add-ok')));
     await tester.pumpAndSettle();
@@ -100,10 +107,10 @@ void main() {
     expect(find.text('Pw1abcdefgh'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('um-copy')));
     await tester.pumpAndSettle();
-    expect(clip, 'new@example.com\t管理者\tPw1abcdefgh');
+    expect(clip, 'new@example.com\t責任者\tPw1abcdefgh');
   });
 
-  testWidgets('ADMIN sets a password: typed and seen, or made up', (tester) async {
+  testWidgets('the administrator sets a password: typed and seen, or made up', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1400, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final p = _Provision();
@@ -114,7 +121,7 @@ void main() {
       ])),
       userProvisioningRepositoryProvider.overrideWithValue(p),
     ]);
-    expect(find.text('通常'), findsOneWidget);
+    expect(find.text('一般ユーザー'), findsOneWidget);
 
     // Typed: too short is refused; the text is shown as typed.
     await tester.tap(find.byKey(const ValueKey('um-reset-u9')));

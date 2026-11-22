@@ -1837,7 +1837,7 @@ abstract class AppLocalizations {
   /// No description provided for @noRoleAssignedBody.
   ///
   /// In ja, this message translates to:
-  /// **'サインインはできていますが、まだ役割（ロール）が割り当てられていないため、使える機能がありません。管理者に権限の割り当てを依頼してください。'**
+  /// **'サインインはできていますが、まだ役割（ロール）が割り当てられていないため、使える機能がありません。システム管理者に権限の割り当てを依頼してください。'**
   String get noRoleAssignedBody;
 
   /// No description provided for @whNoAssignedWarehouse.
@@ -1849,7 +1849,7 @@ abstract class AppLocalizations {
   /// No description provided for @whNoAssignedWarehouseBody.
   ///
   /// In ja, this message translates to:
-  /// **'あなたのアカウントはまだどの倉庫にも割り当てられていないため、在庫の閲覧や作業ができません。管理者に倉庫の割り当てを依頼してください。'**
+  /// **'あなたのアカウントはまだどの倉庫にも割り当てられていないため、在庫の閲覧や作業ができません。システム管理者に倉庫の割り当てを依頼してください。'**
   String get whNoAssignedWarehouseBody;
 
   /// No description provided for @whNoWarehouses.
@@ -4417,7 +4417,7 @@ abstract class AppLocalizations {
   /// No description provided for @userMgmtNoWarehouses.
   ///
   /// In ja, this message translates to:
-  /// **'倉庫が割り当てられていません（管理者は全倉庫、それ以外はどの倉庫にもアクセスできません）'**
+  /// **'倉庫が割り当てられていません（システム管理者は全倉庫、それ以外はどの倉庫にもアクセスできません）'**
   String get userMgmtNoWarehouses;
 
   /// No description provided for @userMgmtAllWarehousesHeld.
@@ -14698,7 +14698,7 @@ abstract class AppLocalizations {
   /// No description provided for @productDeleteNotReady.
   ///
   /// In ja, this message translates to:
-  /// **'削除の機能がまだデータベースに入っていません（0119 の delete_product）。管理者に適用を依頼してください。'**
+  /// **'削除の機能がまだデータベースに入っていません（0119 の delete_product）。システム管理者に適用を依頼してください。'**
   String get productDeleteNotReady;
 
   /// No description provided for @quoteImportTitle.
@@ -15238,7 +15238,7 @@ abstract class AppLocalizations {
   /// No description provided for @quoteWakePolicy.
   ///
   /// In ja, this message translates to:
-  /// **'ファイルに載っている商品は扱う予定の商品とみなし、状態ごとに次のように扱います。休眠 → 取扱中に戻す／アーカイブ → 取扱中に戻す（管理者のみ）／提供終了 → そのまま（メーカー廃番などのため。戻すときは各行でチェック）。各行のチェックで変えられます。在庫数は入荷で増えるもので、ここでは変わりません。'**
+  /// **'ファイルに載っている商品は扱う予定の商品とみなし、状態ごとに次のように扱います。休眠 → 取扱中に戻す／アーカイブ → 取扱中に戻す（システム管理者のみ）／提供終了 → そのまま（メーカー廃番などのため。戻すときは各行でチェック）。各行のチェックで変えられます。在庫数は入荷で増えるもので、ここでは変わりません。'**
   String get quoteWakePolicy;
 
   /// No description provided for @quoteWakeCount.
@@ -15262,7 +15262,7 @@ abstract class AppLocalizations {
   /// No description provided for @quoteWakeNeedsAdmin.
   ///
   /// In ja, this message translates to:
-  /// **'アーカイブ・提供終了から戻すには管理者の権限が必要です'**
+  /// **'アーカイブ・提供終了から戻すにはシステム管理者の権限が必要です'**
   String get quoteWakeNeedsAdmin;
 
   /// No description provided for @quoteSaveAndWake.
@@ -26420,25 +26420,25 @@ abstract class AppLocalizations {
   /// No description provided for @featMenuVisibilityDesc.
   ///
   /// In ja, this message translates to:
-  /// **'ADMIN・管理者・通常ユーザーごとに、見えるメニューと金額の表示を決めます'**
+  /// **'システム管理者・責任者・一般ユーザーごとに、見えるメニューと金額の表示を決めます'**
   String get featMenuVisibilityDesc;
 
   /// No description provided for @tierAdmin.
   ///
   /// In ja, this message translates to:
-  /// **'ADMIN'**
+  /// **'システム管理者'**
   String get tierAdmin;
 
   /// No description provided for @tierManager.
   ///
   /// In ja, this message translates to:
-  /// **'管理者'**
+  /// **'責任者'**
   String get tierManager;
 
   /// No description provided for @tierUser.
   ///
   /// In ja, this message translates to:
-  /// **'通常'**
+  /// **'一般ユーザー'**
   String get tierUser;
 
   /// No description provided for @userMgmtTier.
@@ -26462,25 +26462,25 @@ abstract class AppLocalizations {
   /// No description provided for @mvHint.
   ///
   /// In ja, this message translates to:
-  /// **'チェックしたメニューだけがその区分のユーザーに表示されます。ADMINには常にすべて表示されます。表示しても、使えるかどうかは役割（権限）で決まります。'**
+  /// **'チェックしたメニューだけがその区分のユーザーに表示されます。システム管理者には常にすべて表示されます。表示しても、使えるかどうかは役割（権限）で決まります。'**
   String get mvHint;
 
   /// No description provided for @mvTierAdmin.
   ///
   /// In ja, this message translates to:
-  /// **'ADMIN: システム管理者・会社管理者（すべて表示、この設定を変更できる）'**
+  /// **'システム管理者: システム管理者・会社管理者の役割（すべて表示、この設定を変更できる）'**
   String get mvTierAdmin;
 
   /// No description provided for @mvTierManager.
   ///
   /// In ja, this message translates to:
-  /// **'管理者: 倉庫責任者・在庫管理・購買・営業'**
+  /// **'責任者: 倉庫責任者・在庫管理・購買・営業'**
   String get mvTierManager;
 
   /// No description provided for @mvTierUser.
   ///
   /// In ja, this message translates to:
-  /// **'通常: それ以外（現場スタッフ・入荷・検品・棚入れ・ピッキング・梱包・出荷・閲覧）— 初期設定は現場作業のみ'**
+  /// **'一般ユーザー: それ以外（現場スタッフ・入荷・検品・棚入れ・ピッキング・梱包・出荷・閲覧）— 初期設定は現場作業のみ'**
   String get mvTierUser;
 
   /// No description provided for @mvContent.
@@ -26510,13 +26510,13 @@ abstract class AppLocalizations {
   /// No description provided for @umAddHint.
   ///
   /// In ja, this message translates to:
-  /// **'メールアドレスと区分（普通・管理・ADMIN）を1行に1人ずつ。表（Excel・スプレッドシート）からそのまま貼り付けられます。区分が無い行は「通常」になります。'**
+  /// **'メールアドレスと区分（一般ユーザー・責任者・システム管理者）を1行に1人ずつ。表（Excel・スプレッドシート）からそのまま貼り付けられます。区分が無い行は「一般ユーザー」になります。'**
   String get umAddHint;
 
   /// No description provided for @umAddRoles.
   ///
   /// In ja, this message translates to:
-  /// **'通常＝現場スタッフ（入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整）、管理者＝倉庫責任者、ADMIN＝システム管理者。倉庫はすべて割り当てます（あとで変更できます）。'**
+  /// **'一般ユーザー＝現場スタッフ（入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整）、責任者＝倉庫責任者など、システム管理者＝すべての機能と設定。倉庫はすべて割り当てます（あとで変更できます）。'**
   String get umAddRoles;
 
   /// No description provided for @umAddN.
@@ -26588,7 +26588,7 @@ abstract class AppLocalizations {
   /// No description provided for @umReset.
   ///
   /// In ja, this message translates to:
-  /// **'パスワードを変更（ADMIN）'**
+  /// **'パスワードを変更（システム管理者）'**
   String get umReset;
 
   /// No description provided for @umResetQ.
@@ -26654,7 +26654,7 @@ abstract class AppLocalizations {
   /// No description provided for @umSetHint.
   ///
   /// In ja, this message translates to:
-  /// **'今のパスワードは安全のため元に戻せない形で保存されていて、ADMINでも見ることはできません。新しいパスワードを決めて上書きします。'**
+  /// **'今のパスワードは安全のため元に戻せない形で保存されていて、システム管理者でも見ることはできません。新しいパスワードを決めて上書きします。'**
   String get umSetHint;
 
   /// No description provided for @umSetOwn.
@@ -30461,19 +30461,19 @@ abstract class AppLocalizations {
   /// No description provided for @umTierHelpAdmin.
   ///
   /// In ja, this message translates to:
-  /// **'ADMIN（システム管理者）：すべての機能と、ユーザー・設定の管理'**
+  /// **'システム管理者：すべての機能と、ユーザー・設定の管理'**
   String get umTierHelpAdmin;
 
   /// No description provided for @umTierHelpManager.
   ///
   /// In ja, this message translates to:
-  /// **'管理者（倉庫責任者）：入出荷・在庫・商品・取引先・レポート'**
+  /// **'責任者（倉庫責任者など）：入出荷・在庫・商品・取引先・レポート'**
   String get umTierHelpManager;
 
   /// No description provided for @umTierHelpUser.
   ///
   /// In ja, this message translates to:
-  /// **'通常（現場スタッフ）：入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整'**
+  /// **'一般ユーザー（現場スタッフ）：入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整'**
   String get umTierHelpUser;
 
   /// No description provided for @umTierConfirm.
@@ -31841,7 +31841,7 @@ abstract class AppLocalizations {
   /// No description provided for @caOsManagersOnly.
   ///
   /// In ja, this message translates to:
-  /// **'出荷先カードの追加・編集・削除・デフォルトの設定は、システム管理者と管理者ができます。'**
+  /// **'出荷先カードの追加・編集・削除・デフォルトの設定は、システム管理者と責任者ができます。'**
   String get caOsManagersOnly;
 }
 

@@ -2327,7 +2327,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userMgmtNoWarehouses =>
-      'No warehouse assigned (admins still see every warehouse; anyone else sees none)';
+      'No warehouse assigned (the administrator still sees every warehouse; anyone else sees none)';
 
   @override
   String get userMgmtAllWarehousesHeld =>
@@ -15273,10 +15273,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featMenuVisibilityDesc =>
-      'Choose which menus and prices ADMIN, managers and users see';
+      'Choose which menus and prices the administrator, managers and users see';
 
   @override
-  String get tierAdmin => 'ADMIN';
+  String get tierAdmin => 'Administrator';
 
   @override
   String get tierManager => 'Manager';
@@ -15297,11 +15297,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mvHint =>
-      'Only the menus ticked are shown to that kind of user. ADMIN always sees everything. Being shown does not grant use: that is still the role\'s permission.';
+      'Only the menus ticked are shown to that kind of user. The administrator always sees everything. Being shown does not grant use: that is still the role\'s permission.';
 
   @override
   String get mvTierAdmin =>
-      'ADMIN: system and company admins (see everything, change this)';
+      'Administrator: the system and company administrator roles (see everything, change this)';
 
   @override
   String get mvTierManager =>
@@ -15326,11 +15326,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get umAddHint =>
-      'One person a line: the email and the kind (普通 / 管理 / ADMIN). Paste straight from a sheet. A line without a kind becomes a user.';
+      'One person a line: the email and the kind (User / Manager / Administrator). Paste straight from a sheet. A line without a kind becomes a user.';
 
   @override
   String get umAddRoles =>
-      'User: floor staff (receiving, inspection, put-away, picking, packing, shipping, stock adjustment); manager: warehouse manager; ADMIN: system admin. Every warehouse is assigned (change it later).';
+      'User: floor staff (receiving, inspection, put-away, picking, packing, shipping, stock adjustment); Manager: warehouse lead and the like; Administrator: everything and the settings. Every warehouse is assigned (change it later).';
 
   @override
   String umAddN(int n) {
@@ -15372,7 +15372,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get umClose => 'Close';
 
   @override
-  String get umReset => 'Set the password (ADMIN)';
+  String get umReset => 'Set the password (administrator)';
 
   @override
   String umResetQ(String email) {
@@ -15411,7 +15411,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get umSetHint =>
-      'The current password is kept only in a form that cannot be turned back, so not even an ADMIN can see it. Set a new one in its place.';
+      'The current password is kept only in a form that cannot be turned back, so not even the administrator can see it. Set a new one in its place.';
 
   @override
   String get umSetOwn => 'Type one';
@@ -17711,15 +17711,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get umTierHelpAdmin =>
-      'ADMIN (system administrator): everything, users and settings included';
+      'Administrator: everything, users and settings included';
 
   @override
   String get umTierHelpManager =>
-      'Manager (warehouse lead): receipts, shipments, stock, products, partners, reports';
+      'Manager (warehouse lead and the like): receipts, shipments, stock, products, partners, reports';
 
   @override
   String get umTierHelpUser =>
-      'Standard (floor staff): receiving, inspection, put-away, picking, packing, shipping, adjustments';
+      'User (floor staff): receiving, inspection, put-away, picking, packing, shipping, adjustments';
 
   @override
   String get umTierConfirm => 'Change the tier?';
@@ -18561,5 +18561,5 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get caOsManagersOnly =>
-      'System administrators and managers add, change, erase and set the default of these cards.';
+      'Administrators and managers add, change, erase and set the default of these cards.';
 }

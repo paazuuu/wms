@@ -927,14 +927,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get noRoleAssignedBody =>
-      'サインインはできていますが、まだ役割（ロール）が割り当てられていないため、使える機能がありません。管理者に権限の割り当てを依頼してください。';
+      'サインインはできていますが、まだ役割（ロール）が割り当てられていないため、使える機能がありません。システム管理者に権限の割り当てを依頼してください。';
 
   @override
   String get whNoAssignedWarehouse => '倉庫が割り当てられていません';
 
   @override
   String get whNoAssignedWarehouseBody =>
-      'あなたのアカウントはまだどの倉庫にも割り当てられていないため、在庫の閲覧や作業ができません。管理者に倉庫の割り当てを依頼してください。';
+      'あなたのアカウントはまだどの倉庫にも割り当てられていないため、在庫の閲覧や作業ができません。システム管理者に倉庫の割り当てを依頼してください。';
 
   @override
   String get whNoWarehouses => '倉庫がまだありません';
@@ -2267,7 +2267,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get userMgmtNoWarehouses =>
-      '倉庫が割り当てられていません（管理者は全倉庫、それ以外はどの倉庫にもアクセスできません）';
+      '倉庫が割り当てられていません（システム管理者は全倉庫、それ以外はどの倉庫にもアクセスできません）';
 
   @override
   String get userMgmtAllWarehousesHeld => 'このユーザーはすべての倉庫にアクセスできます。';
@@ -8025,7 +8025,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get productDeleteNotReady =>
-      '削除の機能がまだデータベースに入っていません（0119 の delete_product）。管理者に適用を依頼してください。';
+      '削除の機能がまだデータベースに入っていません（0119 の delete_product）。システム管理者に適用を依頼してください。';
 
   @override
   String get quoteImportTitle => 'ファイルから一括登録';
@@ -8344,7 +8344,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get quoteWakePolicy =>
-      'ファイルに載っている商品は扱う予定の商品とみなし、状態ごとに次のように扱います。休眠 → 取扱中に戻す／アーカイブ → 取扱中に戻す（管理者のみ）／提供終了 → そのまま（メーカー廃番などのため。戻すときは各行でチェック）。各行のチェックで変えられます。在庫数は入荷で増えるもので、ここでは変わりません。';
+      'ファイルに載っている商品は扱う予定の商品とみなし、状態ごとに次のように扱います。休眠 → 取扱中に戻す／アーカイブ → 取扱中に戻す（システム管理者のみ）／提供終了 → そのまま（メーカー廃番などのため。戻すときは各行でチェック）。各行のチェックで変えられます。在庫数は入荷で増えるもので、ここでは変わりません。';
 
   @override
   String quoteWakeCount(int wake, int keep) {
@@ -8358,7 +8358,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get quoteWakeDiscontinued => '提供終了の商品です（メーカー廃番など）。また扱うならチェックしてください';
 
   @override
-  String get quoteWakeNeedsAdmin => 'アーカイブ・提供終了から戻すには管理者の権限が必要です';
+  String get quoteWakeNeedsAdmin => 'アーカイブ・提供終了から戻すにはシステム管理者の権限が必要です';
 
   @override
   String quoteSaveAndWake(int count, int wake) {
@@ -14978,16 +14978,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featMenuVisibility => '表示設定';
 
   @override
-  String get featMenuVisibilityDesc => 'ADMIN・管理者・通常ユーザーごとに、見えるメニューと金額の表示を決めます';
+  String get featMenuVisibilityDesc =>
+      'システム管理者・責任者・一般ユーザーごとに、見えるメニューと金額の表示を決めます';
 
   @override
-  String get tierAdmin => 'ADMIN';
+  String get tierAdmin => 'システム管理者';
 
   @override
-  String get tierManager => '管理者';
+  String get tierManager => '責任者';
 
   @override
-  String get tierUser => '通常';
+  String get tierUser => '一般ユーザー';
 
   @override
   String userMgmtTier(String tier) {
@@ -15002,17 +15003,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mvHint =>
-      'チェックしたメニューだけがその区分のユーザーに表示されます。ADMINには常にすべて表示されます。表示しても、使えるかどうかは役割（権限）で決まります。';
+      'チェックしたメニューだけがその区分のユーザーに表示されます。システム管理者には常にすべて表示されます。表示しても、使えるかどうかは役割（権限）で決まります。';
 
   @override
-  String get mvTierAdmin => 'ADMIN: システム管理者・会社管理者（すべて表示、この設定を変更できる）';
+  String get mvTierAdmin => 'システム管理者: システム管理者・会社管理者の役割（すべて表示、この設定を変更できる）';
 
   @override
-  String get mvTierManager => '管理者: 倉庫責任者・在庫管理・購買・営業';
+  String get mvTierManager => '責任者: 倉庫責任者・在庫管理・購買・営業';
 
   @override
   String get mvTierUser =>
-      '通常: それ以外（現場スタッフ・入荷・検品・棚入れ・ピッキング・梱包・出荷・閲覧）— 初期設定は現場作業のみ';
+      '一般ユーザー: それ以外（現場スタッフ・入荷・検品・棚入れ・ピッキング・梱包・出荷・閲覧）— 初期設定は現場作業のみ';
 
   @override
   String get mvContent => '内容';
@@ -15028,11 +15029,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get umAddHint =>
-      'メールアドレスと区分（普通・管理・ADMIN）を1行に1人ずつ。表（Excel・スプレッドシート）からそのまま貼り付けられます。区分が無い行は「通常」になります。';
+      'メールアドレスと区分（一般ユーザー・責任者・システム管理者）を1行に1人ずつ。表（Excel・スプレッドシート）からそのまま貼り付けられます。区分が無い行は「一般ユーザー」になります。';
 
   @override
   String get umAddRoles =>
-      '通常＝現場スタッフ（入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整）、管理者＝倉庫責任者、ADMIN＝システム管理者。倉庫はすべて割り当てます（あとで変更できます）。';
+      '一般ユーザー＝現場スタッフ（入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整）、責任者＝倉庫責任者など、システム管理者＝すべての機能と設定。倉庫はすべて割り当てます（あとで変更できます）。';
 
   @override
   String umAddN(int n) {
@@ -15073,7 +15074,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get umClose => '閉じる';
 
   @override
-  String get umReset => 'パスワードを変更（ADMIN）';
+  String get umReset => 'パスワードを変更（システム管理者）';
 
   @override
   String umResetQ(String email) {
@@ -15112,7 +15113,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get umSetHint =>
-      '今のパスワードは安全のため元に戻せない形で保存されていて、ADMINでも見ることはできません。新しいパスワードを決めて上書きします。';
+      '今のパスワードは安全のため元に戻せない形で保存されていて、システム管理者でも見ることはできません。新しいパスワードを決めて上書きします。';
 
   @override
   String get umSetOwn => '自分で決める';
@@ -17358,13 +17359,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get umTierPick => '区分';
 
   @override
-  String get umTierHelpAdmin => 'ADMIN（システム管理者）：すべての機能と、ユーザー・設定の管理';
+  String get umTierHelpAdmin => 'システム管理者：すべての機能と、ユーザー・設定の管理';
 
   @override
-  String get umTierHelpManager => '管理者（倉庫責任者）：入出荷・在庫・商品・取引先・レポート';
+  String get umTierHelpManager => '責任者（倉庫責任者など）：入出荷・在庫・商品・取引先・レポート';
 
   @override
-  String get umTierHelpUser => '通常（現場スタッフ）：入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整';
+  String get umTierHelpUser => '一般ユーザー（現場スタッフ）：入荷・検品・棚入れ・ピッキング・梱包・出荷・在庫調整';
 
   @override
   String get umTierConfirm => '区分を変えますか？';
@@ -18194,5 +18195,5 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get caOsManagersOnly => '出荷先カードの追加・編集・削除・デフォルトの設定は、システム管理者と管理者ができます。';
+  String get caOsManagersOnly => '出荷先カードの追加・編集・削除・デフォルトの設定は、システム管理者と責任者ができます。';
 }

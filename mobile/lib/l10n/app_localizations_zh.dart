@@ -924,14 +924,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noRoleAssigned => '尚未分配角色权限';
 
   @override
-  String get noRoleAssignedBody => '您已登录，但账号还没有被分配角色，因此暂时没有可用的功能。请联系管理员为您分配权限。';
+  String get noRoleAssignedBody =>
+      '您已登录，但账号还没有被分配角色，因此暂时没有可用的功能。请联系系统管理员为您分配权限。';
 
   @override
   String get whNoAssignedWarehouse => '尚未为您分配仓库';
 
   @override
   String get whNoAssignedWarehouseBody =>
-      '您的账号还没有被分配到任何仓库，因此无法查看库存或进行作业。请联系管理员为您分配仓库。';
+      '您的账号还没有被分配到任何仓库，因此无法查看库存或进行作业。请联系系统管理员为您分配仓库。';
 
   @override
   String get whNoWarehouses => '还没有仓库';
@@ -2258,7 +2259,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userMgmtAddWarehouse => '添加仓库';
 
   @override
-  String get userMgmtNoWarehouses => '未分配仓库（管理员可访问所有仓库，其他角色则无法访问任何仓库）';
+  String get userMgmtNoWarehouses => '未分配仓库（系统管理员可访问所有仓库，其他人则无法访问任何仓库）';
 
   @override
   String get userMgmtAllWarehousesHeld => '该用户已拥有所有仓库的权限。';
@@ -7991,7 +7992,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productDeleteNotReady =>
-      '数据库尚未启用删除功能（0119 的 delete_product），请联系管理员。';
+      '数据库尚未启用删除功能（0119 的 delete_product），请联系系统管理员。';
 
   @override
   String get quoteImportTitle => '从文件批量登录';
@@ -8308,7 +8309,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get quoteWakePolicy =>
-      '文件中的商品视为准备经营的商品，按状态处理：休眠 → 恢复在售；已归档 → 恢复在售（仅管理员）；停止供应 → 保持不变（厂商停产等，如需恢复请勾选该行）。可逐行更改。库存由入库增加，此处不变。';
+      '文件中的商品视为准备经营的商品，按状态处理：休眠 → 恢复在售；已归档 → 恢复在售（仅系统管理员）；停止供应 → 保持不变（厂商停产等，如需恢复请勾选该行）。可逐行更改。库存由入库增加，此处不变。';
 
   @override
   String quoteWakeCount(int wake, int keep) {
@@ -8322,7 +8323,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get quoteWakeDiscontinued => '此商品已停止供应（如厂商停产）。如需再次经营请勾选';
 
   @override
-  String get quoteWakeNeedsAdmin => '从已归档或停止供应恢复需要管理员权限';
+  String get quoteWakeNeedsAdmin => '从已归档或停止供应恢复需要系统管理员权限';
 
   @override
   String quoteSaveAndWake(int count, int wake) {
@@ -14882,16 +14883,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featMenuVisibility => '显示设置';
 
   @override
-  String get featMenuVisibilityDesc => '按ADMIN、管理者、普通用户设置可见的菜单和金额';
+  String get featMenuVisibilityDesc => '按系统管理员、负责人、一般用户设置可见的菜单和金额';
 
   @override
-  String get tierAdmin => 'ADMIN';
+  String get tierAdmin => '系统管理员';
 
   @override
-  String get tierManager => '管理者';
+  String get tierManager => '负责人';
 
   @override
-  String get tierUser => '普通';
+  String get tierUser => '一般用户';
 
   @override
   String userMgmtTier(String tier) {
@@ -14905,16 +14906,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mvDefaults => '恢复推荐设置';
 
   @override
-  String get mvHint => '只有勾选的菜单会显示给该类用户。ADMIN始终可以看到全部。显示与否不改变权限，能否使用仍由角色决定。';
+  String get mvHint => '只有勾选的菜单会显示给该类用户。系统管理员始终可以看到全部。显示与否不改变权限，能否使用仍由角色决定。';
 
   @override
-  String get mvTierAdmin => 'ADMIN：系统管理员、公司管理员（全部可见，可修改本设置）';
+  String get mvTierAdmin => '系统管理员：系统管理员・公司管理员角色（全部可见，可修改本设置）';
 
   @override
-  String get mvTierManager => '管理者：仓库负责人、库存管理、采购、销售';
+  String get mvTierManager => '负责人：仓库负责人、库存管理、采购、销售';
 
   @override
-  String get mvTierUser => '普通：其他（现场人员、收货、检品、上架、拣货、装箱、发货、查看）— 默认仅现场作业';
+  String get mvTierUser => '一般用户：其他（现场人员、收货、检品、上架、拣货、装箱、发货、查看）— 默认仅现场作业';
 
   @override
   String get mvContent => '内容';
@@ -14929,11 +14930,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get umAdd => '添加用户';
 
   @override
-  String get umAddHint => '每行一人：邮箱和类别（普通・管理・ADMIN）。可直接从表格粘贴。没有类别的行视为普通用户。';
+  String get umAddHint => '每行一人：邮箱和类别（一般用户・负责人・系统管理员）。可直接从表格粘贴。没有类别的行视为一般用户。';
 
   @override
   String get umAddRoles =>
-      '普通＝现场人员（收货、检品、上架、拣货、装箱、发货、库存调整）；管理者＝仓库负责人；ADMIN＝系统管理员。分配全部仓库（之后可更改）。';
+      '一般用户＝现场人员（收货、检品、上架、拣货、装箱、发货、库存调整）；负责人＝仓库负责人等；系统管理员＝全部功能和设置。分配全部仓库（之后可更改）。';
 
   @override
   String umAddN(int n) {
@@ -14973,7 +14974,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get umClose => '关闭';
 
   @override
-  String get umReset => '修改密码（ADMIN）';
+  String get umReset => '修改密码（系统管理员）';
 
   @override
   String umResetQ(String email) {
@@ -15010,7 +15011,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get umSetHint => '为安全起见，当前密码以无法还原的形式保存，ADMIN也无法查看。请设定新密码覆盖。';
+  String get umSetHint => '为安全起见，当前密码以无法还原的形式保存，系统管理员也无法查看。请设定新密码覆盖。';
 
   @override
   String get umSetOwn => '自己设定';
@@ -17233,13 +17234,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get umTierPick => '类别';
 
   @override
-  String get umTierHelpAdmin => 'ADMIN（系统管理员）：全部功能及用户・设置的管理';
+  String get umTierHelpAdmin => '系统管理员：全部功能及用户・设置的管理';
 
   @override
-  String get umTierHelpManager => '管理者（仓库负责人）：出入货・库存・商品・往来方・报表';
+  String get umTierHelpManager => '负责人（仓库负责人等）：出入货・库存・商品・往来方・报表';
 
   @override
-  String get umTierHelpUser => '普通（现场员工）：入库・验货・上架・拣货・包装・出货・库存调整';
+  String get umTierHelpUser => '一般用户（现场员工）：入库・验货・上架・拣货・包装・出货・库存调整';
 
   @override
   String get umTierConfirm => '要更改类别吗？';
@@ -18067,5 +18068,5 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get caOsManagersOnly => '系统管理员和管理者可以添加、编辑、删除卡片及设置默认。';
+  String get caOsManagersOnly => '系统管理员和负责人可以添加、编辑、删除卡片及设置默认。';
 }
