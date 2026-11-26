@@ -1,3 +1,4 @@
+import '../../invoice_registration/presentation/invoice_registration_widgets.dart';
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -1518,6 +1519,22 @@ class _StockFileImportScreenState extends ConsumerState<StockFileImportScreen> {
                   ]),
                 ),
               ),
+            // The invoice's 登録番号, checked with 国税庁 (0229).
+            if ((_docRegistration ?? '').trim().isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Card(
+                key: const ValueKey('sf-registration'),
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('${l10n.irTitle}: ${_docRegistration!.trim()}${_docSupplier == null ? '' : '（${_docSupplier!.trim()}）'}',
+                        style: Theme.of(context).textTheme.titleSmall),
+                    InvoiceRegistrationBadge(number: _docRegistration, company: _docSupplier),
+                  ]),
+                ),
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             // Kept with the import for seven years (0148): the date it is
             // filed under, whether the supplier is paid, and a memo.

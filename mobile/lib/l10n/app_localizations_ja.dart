@@ -18214,4 +18214,111 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get caSystemOwned => 'システム用（削除できません）';
+
+  @override
+  String get irTitle => '登録番号の確認';
+
+  @override
+  String irRegistered(String name) {
+    return '国税庁に登録あり：$name';
+  }
+
+  @override
+  String get irNotFound => '国税庁に登録がありません（読み間違い、または登録していない事業者の可能性）';
+
+  @override
+  String irRevoked(String date) {
+    return '登録が取り消されています（$date）';
+  }
+
+  @override
+  String irExpired(String date) {
+    return '登録が失効しています（$date）';
+  }
+
+  @override
+  String irNameDiffers(String doc) {
+    return '請求書の会社名「$doc」と登録の名前が違います';
+  }
+
+  @override
+  String get irNameMatches => '請求書の会社名と一致';
+
+  @override
+  String get irNotConfigured =>
+      '国税庁で確認するには、アプリケーションIDの設定が必要です（自社情報でシステム管理者が設定）';
+
+  @override
+  String irFailed(String why) {
+    return '国税庁に問い合わせできませんでした（$why）';
+  }
+
+  @override
+  String get irRefresh => '国税庁に再確認';
+
+  @override
+  String irCheckedAt(String date) {
+    return '$date 確認';
+  }
+
+  @override
+  String irBadFormat(String value) {
+    return '登録番号の形ではありません（T＋13桁）: $value';
+  }
+
+  @override
+  String get irInputHint => '登録番号（T＋13桁）。複数は改行かカンマで区切ります';
+
+  @override
+  String get irCheck => '確認する';
+
+  @override
+  String get irNotice =>
+      'このサービスは、国税庁適格請求書発行事業者公表システムのWeb-API機能を利用して取得した情報をもとに作成しているが、サービスの内容は国税庁によって保証されたものではない';
+
+  @override
+  String get irKeyTitle => '国税庁の登録番号確認（Web-API）';
+
+  @override
+  String get irKeyHelp =>
+      '国税庁「適格請求書発行事業者公表システム」のWeb-APIのアプリケーションIDを入れると、請求書の登録番号が有効か、どの会社の番号かを自動で確認できます。IDは国税庁のサイトから無料で申請できます。';
+
+  @override
+  String irKeySet(String date, String name) {
+    return '設定済み（$date・$name）';
+  }
+
+  @override
+  String get irKeyUnset => '未設定';
+
+  @override
+  String get irKeyField => 'アプリケーションID';
+
+  @override
+  String get irKeySave => '保存';
+
+  @override
+  String get irKeyClear => '設定を消す';
+
+  @override
+  String get irKeySaved => '保存しました';
+
+  @override
+  String get irIndividual => '個人事業者';
+
+  @override
+  String get irCorporation => '法人';
+
+  @override
+  String irAddress(String address) {
+    return '所在地: $address';
+  }
+
+  @override
+  String irRegisteredOn(String date) {
+    return '登録日: $date';
+  }
+
+  @override
+  String get irOpenSite => '国税庁の公表サイトを開く';
 }

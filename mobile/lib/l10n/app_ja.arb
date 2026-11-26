@@ -16082,5 +16082,106 @@
   "auditEventSystemReset": "システムの初期化",
   "auditTabLog": "操作の記録",
   "elKindRefused": "操作できず",
-  "caSystemOwned": "システム用（削除できません）"
+  "caSystemOwned": "システム用（削除できません）",
+  "irTitle": "登録番号の確認",
+  "irRegistered": "国税庁に登録あり：{name}",
+  "@irRegistered": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "irNotFound": "国税庁に登録がありません（読み間違い、または登録していない事業者の可能性）",
+  "irRevoked": "登録が取り消されています（{date}）",
+  "@irRevoked": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "irExpired": "登録が失効しています（{date}）",
+  "@irExpired": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "irNameDiffers": "請求書の会社名「{doc}」と登録の名前が違います",
+  "@irNameDiffers": {
+    "placeholders": {
+      "doc": {
+        "type": "String"
+      }
+    }
+  },
+  "irNameMatches": "請求書の会社名と一致",
+  "irNotConfigured": "国税庁で確認するには、アプリケーションIDの設定が必要です（自社情報でシステム管理者が設定）",
+  "irFailed": "国税庁に問い合わせできませんでした（{why}）",
+  "@irFailed": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "irRefresh": "国税庁に再確認",
+  "irCheckedAt": "{date} 確認",
+  "@irCheckedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "irBadFormat": "登録番号の形ではありません（T＋13桁）: {value}",
+  "@irBadFormat": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "irInputHint": "登録番号（T＋13桁）。複数は改行かカンマで区切ります",
+  "irCheck": "確認する",
+  "irNotice": "このサービスは、国税庁適格請求書発行事業者公表システムのWeb-API機能を利用して取得した情報をもとに作成しているが、サービスの内容は国税庁によって保証されたものではない",
+  "irKeyTitle": "国税庁の登録番号確認（Web-API）",
+  "irKeyHelp": "国税庁「適格請求書発行事業者公表システム」のWeb-APIのアプリケーションIDを入れると、請求書の登録番号が有効か、どの会社の番号かを自動で確認できます。IDは国税庁のサイトから無料で申請できます。",
+  "irKeySet": "設定済み（{date}・{name}）",
+  "@irKeySet": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "irKeyUnset": "未設定",
+  "irKeyField": "アプリケーションID",
+  "irKeySave": "保存",
+  "irKeyClear": "設定を消す",
+  "irKeySaved": "保存しました",
+  "irIndividual": "個人事業者",
+  "irCorporation": "法人",
+  "irAddress": "所在地: {address}",
+  "@irAddress": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "irRegisteredOn": "登録日: {date}",
+  "@irRegisteredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "irOpenSite": "国税庁の公表サイトを開く"
 }

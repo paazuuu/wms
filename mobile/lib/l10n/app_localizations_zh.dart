@@ -18087,4 +18087,110 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get caSystemOwned => '系统专用（无法删除）';
+
+  @override
+  String get irTitle => '登记号码确认';
+
+  @override
+  String irRegistered(String name) {
+    return '已在国税厅登记：$name';
+  }
+
+  @override
+  String get irNotFound => '国税厅无登记（可能读错，或为未登记的事业者）';
+
+  @override
+  String irRevoked(String date) {
+    return '登记已被取消（$date）';
+  }
+
+  @override
+  String irExpired(String date) {
+    return '登记已失效（$date）';
+  }
+
+  @override
+  String irNameDiffers(String doc) {
+    return '发票上的公司名「$doc」与登记名称不同';
+  }
+
+  @override
+  String get irNameMatches => '与发票上的公司名一致';
+
+  @override
+  String get irNotConfigured => '要向国税厅确认，需要设置应用程序ID（由系统管理员在公司信息中设置）';
+
+  @override
+  String irFailed(String why) {
+    return '无法向国税厅查询（$why）';
+  }
+
+  @override
+  String get irRefresh => '重新向国税厅确认';
+
+  @override
+  String irCheckedAt(String date) {
+    return '$date 确认';
+  }
+
+  @override
+  String irBadFormat(String value) {
+    return '不是登记号码格式（T＋13位）：$value';
+  }
+
+  @override
+  String get irInputHint => '登记号码（T＋13位）。多个请用换行或逗号分隔';
+
+  @override
+  String get irCheck => '确认';
+
+  @override
+  String get irNotice =>
+      '本服务基于通过国税厅合格发票开具事业者公示系统Web-API获取的信息制作，但服务内容并未得到国税厅的保证。';
+
+  @override
+  String get irKeyTitle => '国税厅登记号码确认（Web-API）';
+
+  @override
+  String get irKeyHelp =>
+      '填入国税厅“合格发票开具事业者公示系统”Web-API的应用程序ID后，可自动确认发票上的登记号码是否有效、属于哪家公司。ID可在国税厅网站免费申请。';
+
+  @override
+  String irKeySet(String date, String name) {
+    return '已设置（$date・$name）';
+  }
+
+  @override
+  String get irKeyUnset => '未设置';
+
+  @override
+  String get irKeyField => '应用程序ID';
+
+  @override
+  String get irKeySave => '保存';
+
+  @override
+  String get irKeyClear => '清除设置';
+
+  @override
+  String get irKeySaved => '已保存';
+
+  @override
+  String get irIndividual => '个体事业者';
+
+  @override
+  String get irCorporation => '法人';
+
+  @override
+  String irAddress(String address) {
+    return '所在地：$address';
+  }
+
+  @override
+  String irRegisteredOn(String date) {
+    return '登记日：$date';
+  }
+
+  @override
+  String get irOpenSite => '打开国税厅公示网站';
 }

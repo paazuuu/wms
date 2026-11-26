@@ -1,3 +1,4 @@
+import '../../invoice_registration/presentation/invoice_registration_widgets.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -660,6 +661,11 @@ class _PlanImportScreenState extends ConsumerState<PlanImportScreen> {
         _field(l10n, _regNoController, l10n.fieldRegistrationNumber,
             Icons.verified_outlined,
             wasRead: preview.registrationNumber != null),
+        // Checked with 国税庁 as it stands (0229).
+        ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _regNoController,
+          builder: (_, v, __) => InvoiceRegistrationBadge(number: v.text, company: _supplierController.text),
+        ),
         _field(l10n, _customerCodeController, l10n.fieldCustomerCode,
             Icons.badge_outlined,
             wasRead: preview.customerCode != null),

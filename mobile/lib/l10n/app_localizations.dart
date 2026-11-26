@@ -31879,6 +31879,174 @@ abstract class AppLocalizations {
   /// In ja, this message translates to:
   /// **'システム用（削除できません）'**
   String get caSystemOwned;
+
+  /// No description provided for @irTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録番号の確認'**
+  String get irTitle;
+
+  /// No description provided for @irRegistered.
+  ///
+  /// In ja, this message translates to:
+  /// **'国税庁に登録あり：{name}'**
+  String irRegistered(String name);
+
+  /// No description provided for @irNotFound.
+  ///
+  /// In ja, this message translates to:
+  /// **'国税庁に登録がありません（読み間違い、または登録していない事業者の可能性）'**
+  String get irNotFound;
+
+  /// No description provided for @irRevoked.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録が取り消されています（{date}）'**
+  String irRevoked(String date);
+
+  /// No description provided for @irExpired.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録が失効しています（{date}）'**
+  String irExpired(String date);
+
+  /// No description provided for @irNameDiffers.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書の会社名「{doc}」と登録の名前が違います'**
+  String irNameDiffers(String doc);
+
+  /// No description provided for @irNameMatches.
+  ///
+  /// In ja, this message translates to:
+  /// **'請求書の会社名と一致'**
+  String get irNameMatches;
+
+  /// No description provided for @irNotConfigured.
+  ///
+  /// In ja, this message translates to:
+  /// **'国税庁で確認するには、アプリケーションIDの設定が必要です（自社情報でシステム管理者が設定）'**
+  String get irNotConfigured;
+
+  /// No description provided for @irFailed.
+  ///
+  /// In ja, this message translates to:
+  /// **'国税庁に問い合わせできませんでした（{why}）'**
+  String irFailed(String why);
+
+  /// No description provided for @irRefresh.
+  ///
+  /// In ja, this message translates to:
+  /// **'国税庁に再確認'**
+  String get irRefresh;
+
+  /// No description provided for @irCheckedAt.
+  ///
+  /// In ja, this message translates to:
+  /// **'{date} 確認'**
+  String irCheckedAt(String date);
+
+  /// No description provided for @irBadFormat.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録番号の形ではありません（T＋13桁）: {value}'**
+  String irBadFormat(String value);
+
+  /// No description provided for @irInputHint.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録番号（T＋13桁）。複数は改行かカンマで区切ります'**
+  String get irInputHint;
+
+  /// No description provided for @irCheck.
+  ///
+  /// In ja, this message translates to:
+  /// **'確認する'**
+  String get irCheck;
+
+  /// No description provided for @irNotice.
+  ///
+  /// In ja, this message translates to:
+  /// **'このサービスは、国税庁適格請求書発行事業者公表システムのWeb-API機能を利用して取得した情報をもとに作成しているが、サービスの内容は国税庁によって保証されたものではない'**
+  String get irNotice;
+
+  /// No description provided for @irKeyTitle.
+  ///
+  /// In ja, this message translates to:
+  /// **'国税庁の登録番号確認（Web-API）'**
+  String get irKeyTitle;
+
+  /// No description provided for @irKeyHelp.
+  ///
+  /// In ja, this message translates to:
+  /// **'国税庁「適格請求書発行事業者公表システム」のWeb-APIのアプリケーションIDを入れると、請求書の登録番号が有効か、どの会社の番号かを自動で確認できます。IDは国税庁のサイトから無料で申請できます。'**
+  String get irKeyHelp;
+
+  /// No description provided for @irKeySet.
+  ///
+  /// In ja, this message translates to:
+  /// **'設定済み（{date}・{name}）'**
+  String irKeySet(String date, String name);
+
+  /// No description provided for @irKeyUnset.
+  ///
+  /// In ja, this message translates to:
+  /// **'未設定'**
+  String get irKeyUnset;
+
+  /// No description provided for @irKeyField.
+  ///
+  /// In ja, this message translates to:
+  /// **'アプリケーションID'**
+  String get irKeyField;
+
+  /// No description provided for @irKeySave.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存'**
+  String get irKeySave;
+
+  /// No description provided for @irKeyClear.
+  ///
+  /// In ja, this message translates to:
+  /// **'設定を消す'**
+  String get irKeyClear;
+
+  /// No description provided for @irKeySaved.
+  ///
+  /// In ja, this message translates to:
+  /// **'保存しました'**
+  String get irKeySaved;
+
+  /// No description provided for @irIndividual.
+  ///
+  /// In ja, this message translates to:
+  /// **'個人事業者'**
+  String get irIndividual;
+
+  /// No description provided for @irCorporation.
+  ///
+  /// In ja, this message translates to:
+  /// **'法人'**
+  String get irCorporation;
+
+  /// No description provided for @irAddress.
+  ///
+  /// In ja, this message translates to:
+  /// **'所在地: {address}'**
+  String irAddress(String address);
+
+  /// No description provided for @irRegisteredOn.
+  ///
+  /// In ja, this message translates to:
+  /// **'登録日: {date}'**
+  String irRegisteredOn(String date);
+
+  /// No description provided for @irOpenSite.
+  ///
+  /// In ja, this message translates to:
+  /// **'国税庁の公表サイトを開く'**
+  String get irOpenSite;
 }
 
 class _AppLocalizationsDelegate

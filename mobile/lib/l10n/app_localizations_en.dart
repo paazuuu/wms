@@ -18581,4 +18581,113 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get caSystemOwned => 'The system\'s own (cannot be erased)';
+
+  @override
+  String get irTitle => 'Registration number check';
+
+  @override
+  String irRegistered(String name) {
+    return 'Registered with the NTA: $name';
+  }
+
+  @override
+  String get irNotFound =>
+      'Not registered with the NTA (misread, or a business that is not registered)';
+
+  @override
+  String irRevoked(String date) {
+    return 'The registration was revoked ($date)';
+  }
+
+  @override
+  String irExpired(String date) {
+    return 'The registration has lapsed ($date)';
+  }
+
+  @override
+  String irNameDiffers(String doc) {
+    return 'The invoice names \"$doc\", which differs from the registered name';
+  }
+
+  @override
+  String get irNameMatches => 'Matches the invoice\'s company';
+
+  @override
+  String get irNotConfigured =>
+      'To check with the NTA, an application ID is needed (set in 自社情報 by the administrator)';
+
+  @override
+  String irFailed(String why) {
+    return 'The NTA could not be asked ($why)';
+  }
+
+  @override
+  String get irRefresh => 'Ask the NTA again';
+
+  @override
+  String irCheckedAt(String date) {
+    return 'Checked $date';
+  }
+
+  @override
+  String irBadFormat(String value) {
+    return 'Not a registration number (T + 13 digits): $value';
+  }
+
+  @override
+  String get irInputHint =>
+      'Registration numbers (T + 13 digits), one a line or comma-separated';
+
+  @override
+  String get irCheck => 'Check';
+
+  @override
+  String get irNotice =>
+      'This service uses information obtained through the Web-API of the NTA\'s Qualified Invoice Issuer Publication System, but its content is not guaranteed by the NTA.';
+
+  @override
+  String get irKeyTitle => 'NTA registration number check (Web-API)';
+
+  @override
+  String get irKeyHelp =>
+      'With the application ID of the NTA\'s Qualified Invoice Issuer Publication System Web-API, invoices\' registration numbers are checked automatically: in force or not, and whose they are. The ID is applied for free on the NTA\'s site.';
+
+  @override
+  String irKeySet(String date, String name) {
+    return 'Set ($date, $name)';
+  }
+
+  @override
+  String get irKeyUnset => 'Not set';
+
+  @override
+  String get irKeyField => 'Application ID';
+
+  @override
+  String get irKeySave => 'Save';
+
+  @override
+  String get irKeyClear => 'Clear';
+
+  @override
+  String get irKeySaved => 'Saved';
+
+  @override
+  String get irIndividual => 'Sole proprietor';
+
+  @override
+  String get irCorporation => 'Corporation';
+
+  @override
+  String irAddress(String address) {
+    return 'Address: $address';
+  }
+
+  @override
+  String irRegisteredOn(String date) {
+    return 'Registered: $date';
+  }
+
+  @override
+  String get irOpenSite => 'Open the NTA\'s publication site';
 }

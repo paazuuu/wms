@@ -1,3 +1,4 @@
+import '../../invoice_registration/presentation/invoice_registration_widgets.dart';
 import 'partner_admin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,6 +70,13 @@ class TradingPartnerListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.partnersTitle),
         actions: [
+          // 登録番号の確認 with 国税庁, by hand (0229).
+          IconButton(
+            key: const ValueKey('partner-invoice-check'),
+            tooltip: l10n.irTitle,
+            icon: const Icon(Icons.verified_outlined),
+            onPressed: () => showInvoiceCheckDialog(context),
+          ),
           // How our codes for companies are numbered (0112).
           IconButton(
             key: const ValueKey('partner-code-rules'),

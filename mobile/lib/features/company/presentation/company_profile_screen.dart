@@ -1,3 +1,5 @@
+import '../../invoice_registration/presentation/invoice_registration_widgets.dart';
+import '../../admin/data/menu_visibility_repository.dart' show isSystemAdminProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -196,6 +198,13 @@ class _CompanyFormState extends ConsumerState<_CompanyForm> {
                   const SizedBox(height: AppSpacing.md),
                 ],
                 field(_reg, l10n.cpRegNo, 'cp-reg'),
+                // Our own 登録番号, as 国税庁 has it (0229).
+                if ((widget.profile.registrationNumber ?? '').isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: InvoiceRegistrationBadge(
+                        number: widget.profile.registrationNumber, company: widget.profile.name),
+                  ),
                 field(_postal, l10n.cpPostal, 'cp-postal'),
                 field(_address, l10n.cpAddress, 'cp-address', lines: 2),
                 field(_phone, l10n.cpPhone, 'cp-phone', type: TextInputType.phone),
@@ -208,6 +217,11 @@ class _CompanyFormState extends ConsumerState<_CompanyForm> {
                     icon: const Icon(Icons.save_outlined),
                     label: Text(l10n.cpSave),
                   ),
+                // The Web-API's アプリケーションID (0229): the system administrator's.
+                if (ref.watch(isSystemAdminProvider)) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  const NtaKeyCard(),
+                ],
               ],
             ),
           ),
