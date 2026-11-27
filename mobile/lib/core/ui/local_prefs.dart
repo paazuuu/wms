@@ -5,3 +5,7 @@ import 'local_prefs_io.dart' if (dart.library.js_interop) 'local_prefs_web.dart'
 String? readLocalPref(String key) => impl.readLocalPref(key);
 
 void writeLocalPref(String key, String? value) => impl.writeLocalPref(key, value);
+
+/// Reads what was kept before the app shows anything (the phone and desktop
+/// apps keep it on the device; a browser needs nothing).
+Future<void> initLocalPrefs() => impl.initLocalPrefs();

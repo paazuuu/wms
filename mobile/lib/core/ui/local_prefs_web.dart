@@ -1,5 +1,8 @@
 import 'package:web/web.dart' as web;
 
+/// The browser's localStorage needs no start.
+Future<void> initLocalPrefs() async {}
+
 String? readLocalPref(String key) {
   try {
     return web.window.localStorage.getItem(key);

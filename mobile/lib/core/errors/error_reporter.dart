@@ -21,6 +21,20 @@ class ErrorReporter {
   /// Sends one report; true when the server took it.
   Future<bool> Function(Map<String, dynamic> report)? sender;
 
+  /// The screen open, as the app's router has it (the phone and desktop apps
+  /// have no address bar); the browser's address when not set.
+  String Function()? place;
+
+  String _placeNow() {
+    try {
+      final p = place?.call();
+      if (p != null && p.isNotEmpty) return p.length > 300 ? p.substring(0, 300) : p;
+    } catch (_) {
+      // The router not ready yet: the browser's address instead.
+    }
+    return client.placeNow();
+  }
+
   static const _keepMax = 50;
   static const _sameWithin = Duration(seconds: 30);
   static const _perMinute = 20;
@@ -52,7 +66,7 @@ class ErrorReporter {
       if (detail != null && detail.trim().isNotEmpty) 'detail': _cut(detail.trim(), 8000),
       if (request != null) 'request': _cut(request, 300),
       if (status != null) 'status': status,
-      'place': client.placeNow(),
+      'place': _placeNow(),
       'client': _cut([if (kIsWeb) 'web', defaultTargetPlatform.name, client.clientInfo()].where((s) => s.isNotEmpty).join(' / '), 300),
     };
     made.add(r);
@@ -86,6 +100,7 @@ class ErrorReporter {
     _lastSent.clear();
     _recent.clear();
     sender = null;
+    place = null;
   }
 
   static String _cut(String s, int max) => s.length <= max ? s : s.substring(0, max);

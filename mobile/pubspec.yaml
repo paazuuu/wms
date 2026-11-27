@@ -38,6 +38,8 @@ dependencies:
   barcode: ^2.2.9
   # Browser downloads (file_picker has no saveFile on the web)
   web: ^1.1.0
+  url_launcher: ^6.3.3
+  shared_preferences: ^2.5.6
 
 dev_dependencies:
   flutter_test:

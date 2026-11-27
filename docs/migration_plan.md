@@ -9946,6 +9946,28 @@ PC 向けの画面はそのままに、iPhone・iPad で開いたときに崩れ
   - IDがない間は「設定が必要」と表示し、国税庁の公表サイトへのリンクを出します。
 - 結果の画面には、国税庁の情報であり内容は国税庁が保証するものではない旨の文を出します。
 
+## スマホアプリ化の準備（iPhone・Android）
+
+同じDartのコードから、Webのほかにスマホアプリも作れるように手直ししました。サーバー（Supabase）の接続先はアプリに組み込み済みなので、ビルド時の追加設定はいりません。
+
+- Web専用だった部分のアプリ版
+  - 外部ページ（メーカーのカタログ、国税庁の公表サイトなど）: スマホのブラウザで開きます（`url_launcher`）。
+  - 列の幅などの設定: 端末に保存します（`shared_preferences`）。起動時に一度読み込みます（`initLocalPrefs`）。
+  - 別ウィンドウ・別タブ: アプリにはないので、今までどおり、その場で開くかファイルを保存する形になります。
+  - エラーログの「画面」: アプリの画面の場所（ルーター）から取ります。
+- Android
+  - アプリID `com.warakutrade.wms`、表示名「WMS」。
+  - インターネットとカメラの許可を設定（インターネットの許可がないと、本番ビルドはサーバーにつながりません）。
+- iPhone
+  - `ios/` を作成。Bundle ID `com.warakutrade.wms`、表示名「WMS」。
+  - カメラ・写真の利用目的の文を設定。
+  - 最低 iOS 15.5（端末で文字を読む Google ML Kit の条件）。
+  - 作るには Mac（Xcode）と Apple Developer の登録が必要です。
+- 作り方
+  - Android: `flutter build apk --release`
+  - iPhone: Mac で `flutter build ipa`
+  - 配布用の署名鍵はまだ設定していません。今は開発用の鍵で署名されます。Google Play に出す前に、自社の鍵を作って設定します。
+
 ## Rollout discipline
 
 - One concern per migration; each reversible in intent (inactivate, not destroy).
